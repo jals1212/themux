@@ -44,6 +44,24 @@
 
 </details>
 
+### Multi-theme selection (themux)
+
+This fork is a multi-theme manager: besides the catppuccin flavors, other
+themes can be selected with `@themux_theme`, which loads
+`themes/<theme>_tmux.conf`:
+
+```sh
+# Kanagawa (wave, dragon or lotus)
+set -g @themux_theme 'kanagawa_dragon'
+
+# Or keep using catppuccin via the classic flavor option (default: mocha)
+set -g @catppuccin_flavor 'frappe'
+```
+
+Available themes: `catppuccin_latte`, `catppuccin_frappe`,
+`catppuccin_macchiato`, `catppuccin_mocha`, `kanagawa_wave`,
+`kanagawa_dragon`, `kanagawa_lotus`.
+
 ## Installation
 
 In order to have the icons displayed correctly please use/update your favorite
