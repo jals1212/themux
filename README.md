@@ -321,7 +321,12 @@ themux is a multi-theme fork of [catppuccin/tmux] — the module system,
 status-line architecture, and the catppuccin palettes are their work
 (MIT, Copyright © Catppuccin Org).
 
+The flat style is inspired by [@89iuv]'s configuration shared in the
+catppuccin/tmux [configuration showcase][89iuv-config].
+
 [catppuccin/tmux]: https://github.com/catppuccin/tmux
+[@89iuv]: https://github.com/89iuv
+[89iuv-config]: https://github.com/catppuccin/tmux/discussions/317#discussioncomment-11064512
 
 Thanks to the original catppuccin/tmux contributors:
 
