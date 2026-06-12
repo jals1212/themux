@@ -3,9 +3,9 @@ window-status-format #[fg=#11111b,bg=#{@thm_overlay_2}] #I #[fg=#cdd6f4,bg=#{@th
 
 window-status-current-format #[fg=#11111b,bg=#{@thm_mauve}] #I #[fg=#cdd6f4,bg=#{@thm_surface_1}] #T 
 
-window-status-format #[fg=#11111b,bg=#{@thm_overlay_2}]#[fg=#181825,reverse]#[none]#I #[fg=#cdd6f4,bg=#{@thm_surface_0}] #T#[fg=#181825,reverse]#[none]
+window-status-format #[fg=#11111b,bg=#{@thm_overlay_2}]#[fg=#{@thm_overlay_2},bg=#181825]#I #[fg=#cdd6f4,bg=#{@thm_surface_0}] #T#[fg=#{@thm_surface_0},bg=#181825]
 
-window-status-current-format #[fg=#11111b,bg=#{@thm_mauve}]#[fg=#181825,reverse]#[none]#I #[fg=#cdd6f4,bg=#{@thm_surface_1}] #T#[fg=#181825,reverse]#[none]
+window-status-current-format #[fg=#11111b,bg=#{@thm_mauve}]#[fg=#{@thm_mauve},bg=#181825]#I #[fg=#cdd6f4,bg=#{@thm_surface_1}] #T#[fg=#{@thm_surface_1},bg=#181825]
 
 window-status-format #[fg=#cdd6f4,bg=#{@thm_surface_0}] #[fg=#cdd6f4,bg=#{@thm_surface_0}] #T #[fg=#11111b,bg=#{@thm_overlay_2}] #I 
 
