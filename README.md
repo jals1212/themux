@@ -138,7 +138,8 @@ Move the window list to its own status line (aligned by `status-justify`),
 leaving line 0 to `status-left`/`status-right`:
 
 ```sh
-set -g @themux_windows_line "1" # 0 keeps the stock single line
+set -g @themux_windows_line "1" # 0 = stock single line; 2 = leave a
+                                # blank spacer line between the two
 ```
 
 ### Reset pattern (themux)

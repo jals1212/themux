@@ -18,3 +18,14 @@ tmux show -gv 'status-format[1]' | cut -c1-60
 # Line 0 must not contain the window list (grep exits 1 on zero matches)
 printf "format0_has_list "
 tmux show -gv 'status-format[0]' | grep -c 'list=on align' || true
+
+# Spacer mode: windows on line 2 with a blank line 1
+tmux set -g @themux_windows_line "2"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+
+printf "\nstatus_spacer "
+tmux show -gv status
+printf "format1_blank [%s]\n" "$(tmux show -gv 'status-format[1]')"
+printf "format2 "
+tmux show -gv 'status-format[2]' | cut -c1-40

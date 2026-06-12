@@ -2,3 +2,7 @@
 status 2
 format1 #[list=on align=#{status-justify}]#[list=left-marker]<#[list
 format0_has_list 0
+
+status_spacer 3
+format1_blank []
+format2 #[list=on align=#{status-justify}]#[list
