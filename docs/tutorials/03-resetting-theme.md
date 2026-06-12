@@ -36,7 +36,7 @@ setting a global option called `@themux_reset` to `true.
 @thm_surface_0
 @thm_mantle
 @thm_crust
-@themux_window_status_style
+@themux_windows_variant
 @themux_window_text_color
 @themux_window_number_color
 @themux_window_text
@@ -132,7 +132,7 @@ run /path/to/catppuccin/tmux/themux.tmux
 
 # right after the initial reset call.
 set -g @themux_theme "catppuccin_mocha"
-set -g @themux_window_status_style "basic"
+set -g @themux_windows_variant "squared"
 set -g @themux_window_text " #W"
 set -g @themux_window_number "#I"
 set -g @themux_window_current_text " #W"

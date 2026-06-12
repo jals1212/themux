@@ -23,7 +23,7 @@ This is a diagram of how the theme is split between its components.
 ### Window
 
 The plugin comes with three window styles built in, these can be customized by
-setting the `@themux_window_status_style` option. The default is `basic`.
+setting the `@themux_windows_variant` option. The default is `squared`.
 
 | Option    | Effect                                                                   | Preview                                                |
 | --------- | ------------------------------------------------------------------------ | ------------------------------------------------------ |
@@ -48,7 +48,7 @@ Add the following,
 setting whatever values you'd like for the separators:
 
 ```bash
-set -g @themux_window_status_style "custom"
+set -g @themux_windows_variant "custom"
 set -g @themux_window_left_separator ""
 set -g @themux_window_middle_separator ""
 set -g @themux_window_right_separator ""
@@ -85,7 +85,7 @@ set -g @themux_pane_default_text "##{b:pane_current_path}"
 set -g @themux_pane_default_fill "number"
 set -g @themux_pane_number_position "left" # right, left
 
-set -g @themux_window_status_style "basic" # basic, rounded, slanted, custom, or none
+set -g @themux_windows_variant "squared" # squared, rounded, slanted, flat, unstyled
 set -g @themux_window_text_color "#{@thm_surface_0}"
 set -g @themux_window_number_color "#{@thm_overlay_2}"
 set -g @themux_window_text " #T"

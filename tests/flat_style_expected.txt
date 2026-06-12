@@ -1,7 +1,9 @@
 
 @themux_status_application #[fg=#eba0ac,bg=default] #{E:@themux_application_text}
 
-@themux_status_separator #[fg=#{E:@themux_separator_color},bg=default]#{E:@themux_separator_pad_left}#{E:@themux_separator_char}#{E:@themux_separator_pad_right}
+@themux_status_session #{?client_prefix,#{E:@themux_session_prefix_style},#{E:@themux_session_style}}#{E:@themux_session_icon}#{E:@themux_session_text} 
+
+@themux_status_separator #[fg=#{E:@themux_separator_color},bg=default]#{E:@themux_separator_char}
 
 @themux_status_zoom #{?window_zoomed_flag,#{E:@themux_status_zoom_content},}
 
@@ -13,4 +15,4 @@ window-status-style fg=#f5e0dc,bg=default
 
 window-status-current-style fg=#1e1e2e,bg=#fab387,bold
 
-window-status-separator #[fg=#6c7086,bg=default]│
+window-status-separator #[fg=#6c7086,bg=default] │ 

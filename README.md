@@ -62,18 +62,33 @@ Available themes: `catppuccin_latte`, `catppuccin_frappe`,
 `catppuccin_macchiato`, `catppuccin_mocha`, `kanagawa_wave`,
 `kanagawa_dragon`, `kanagawa_lotus`.
 
+### Style variants (themux)
+
+Every item of the UI selects its style independently. `unstyled` makes
+themux leave that item completely untouched, so you can build it by hand
+with the `@thm_*` palette colors:
+
+```sh
+set -g @themux_status_variant  "pill"    # pill, flat, unstyled
+set -g @themux_windows_variant "squared" # squared, rounded, slanted, flat, unstyled
+set -g @themux_panes_variant   "pill"    # pill, flat, unstyled
+```
+
+Window and pane variants live one file per look under `variants/windows/`
+and `variants/panes/`, so adding a new look is dropping a file there.
+
 ### Flat style (themux)
 
 By default status modules render as "pills" — icon and text blocks with
 their own backgrounds — even when `@themux_status_background` is set to
 `"none"` (that option only clears the bar itself). For a fully transparent
-status line, this fork adds a flat style: modules become colored text on the
-default background, separated by a configurable divider.
+status line, this fork adds a flat variant: modules become colored text on
+the default background, separated by a configurable divider.
 
 ```sh
 # Before loading the plugin
-set -g @themux_status_style "flat"        # pill (default), flat
-set -g @themux_window_status_style "flat" # flat window list to match
+set -g @themux_status_variant "flat"  # transparent modules
+set -g @themux_windows_variant "flat" # flat window list to match
 set -g @themux_status_background "none"
 
 # Optional: tweak the default separator segment (any style)
@@ -279,7 +294,7 @@ set -g default-terminal "tmux-256color"
 
 # Configure the catppuccin plugin
 set -g @themux_theme "catppuccin_mocha"
-set -g @themux_window_status_style "rounded"
+set -g @themux_windows_variant "rounded"
 
 # Load catppuccin
 run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux

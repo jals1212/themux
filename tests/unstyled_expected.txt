@@ -1,0 +1,7 @@
+
+status_application_set 0
+
+window-status-format #I:#W#{?window_flags,#{window_flags}, }
+
+window-status-current-format #I:#W#{?window_flags,#{window_flags}, }
+pane_border_style default
