@@ -15,4 +15,4 @@ window-status-style fg=#f5e0dc,bg=default
 
 window-status-current-style fg=#1e1e2e,bg=#fab387,bold
 
-window-status-separator #[fg=#313244,bg=default] │ 
+window-status-separator #[fg=#6c7086,bg=default] │ 
