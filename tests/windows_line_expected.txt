@@ -1,0 +1,4 @@
+
+status 2
+format1 #[list=on align=#{status-justify}]#[list=left-marker]<#[list
+format0_has_list 0

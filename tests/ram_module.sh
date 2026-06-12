@@ -5,7 +5,7 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 source "${script_dir}/helpers.sh"
 
 # Tests that the default options are set correctly
-tmux source "${script_dir}/../catppuccin_options_tmux.conf"
-tmux source "${script_dir}/../catppuccin_tmux.conf"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
 
-print_option E:@catppuccin_status_ram
+print_option E:@themux_status_ram
