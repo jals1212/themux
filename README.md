@@ -54,13 +54,93 @@ themes can be selected with `@themux_theme`, which loads
 # Kanagawa (wave, dragon or lotus)
 set -g @themux_theme 'kanagawa_dragon'
 
-# Or keep using catppuccin via the classic flavor option (default: mocha)
-set -g @catppuccin_flavor 'frappe'
+# Catppuccin (latte, frappe, macchiato or mocha)
+set -g @themux_theme 'catppuccin_frappe'
 ```
 
 Available themes: `catppuccin_latte`, `catppuccin_frappe`,
 `catppuccin_macchiato`, `catppuccin_mocha`, `kanagawa_wave`,
 `kanagawa_dragon`, `kanagawa_lotus`.
+
+### Flat style (themux)
+
+By default status modules render as "pills" — icon and text blocks with
+their own backgrounds — even when `@themux_status_background` is set to
+`"none"` (that option only clears the bar itself). For a fully transparent
+status line, this fork adds a flat style: modules become colored text on the
+default background, separated by a configurable divider.
+
+```sh
+# Before loading the plugin
+set -g @themux_status_style "flat"        # pill (default), flat
+set -g @themux_window_status_style "flat" # flat window list to match
+set -g @themux_status_background "none"
+
+# Optional: tweak the default separator segment (any style)
+set -g @themux_separator_char "│"
+set -g @themux_separator_color "#{@thm_overlay_0}"
+set -g @themux_separator_pad_left " "
+set -g @themux_separator_pad_right " "
+
+# Optional: flat window list colors
+set -g @themux_window_flat_text_color "#{@thm_rosewater}"  # inactive windows
+set -g @themux_window_flat_last_color "#{@thm_peach}"      # last window
+set -g @themux_window_flat_current_fg "#{@thm_bg}"         # current window
+set -g @themux_window_flat_current_bg "#{@thm_peach}"
+```
+
+In flat mode each module's icon and text take the module color
+(`@themux_<module>_color`), so all the existing modules and the
+per-module options keep working — only the rendering changes. Modules draw
+no dividers themselves; compose them explicitly with the separator segment:
+
+```sh
+set -g status-left ""
+set -ga status-left "#{E:@themux_status_session}"
+set -ga status-left "#{E:@themux_status_separator}"
+set -ga status-left "#{E:@themux_status_application}"
+```
+
+Different dividers can coexist: create extra named separator segments from
+the template (after loading the plugin), each with its own character, color
+and padding:
+
+```sh
+%hidden SEPARATOR_NAME="dot"
+set -g @themux_dot_char "·"
+source -F "~/.config/tmux/plugins/themux/utils/separator.conf"
+
+set -ga status-right "#{E:@themux_status_dot}"
+```
+
+This fork also adds a `zoom` status module
+(`#{E:@themux_status_zoom}`) that renders only while the active pane
+is zoomed, in both pill and flat styles.
+
+### Two-line status (themux)
+
+Move the window list to its own status line (aligned by `status-justify`),
+leaving line 0 to `status-left`/`status-right`:
+
+```sh
+set -g @themux_windows_line "1" # 0 keeps the stock single line
+```
+
+### Reset pattern (themux)
+
+Source `themux_reset.conf` at the top of your theme config, before setting
+any `@themux_*` option. On a running server it wipes all themux-derived
+state (palette, options, built segments, status/window formats), so
+re-sourcing your config switches theme or style cleanly — no
+`tmux kill-server` needed. On fresh servers it is a no-op.
+
+```sh
+source ~/.config/tmux/plugins/themux/themux_reset.conf
+set -g @themux_theme 'kanagawa_dragon'
+# ... options ...
+run ~/.config/tmux/plugins/themux/themux.tmux
+```
+
 
 ## Installation
 
@@ -85,7 +165,7 @@ This method is recommended as TPM has some issues with name conflicts.
    ```
 
 1. Add the following line to your `tmux.conf` file:
-   `run ~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux`.
+   `run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux`.
 1. Reload Tmux by either restarting or reloading with `tmux source ~/.tmux.conf`.
 <!-- x-release-please-end -->
 
@@ -104,10 +184,10 @@ Check out what to do next in the "[Getting Started Guide](./docs/tutorials/01-ge
     set -g @plugin 'tmux-plugins/tpm'
     ```
 
-1.  (Optional) Set your preferred flavor, it defaults to `"mocha"`:
+1.  (Optional) Set your preferred theme, it defaults to `catppuccin_mocha`:
 
     ```bash
-    set -g @catppuccin_flavor 'mocha' # latte, frappe, macchiato or mocha
+    set -g @themux_theme 'catppuccin_mocha'
     ```
 
     <!-- x-release-please-end -->
@@ -151,22 +231,14 @@ hooks in your tmux configuration file like so:
 
 ```conf
 set-hook -g client-dark-theme {
-  set -g @catppuccin_flavor "frappe"
-  set -g @catppuccin_reset "true"
-
-  # NOTE: you may need to set more `@catppuccin_*` variables to fully reset
-  # everything.
-
-  run ~/code/github.com/catppuccin/tmux/catppuccin.tmux
+  source ~/code/github.com/catppuccin/tmux/themux_reset.conf
+  set -g @themux_theme "catppuccin_frappe"
+  run ~/code/github.com/catppuccin/tmux/themux.tmux
 }
 set-hook -g client-light-theme {
-  set -g @catppuccin_flavor "latte"
-  set -g @catppuccin_reset "true"
-
-  # NOTE: you may need to set more `@catppuccin_*` variables to fully reset
-  # everything.
-
-  run ~/code/github.com/catppuccin/tmux/catppuccin.tmux
+  source ~/code/github.com/catppuccin/tmux/themux_reset.conf
+  set -g @themux_theme "catppuccin_latte"
+  run ~/code/github.com/catppuccin/tmux/themux.tmux
 }
 ```
 
@@ -181,7 +253,7 @@ relying on tmux hooks.
 
 > [!IMPORTANT]
 > As mentioned in the comments in the `conf` snippet above, you may find that
-> you'll need to add to the list of `@catppuccin_*` variables. Test your
+> you'll need to add to the list of `@themux_*` variables. Test your
 > configuration by switching themes and noting what of the Tmux session isn't
 > getting reset to an expected color.
 
@@ -206,23 +278,23 @@ set -g mouse on
 set -g default-terminal "tmux-256color"
 
 # Configure the catppuccin plugin
-set -g @catppuccin_flavor "mocha"
-set -g @catppuccin_window_status_style "rounded"
+set -g @themux_theme "catppuccin_mocha"
+set -g @themux_window_status_style "rounded"
 
 # Load catppuccin
-run ~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux
-# For TPM, instead use `run ~/.tmux/plugins/tmux/catppuccin.tmux`
+run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
+# For TPM, instead use `run ~/.tmux/plugins/tmux/themux.tmux`
 
 # Make the status line pretty and add some modules
 set -g status-right-length 100
 set -g status-left-length 100
 set -g status-left ""
-set -g status-right "#{E:@catppuccin_status_application}"
-set -agF status-right "#{E:@catppuccin_status_cpu}"
-set -agF status-right "#{E:@catppuccin_status_ram}"
-set -ag status-right "#{E:@catppuccin_status_session}"
-set -ag status-right "#{E:@catppuccin_status_uptime}"
-set -agF status-right "#{E:@catppuccin_status_battery}"
+set -g status-right "#{E:@themux_status_application}"
+set -agF status-right "#{E:@themux_status_cpu}"
+set -agF status-right "#{E:@themux_status_ram}"
+set -ag status-right "#{E:@themux_status_session}"
+set -ag status-right "#{E:@themux_status_uptime}"
+set -agF status-right "#{E:@themux_status_battery}"
 
 run ~/.config/tmux/plugins/tmux-plugins/tmux-cpu/cpu.tmux
 run ~/.config/tmux/plugins/tmux-plugins/tmux-battery/battery.tmux
@@ -243,7 +315,15 @@ run ~/.config/tmux/plugins/tmux-plugins/tmux-battery/battery.tmux
 - [Configuration Options Reference](./docs/reference/configuration.md)
 - [Tmux Configuration Showcase](https://github.com/catppuccin/tmux/discussions/317)
 
-## 💝 Thanks to
+## 💝 Credits
+
+themux is a multi-theme fork of [catppuccin/tmux] — the module system,
+status-line architecture, and the catppuccin palettes are their work
+(MIT, Copyright © Catppuccin Org).
+
+[catppuccin/tmux]: https://github.com/catppuccin/tmux
+
+Thanks to the original catppuccin/tmux contributors:
 
 - [Pocco81](https://github.com/Pocco81)
 - [vinnyA3](https://github.com/vinnyA3)

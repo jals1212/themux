@@ -16,9 +16,9 @@ Using your favourite editor, edit the file `~/.tmux.conf`.
 It should look like this:
 
 ```bash
-set -g @catppuccin_flavor 'mocha'
+set -g @themux_theme 'catppuccin_mocha'
 
-run ~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux
+run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
 ```
 
 This will load the catppuccin plugin and apply the defaults.
@@ -33,9 +33,9 @@ be a bit more colorful. Edit your tmux config again so it looks like this.
 
 ```bash
 # Pick a softer palette.
-set -g @catppuccin_flavor 'frappe'
+set -g @themux_theme 'catppuccin_frappe'
 
-run ~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux
+run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
 
 # Make the status line more pleasant.
 set -g status-left ""
@@ -61,7 +61,7 @@ and right of the status line.
 The `#[]` syntax is an embedded style, similar to inline css.
 `fg=#{@thm_crust}` says "make the text the crust color". `@thm_crust` is a
 user option set by the plugin. It is created by the line
-`run ~/.config/tmux/plugins/catppuccin/tmux/catppuccin.tmux`, so if you try
+`run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux`, so if you try
 and use colors before that line, it won't work. The `#S` is a special sequence
 that tmux replaces with the current session name. There are a long, long
 "[list of special sequences](https://man7.org/linux/man-pages/man1/tmux.1.html#FORMATS)"
