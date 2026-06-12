@@ -93,7 +93,7 @@ set -g @themux_status_background "none"
 
 # Optional: tweak the default separator segment (any style)
 set -g @themux_separator_char "│"
-set -g @themux_separator_color "#{@thm_overlay_0}"
+set -g @themux_separator_color "#{@thm_surface_0}"
 set -g @themux_separator_pad_left " "
 set -g @themux_separator_pad_right " "
 
