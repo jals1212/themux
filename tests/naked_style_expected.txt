@@ -3,16 +3,16 @@
 
 @themux_status_session #{?client_prefix,#{E:@themux_session_prefix_style},#{E:@themux_session_style}}#{E:@themux_session_icon}#{E:@themux_session_text} 
 
-@themux_status_divider #[fg=#{E:@themux_divider_color},bg=default]#{E:@themux_divider_text}
+@_tmx_status_divider #[fg=#{E:@themux_status_modules_divider_color},bg=default]#{E:@themux_status_modules_divider}
 
 @themux_status_zoom #{?window_zoomed_flag,#{E:@themux_status_zoom_content},}
 
-window-status-format #[fg=#11111b,bg=#f5e0dc]#I#[fg=#cdd6f4,bg=default] #W 
+window-status-format #[fg=#11111b,bg=#9399b2]#I#[fg=#cdd6f4,bg=default] #W 
 
-window-status-current-format #[fg=#11111b,bg=#fab387]#I#[fg=#cdd6f4,bg=default,bold] #W 
+window-status-current-format #[fg=#11111b,bg=#cba6f7]#I#[fg=#cdd6f4,bg=default,bold] #W 
 
 window-status-style default
 
 window-status-current-style default
 
-window-status-separator #[fg=#6c7086,bg=default] │ 
+window-status-separator #[fg=#6c7086,bg=default] 

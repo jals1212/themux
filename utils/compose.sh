@@ -3,8 +3,8 @@
 #
 # Usage: compose.sh <status-left|status-right> "<module list>"
 #
-# Modules are separated by spaces; a "|" between two modules inserts a divider
-# (@themux_status_divider). So "session|application directory" renders
+# Modules are separated by spaces; a "|" between two modules inserts the
+# divider (@_tmx_status_divider). So "session|application directory" renders
 # session, a divider, application, then directory with no divider.
 #
 # Each token NAME becomes the segment #{E:@themux_status_NAME}, resolved at
@@ -17,7 +17,9 @@ list="${2//|/ divider }"
 
 tmux set -g "$option" ""
 for m in $list; do
-  if [ "$(tmux show -gqv "@themux_${m}_expand")" = "yes" ]; then
+  if [ "$m" = "divider" ]; then
+    tmux set -ag "$option" "#{E:@_tmx_status_divider}"
+  elif [ "$(tmux show -gqv "@themux_${m}_expand")" = "yes" ]; then
     tmux set -agF "$option" "#{E:@themux_status_${m}}"
   else
     tmux set -ag "$option" "#{E:@themux_status_${m}}"

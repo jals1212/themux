@@ -15,7 +15,7 @@ print_option @themux_status_application | grep -q "@thm_" &&
 
 print_option @themux_status_application | sed -E 's/(bash|fish|zsh)/<application>/'
 print_option @themux_status_session
-print_option @themux_status_divider
+print_option @_tmx_status_divider
 print_option @themux_status_zoom
 print_option window-status-format
 print_option window-status-current-format
