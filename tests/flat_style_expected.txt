@@ -7,9 +7,9 @@
 
 @themux_status_zoom #{?window_zoomed_flag,#{E:@themux_status_zoom_content},}
 
-window-status-format  #I #T 
+window-status-format  #I #W 
 
-window-status-current-format  #I #T 
+window-status-current-format  #I #W 
 
 window-status-style fg=#f5e0dc,bg=default
 
