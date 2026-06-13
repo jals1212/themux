@@ -55,9 +55,9 @@ setting a global option called `@themux_reset` to `true.
 @themux_window_flags_icon_activity
 @themux_window_flags_icon_bell
 @themux_window_flags_icon_format
-@themux_status_left_separator
+@themux_status_left_border
 @themux_status_middle_separator
-@themux_status_right_separator
+@themux_status_right_border
 @themux_status_connect_separator
 @themux_status_module_text_bg
 @themux_window_current_left_separator
@@ -144,10 +144,10 @@ set -g @themux_window_current_text "#{pane_current_path}"
 set -g @themux_pane_left_separator "▓"
 set -g @themux_pane_middle_separator "▓"
 set -g @themux_pane_right_separator "▓"
-set -g @themux_status_left_separator "▓"
+set -g @themux_status_left_border "▓"
 set -g @themux_status_middle_separator "▓"
-set -g @themux_status_right_separator "▓"
-set -g @themux_status_right_separator_inverse "no"
+set -g @themux_status_right_border "▓"
+set -g @themux_status_right_border_inverse "no"
 set -g @themux_status_connect_separator "yes"
 set -g @themux_window_status_enable "yes"
 set -g @themux_status_fill "icon"

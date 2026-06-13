@@ -69,9 +69,9 @@ themux leave that item completely untouched, so you can build it by hand
 with the `@thm_*` palette colors:
 
 ```sh
-set -g @themux_status_variant  "pill"    # pill, flat, unstyled
+set -g @themux_status_variant  "rounded" # squared, rounded, slanted, flat, unstyled
 set -g @themux_windows_variant "squared" # squared, rounded, slanted, flat, unstyled
-set -g @themux_panes_variant   "pill"    # pill, flat, unstyled
+set -g @themux_panes_variant   "squared" # squared, rounded, slanted, flat, unstyled
 ```
 
 Window and pane variants live one file per look under `variants/windows/`

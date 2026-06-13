@@ -107,9 +107,9 @@ set -g @themux_window_flags_icon_bell " 󰂞" # !
 set -g @themux_window_flags_icon_format "##{?window_activity_flag,#{E:@themux_window_flags_icon_activity},}##{?window_bell_flag,#{E:@themux_window_flags_icon_bell},}##{?window_silence_flag,#{E:@themux_window_flags_icon_silent},}##{?window_active,#{E:@themux_window_flags_icon_current},}##{?window_last_flag,#{E:@themux_window_flags_icon_last},}##{?window_marked_flag,#{E:@themux_window_flags_icon_mark},}##{?window_zoomed_flag,#{E:@themux_window_flags_icon_zoom},} "
 
 # Status line options
-set -g @themux_status_left_separator ""
+set -g @themux_status_left_border ""
 set -g @themux_status_middle_separator ""
-set -g @themux_status_right_separator "█"
+set -g @themux_status_right_border "█"
 set -g @themux_status_connect_separator "yes" # yes, no
 set -g @themux_status_fill "icon"
 set -g @themux_status_module_bg_color "#{@thm_surface_0}"
