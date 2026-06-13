@@ -4,34 +4,42 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 # shellcheck disable=SC1091
 source "${script_dir}/helpers.sh"
 
-# stacked: window list on its own line below status-left/right
-tmux set -g @themux_windows_line "stacked"
+# run-shell is synchronous, so status-format is built before we read it.
+run_layout() { tmux run-shell "${script_dir}/../utils/layout.sh"; }
+
+# One line: left modules (with a "|" divider), windows centred, right module.
+tmux set -g @themux_status_line_1 "session|application / windows / host"
+tmux set -g @themux_status_line_2 ""
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
+run_layout
 
-printf "\nstacked_status "
+printf "\none_status "
 tmux show -gv status
-printf "stacked_line1_has_list "
-tmux show -gv 'status-format[1]' | grep -c 'list=on align' || true
-# Line 0 keeps status-left/right, not the window list
-printf "stacked_line0_has_list "
-tmux show -gv 'status-format[0]' | grep -c 'list=on align' || true
+printf "one_zones "
+tmux show -gv 'status-format[0]' | grep -oE '#\[align=(left|centre|right)\]' | tr '\n' ' '
+printf "\none_left_divider "
+tmux show -gv 'status-format[0]' | grep -c '@themux_status_session}#{E:@_tmx_status_divider}#{E:@themux_status_application' || true
+printf "one_windows_centre "
+tmux show -gv 'status-format[0]' | grep -c 'list=on align=centre' || true
+printf "one_right_module "
+tmux show -gv 'status-format[0]' | grep -c 'align=right]#{E:@themux_status_host}' || true
 
-# stacked + top: window list moves to line 0
-tmux set -g @themux_windows_position "top"
+# Two lines: windows alone on the second row, right-aligned.
+tmux set -g @themux_status_line_1 "session / / host"
+tmux set -g @themux_status_line_2 " / / windows"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
-printf "\ntop_line0_has_list "
-tmux show -gv 'status-format[0]' | grep -c 'list=on align' || true
-tmux set -g @themux_windows_position "bottom" # reset
-
-# spaced: window list on line 2 with a blank line 1
-tmux set -g @themux_windows_line "spaced"
-tmux source "${script_dir}/../themux_options.conf"
-tmux source "${script_dir}/../themux.conf"
-
-printf "\nspaced_status "
+run_layout
+printf "\ntwo_status "
 tmux show -gv status
-printf "spaced_line1_blank [%s]\n" "$(tmux show -gv 'status-format[1]')"
-printf "spaced_line2_has_list "
-tmux show -gv 'status-format[2]' | grep -c 'list=on align' || true
+printf "two_line2_windows_right "
+tmux show -gv 'status-format[1]' | grep -c 'list=on align=right' || true
+
+# Back to a single row when the extra lines are blank.
+tmux set -g @themux_status_line_2 ""
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "\nsingle_status "
+tmux show -gv status

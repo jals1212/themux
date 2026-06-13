@@ -89,17 +89,35 @@ set -g @themux_panes_fill   "icon" # all, icon, none
 
 ### Composition (themux)
 
-Each item of tmux is a component you compose declaratively. List the
-component names and themux builds `status-left`/`status-right` for you — a
-token `NAME` becomes the `@themux_status_NAME` segment. Separate modules with
-a space; put a `|` between two of them to insert a divider:
+The status line is built from up to five rows. Each `@themux_status_line_N`
+(N = 1..5) is split into three zones — left, centre, right — by `/`, and a zone
+is either a list of component names (a token `NAME` becomes the
+`@themux_status_NAME` segment) or the special token `windows` (the window
+list). Separate modules with a space; put a `|` between two of them to insert
+the modules divider:
 
 ```sh
-set -g @themux_status_left_modules  "session|application|directory zoom"
-set -g @themux_status_right_modules "gitmux|ram|date_time"
+set -g @themux_status_line_1 "session|application|directory / windows / gitmux|ram|date_time"
 ```
 
-Leave them empty to compose `status-left`/`status-right` by hand instead.
+The number of non-empty lines sets how many status rows are shown, and the
+window list aligns to its zone. A multi-row layout is just more lines — e.g.
+give the window list its own row:
+
+```sh
+set -g @themux_status_line_1 "session / / gitmux date_time"
+set -g @themux_status_line_2 " / windows / "
+```
+
+The divider between status modules and the divider between windows are
+configured independently:
+
+```sh
+set -g @themux_status_modules_divider " | "            # what "|" inserts
+set -g @themux_status_modules_divider_color "#{@thm_overlay_0}"
+set -g @themux_windows_divider " "                     # window-status-separator
+set -g @themux_windows_divider_color "#{@thm_overlay_0}"
+```
 
 ### Naked style (themux)
 
@@ -107,65 +125,35 @@ By default status modules render as "pills" — icon and text blocks with
 their own backgrounds — even when `@themux_status_background` is set to
 `"none"` (that option only clears the bar itself). For a fully transparent
 status line, this fork adds a naked variant: modules become colored text on
-the default background, separated by a configurable divider.
+the default background.
 
 ```sh
 # Before loading the plugin
 set -g @themux_status_variant "naked"  # transparent modules
 set -g @themux_windows_variant "naked" # naked window list to match
 set -g @themux_status_background "none"
-
-# Optional: tweak the default divider segment (its text includes padding)
-set -g @themux_divider_text " │ "
-set -g @themux_divider_color "#{@thm_overlay_0}"
-
-# Optional: naked window list colors
-set -g @themux_window_naked_text_color "#{@thm_rosewater}"  # inactive windows
-set -g @themux_window_naked_last_color "#{@thm_peach}"      # last window
-set -g @themux_window_naked_current_color "#{@thm_peach}"  # current window
 ```
 
 In naked mode each module's icon and text take the module color
-(`@themux_<module>_color`), so all the existing modules and the
-per-module options keep working — only the rendering changes. Modules draw
-no dividers themselves; compose them explicitly with the divider segment:
+(`@themux_<module>_color`), so all the existing modules and the per-module
+options keep working — only the rendering changes. Naked windows reuse the
+same `@themux_window_number_color` / `@themux_window_current_number_color` as
+the block variants.
 
-```sh
-set -g status-left ""
-set -ga status-left "#{E:@themux_status_session}"
-set -ga status-left "#{E:@themux_status_divider}"
-set -ga status-left "#{E:@themux_status_application}"
-```
-
-Different dividers can coexist: create extra named divider segments from
-the template (after loading the plugin), each with its own text and color:
+Extra named dividers can be created from the template (after loading the
+plugin) and then dropped into a zone as a token:
 
 ```sh
 %hidden DIVIDER_NAME="dot"
 set -g @themux_dot_text "·"
 source -F "~/.config/tmux/plugins/themux/utils/divider.conf"
 
-set -ga status-right "#{E:@themux_status_dot}"
+set -g @themux_status_line_1 "session dot application / windows / date_time"
 ```
 
 This fork also adds a `zoom` status module
 (`#{E:@themux_status_zoom}`) that renders only while the active pane
 is zoomed, in both pill and naked styles.
-
-### Multi-line status (themux)
-
-Give the window list its own status line (aligned by `status-justify`),
-leaving the other line to `status-left`/`status-right`:
-
-```sh
-set -g @themux_windows_line "stacked"    # inline (default), stacked, spaced
-set -g @themux_windows_position "bottom" # top, bottom
-```
-
-- `inline` keeps the stock single line (windows between left and right).
-- `stacked` puts the window list on its own line.
-- `spaced` does the same with a blank line between them.
-- `@themux_windows_position` chooses which line the window list takes.
 
 ### Clean reloads (themux)
 
