@@ -13,7 +13,7 @@ if [ -n "$(tmux show -gqv @thm_bg)" ]; then
   tmux show -g | awk '$1 ~ /^@(thm_|_tmx_)/ { print $1 }' |
     while read -r o; do tmux set -gu "$o"; done
   for o in \
-    @themux_pane_left_separator @themux_pane_middle_separator @themux_pane_right_separator \
+    @themux_pane_left_border @themux_pane_middle_separator @themux_pane_right_border \
     @themux_window_left_border @themux_window_right_border @themux_window_middle_separator \
     @themux_window_current_left_border @themux_window_current_right_border @themux_window_current_middle_separator \
     @themux_status_left_border @themux_status_right_border \

@@ -16,8 +16,8 @@ tmux set -g @themux_panes_variant "rounded"
 tmux set -g @themux_pane_status "top"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
-print_option @themux_pane_left_separator
-print_option @themux_pane_right_separator
+print_option @themux_pane_left_border
+print_option @themux_pane_right_border
 
 # Unstyled panes: themux leaves pane styling untouched
 tmux set -gu @themux_pane_status
