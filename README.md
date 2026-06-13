@@ -77,6 +77,16 @@ set -g @themux_panes_variant   "squared" # squared, rounded, slanted, naked, uns
 Window and pane variants live one file per look under `variants/windows/`
 and `variants/panes/`, so adding a new look is dropping a file there.
 
+Each item also takes a `fill`, which picks how much of the badge gets the
+accent color — `all` (the whole block, one solid color) or `icon` (only the
+icon/index, the rest stays neutral):
+
+```sh
+set -g @themux_status_fill  "all"  # all, icon
+set -g @themux_windows_fill "all"  # all, icon
+set -g @themux_panes_fill   "icon" # all, icon, none
+```
+
 ### Composition (themux)
 
 Each item of tmux is a component you compose declaratively. List the
