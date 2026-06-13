@@ -3,7 +3,7 @@
 
 @themux_status_session #{?client_prefix,#{E:@themux_session_prefix_style},#{E:@themux_session_style}}#{E:@themux_session_icon}#{E:@themux_session_text} 
 
-@themux_status_separator #[fg=#{E:@themux_separator_color},bg=default]#{E:@themux_separator_char}
+@themux_status_divider #[fg=#{E:@themux_divider_color},bg=default]#{E:@themux_divider_text}
 
 @themux_status_zoom #{?window_zoomed_flag,#{E:@themux_status_zoom_content},}
 

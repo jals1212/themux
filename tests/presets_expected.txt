@@ -1,0 +1,11 @@
+
+@themux_status_variant rounded
+
+@themux_status_background default
+classic_left_composed 1
+
+@themux_status_variant squared
+
+@themux_status_variant flat
+
+@themux_status_background none

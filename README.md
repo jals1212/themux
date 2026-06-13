@@ -91,11 +91,9 @@ set -g @themux_status_variant "flat"  # transparent modules
 set -g @themux_windows_variant "flat" # flat window list to match
 set -g @themux_status_background "none"
 
-# Optional: tweak the default separator segment (any style)
-set -g @themux_separator_char "│"
-set -g @themux_separator_color "#{@thm_surface_0}"
-set -g @themux_separator_pad_left " "
-set -g @themux_separator_pad_right " "
+# Optional: tweak the default divider segment (its text includes padding)
+set -g @themux_divider_text " │ "
+set -g @themux_divider_color "#{@thm_overlay_0}"
 
 # Optional: flat window list colors
 set -g @themux_window_flat_text_color "#{@thm_rosewater}"  # inactive windows
@@ -107,23 +105,22 @@ set -g @themux_window_flat_current_bg "#{@thm_peach}"
 In flat mode each module's icon and text take the module color
 (`@themux_<module>_color`), so all the existing modules and the
 per-module options keep working — only the rendering changes. Modules draw
-no dividers themselves; compose them explicitly with the separator segment:
+no dividers themselves; compose them explicitly with the divider segment:
 
 ```sh
 set -g status-left ""
 set -ga status-left "#{E:@themux_status_session}"
-set -ga status-left "#{E:@themux_status_separator}"
+set -ga status-left "#{E:@themux_status_divider}"
 set -ga status-left "#{E:@themux_status_application}"
 ```
 
-Different dividers can coexist: create extra named separator segments from
-the template (after loading the plugin), each with its own character, color
-and padding:
+Different dividers can coexist: create extra named divider segments from
+the template (after loading the plugin), each with its own text and color:
 
 ```sh
-%hidden SEPARATOR_NAME="dot"
-set -g @themux_dot_char "·"
-source -F "~/.config/tmux/plugins/themux/utils/separator.conf"
+%hidden DIVIDER_NAME="dot"
+set -g @themux_dot_text "·"
+source -F "~/.config/tmux/plugins/themux/utils/divider.conf"
 
 set -ga status-right "#{E:@themux_status_dot}"
 ```
