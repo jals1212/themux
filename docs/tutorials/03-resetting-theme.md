@@ -59,7 +59,7 @@ setting a global option called `@themux_reset` to `true.
 @themux_status_middle_separator
 @themux_status_right_border
 @themux_status_connect_separator
-@themux_status_module_text_bg
+@themux_module_text_bg
 @themux_window_current_left_border
 @themux_window_current_middle_separator
 @themux_window_current_right_border
@@ -159,13 +159,13 @@ set -g @themux_window_number_color "#{@thm_overlay_2}"
 set -g @themux_window_current_text_color "#{@thm_surface_1}"
 set -g @themux_window_current_number_color "#{@thm_mauve}"
 set -g @themux_status_module_bg_color "#{@thm_surface_0}"
-set -g @themux_status_application_icon_fg "#{E:@thm_crust}"
-set -g @themux_status_application_text_fg "#{E:@thm_fg}"
+set -g @themux_application_icon_fg "#{E:@thm_crust}"
+set -g @themux_application_text_fg "#{E:@thm_fg}"
 set -g @themux_application_color "#{E:@thm_maroon}"
-set -g @themux_status_session_icon_fg "#{E:@thm_crust}"
-set -g @themux_status_session_text_fg "#{E:@thm_fg}"
+set -g @themux_session_icon_fg "#{E:@thm_crust}"
+set -g @themux_session_text_fg "#{E:@thm_fg}"
 set -g @themux_session_color "#{?client_prefix,#{E:@thm_red},#{E:@thm_green}}"
-set -g @themux_status_module_text_bg "#{?@themux_status_module_bg_color,#{E:@themux_status_module_bg_color},#{@thm_surface_0}}"
+set -g @themux_module_text_bg "#{?@themux_status_module_bg_color,#{E:@themux_status_module_bg_color},#{@thm_surface_0}}"
 run /path/to/catppuccin/tmux/themux.tmux
 ```
 
@@ -189,13 +189,13 @@ set -g @themux_window_number_color "#{@thm_overlay_2}"
 set -g @themux_window_current_text_color "#{@thm_surface_1}"
 set -g @themux_window_current_number_color "#{@thm_mauve}"
 set -g @themux_status_module_bg_color "#{@thm_surface_0}"
-set -g @themux_status_application_icon_fg "#{E:@thm_crust}"
-set -g @themux_status_application_text_fg "#{E:@thm_fg}"
+set -g @themux_application_icon_fg "#{E:@thm_crust}"
+set -g @themux_application_text_fg "#{E:@thm_fg}"
 set -g @themux_application_color "#{E:@thm_maroon}"
-set -g @themux_status_session_icon_fg "#{E:@thm_crust}"
-set -g @themux_status_session_text_fg "#{E:@thm_fg}"
+set -g @themux_session_icon_fg "#{E:@thm_crust}"
+set -g @themux_session_text_fg "#{E:@thm_fg}"
 set -g @themux_session_color "#{?client_prefix,#{E:@thm_red},#{E:@thm_green}}"
-set -g @themux_status_module_text_bg "#{?@themux_status_module_bg_color,#{E:@themux_status_module_bg_color},#{@thm_surface_0}}"
+set -g @themux_module_text_bg "#{?@themux_status_module_bg_color,#{E:@themux_status_module_bg_color},#{@thm_surface_0}}"
 ```
 
 > [!NOTE]
