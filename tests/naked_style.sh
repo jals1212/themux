@@ -4,9 +4,9 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 # shellcheck disable=SC1091
 source "${script_dir}/helpers.sh"
 
-# Tests the flat status module and window status style
-tmux set -g @themux_status_variant "flat"
-tmux set -g @themux_windows_variant "flat"
+# Tests the naked status module and window status style
+tmux set -g @themux_status_variant "naked"
+tmux set -g @themux_windows_variant "naked"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 

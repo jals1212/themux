@@ -30,7 +30,7 @@ is `squared`. The variant names are shared with the status and pane items.
 | `squared`  | Solid blocks separated by spaces.                                     |
 | `rounded`  | Solid blocks with rounded caps.                                       |
 | `slanted`  | Solid blocks with slanted caps.                                       |
-| `flat`     | Transparent text; only the current window keeps a highlight.          |
+| `naked`     | Transparent text; only the current window keeps a highlight.          |
 | `unstyled` | themux leaves the window status untouched for hand styling.           |
 
 If you want to change the active color to something else (the default is mauve),
@@ -85,7 +85,7 @@ set -g @themux_pane_default_text "##{b:pane_current_path}"
 set -g @themux_pane_default_fill "number"
 set -g @themux_pane_number_position "left" # right, left
 
-set -g @themux_windows_variant "squared" # squared, rounded, slanted, flat, unstyled
+set -g @themux_windows_variant "squared" # squared, rounded, slanted, naked, unstyled
 set -g @themux_window_text_color "#{@thm_surface_0}"
 set -g @themux_window_number_color "#{@thm_overlay_2}"
 set -g @themux_window_text " #T"
@@ -106,7 +106,7 @@ set -g @themux_window_flags_icon_bell " 󰂞" # !
 # Matches icon order when using `#F` (`#!~[*-]MZ`)
 set -g @themux_window_flags_icon_format "##{?window_activity_flag,#{E:@themux_window_flags_icon_activity},}##{?window_bell_flag,#{E:@themux_window_flags_icon_bell},}##{?window_silence_flag,#{E:@themux_window_flags_icon_silent},}##{?window_active,#{E:@themux_window_flags_icon_current},}##{?window_last_flag,#{E:@themux_window_flags_icon_last},}##{?window_marked_flag,#{E:@themux_window_flags_icon_mark},}##{?window_zoomed_flag,#{E:@themux_window_flags_icon_zoom},} "
 
-# Style variants (shared vocabulary: squared, rounded, slanted, flat, unstyled)
+# Style variants (shared vocabulary: squared, rounded, slanted, naked, unstyled)
 set -g @themux_status_variant "rounded"
 set -g @themux_panes_variant "squared"
 

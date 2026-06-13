@@ -6,7 +6,7 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 
 "${script_dir}"/tests/harness.sh --test "${script_dir}"/tests/default_options.sh --expected "${script_dir}"/tests/default_options_expected.txt "$@"
 "${script_dir}"/tests/harness.sh --test "${script_dir}"/tests/window_status_styling.sh --expected "${script_dir}"/tests/window_status_styling_expected.txt "$@"
-"${script_dir}"/tests/harness.sh --test "${script_dir}"/tests/flat_style.sh --expected "${script_dir}"/tests/flat_style_expected.txt "$@"
+"${script_dir}"/tests/harness.sh --test "${script_dir}"/tests/naked_style.sh --expected "${script_dir}"/tests/naked_style_expected.txt "$@"
 "${script_dir}"/tests/harness.sh --test "${script_dir}"/tests/windows_line.sh --expected "${script_dir}"/tests/windows_line_expected.txt "$@"
 "${script_dir}"/tests/harness.sh --test "${script_dir}"/tests/unstyled.sh --expected "${script_dir}"/tests/unstyled_expected.txt "$@"
 

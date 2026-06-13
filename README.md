@@ -69,9 +69,9 @@ themux leave that item completely untouched, so you can build it by hand
 with the `@thm_*` palette colors:
 
 ```sh
-set -g @themux_status_variant  "rounded" # squared, rounded, slanted, flat, unstyled
-set -g @themux_windows_variant "squared" # squared, rounded, slanted, flat, unstyled
-set -g @themux_panes_variant   "squared" # squared, rounded, slanted, flat, unstyled
+set -g @themux_status_variant  "rounded" # squared, rounded, slanted, naked, unstyled
+set -g @themux_windows_variant "squared" # squared, rounded, slanted, naked, unstyled
+set -g @themux_panes_variant   "squared" # squared, rounded, slanted, naked, unstyled
 ```
 
 Window and pane variants live one file per look under `variants/windows/`
@@ -91,32 +91,32 @@ set -g @themux_status_right_modules "gitmux|ram|date_time"
 
 Leave them empty to compose `status-left`/`status-right` by hand instead.
 
-### Flat style (themux)
+### Naked style (themux)
 
 By default status modules render as "pills" — icon and text blocks with
 their own backgrounds — even when `@themux_status_background` is set to
 `"none"` (that option only clears the bar itself). For a fully transparent
-status line, this fork adds a flat variant: modules become colored text on
+status line, this fork adds a naked variant: modules become colored text on
 the default background, separated by a configurable divider.
 
 ```sh
 # Before loading the plugin
-set -g @themux_status_variant "flat"  # transparent modules
-set -g @themux_windows_variant "flat" # flat window list to match
+set -g @themux_status_variant "naked"  # transparent modules
+set -g @themux_windows_variant "naked" # naked window list to match
 set -g @themux_status_background "none"
 
 # Optional: tweak the default divider segment (its text includes padding)
 set -g @themux_divider_text " │ "
 set -g @themux_divider_color "#{@thm_overlay_0}"
 
-# Optional: flat window list colors
-set -g @themux_window_flat_text_color "#{@thm_rosewater}"  # inactive windows
-set -g @themux_window_flat_last_color "#{@thm_peach}"      # last window
-set -g @themux_window_flat_current_fg "#{@thm_bg}"         # current window
-set -g @themux_window_flat_current_bg "#{@thm_peach}"
+# Optional: naked window list colors
+set -g @themux_window_naked_text_color "#{@thm_rosewater}"  # inactive windows
+set -g @themux_window_naked_last_color "#{@thm_peach}"      # last window
+set -g @themux_window_naked_current_fg "#{@thm_bg}"         # current window
+set -g @themux_window_naked_current_bg "#{@thm_peach}"
 ```
 
-In flat mode each module's icon and text take the module color
+In naked mode each module's icon and text take the module color
 (`@themux_<module>_color`), so all the existing modules and the
 per-module options keep working — only the rendering changes. Modules draw
 no dividers themselves; compose them explicitly with the divider segment:
@@ -141,7 +141,7 @@ set -ga status-right "#{E:@themux_status_dot}"
 
 This fork also adds a `zoom` status module
 (`#{E:@themux_status_zoom}`) that renders only while the active pane
-is zoomed, in both pill and flat styles.
+is zoomed, in both pill and naked styles.
 
 ### Multi-line status (themux)
 
@@ -350,7 +350,7 @@ themux is a multi-theme fork of [catppuccin/tmux] — the module system,
 status-line architecture, and the catppuccin palettes are their work
 (MIT, Copyright © Catppuccin Org).
 
-The flat style is inspired by [@89iuv]'s configuration shared in the
+The naked style is inspired by [@89iuv]'s configuration shared in the
 catppuccin/tmux [configuration showcase][89iuv-config].
 
 [catppuccin/tmux]: https://github.com/catppuccin/tmux

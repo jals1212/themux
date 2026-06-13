@@ -31,7 +31,7 @@ not by removing configurability but by keeping the configurable surface
 | `squared`  | Solid block with full-block edges.                           |
 | `rounded`  | Solid block with rounded caps.                               |
 | `slanted`  | Solid block with slanted caps.                               |
-| `flat`     | Transparent text on the bar; no block background.            |
+| `naked`     | Transparent text on the bar; no block background.            |
 | `unstyled` | themux leaves the item alone so you can build it by hand.    |
 
 The variants are orthogonal: `@themux_status_variant`, `@themux_windows_variant`
