@@ -26,10 +26,10 @@ and that your terminal is set to use that font.
 
 Go through these steps:
 
-1. Completely kill tmux and restart (`killall tmux`).
-1. Ensure every `@catppuccin.*` option is being set _before_
+1. Completely kill tmux and restart (`killall tmux`). Or, if you use the reset
+   pattern, just re-source your config — see [Resetting the theme](../tutorials/03-resetting-theme.md).
+1. Ensure every `@themux_*` option is being set _before_
    the plugin is loaded. Loading occurs where you have `run` in your config file.
-1. Double check for typos. There are two "c"s and two "p"s in "catppuccin".
 1. Do not use `-o` to set options that begin with `@`. The `-o` flag means that
    the option will not be set if it has already been set. You do not need this
    in your config file.

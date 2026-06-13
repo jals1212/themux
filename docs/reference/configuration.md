@@ -22,16 +22,16 @@ This is a diagram of how the theme is split between its components.
 
 ### Window
 
-The plugin comes with three window styles built in, these can be customized by
-setting the `@themux_windows_variant` option. The default is `squared`.
+Windows select a style with the `@themux_windows_variant` option. The default
+is `squared`. The variant names are shared with the status and pane items.
 
-| Option    | Effect                                                                   | Preview                                                |
-| --------- | ------------------------------------------------------------------------ | ------------------------------------------------------ |
-| `basic`   | Simple styling with blocks.                                              | ![window basic](../../assets/window-basic.webp)           |
-| `rounded` | Each window is separated with rounded separators.                        | ![window rounded style](../../assets/window-rounded.webp) |
-| `slanted` | Each window is separated with slanted separators.                        | ![window slanted style](../../assets/window-slanted.webp) |
-| `custom`  | Custom separators are used. This is required to override the separators! |                                                        |
-| `none`    | Styling of the window status is completely disabled.                     | ![window no styling](../../assets/window-none.webp)       |
+| Option     | Effect                                                                |
+| ---------- | --------------------------------------------------------------------- |
+| `squared`  | Solid blocks separated by spaces.                                     |
+| `rounded`  | Solid blocks with rounded caps.                                       |
+| `slanted`  | Solid blocks with slanted caps.                                       |
+| `flat`     | Transparent text; only the current window keeps a highlight.          |
+| `unstyled` | themux leaves the window status untouched for hand styling.           |
 
 If you want to change the active color to something else (the default is mauve),
 use the following. For example to use lavender:
@@ -44,11 +44,12 @@ set -g @themux_window_current_number_color "#{@thm_lavender}"
 
 <summary>Customising the separators</summary>
 
-Add the following,
-setting whatever values you'd like for the separators:
+The block variants (`squared`/`rounded`/`slanted`) read the cap glyphs from
+options, so you can keep a base variant and override the separators (set them
+before the plugin loads):
 
 ```bash
-set -g @themux_windows_variant "custom"
+set -g @themux_windows_variant "rounded"
 set -g @themux_window_left_separator ""
 set -g @themux_window_middle_separator ""
 set -g @themux_window_right_separator ""
@@ -106,11 +107,13 @@ set -g @themux_window_flags_icon_bell " 󰂞" # !
 # Matches icon order when using `#F` (`#!~[*-]MZ`)
 set -g @themux_window_flags_icon_format "##{?window_activity_flag,#{E:@themux_window_flags_icon_activity},}##{?window_bell_flag,#{E:@themux_window_flags_icon_bell},}##{?window_silence_flag,#{E:@themux_window_flags_icon_silent},}##{?window_active,#{E:@themux_window_flags_icon_current},}##{?window_last_flag,#{E:@themux_window_flags_icon_last},}##{?window_marked_flag,#{E:@themux_window_flags_icon_mark},}##{?window_zoomed_flag,#{E:@themux_window_flags_icon_zoom},} "
 
+# Style variants (shared vocabulary: squared, rounded, slanted, flat, unstyled)
+set -g @themux_status_variant "rounded"
+set -g @themux_panes_variant "squared"
+
 # Status line options
-set -g @themux_status_left_border ""
+# Left/right block borders come from the status variant; squared uses a full
+# block, rounded/slanted use caps. Override them to change a variant's caps.
 set -g @themux_status_middle_separator ""
-set -g @themux_status_right_border "█"
-set -g @themux_status_connect_separator "yes" # yes, no
-set -g @themux_status_fill "icon"
-set -g @themux_status_module_bg_color "#{@thm_surface_0}"
+set -g @themux_status_connect_separator "no" # yes, no
 ```
