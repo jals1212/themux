@@ -1,57 +1,60 @@
 ## Design Philosophy
 
-First and foremost, this is a color scheme. Making colors work
-well takes precedence over other kinds of functionality.
+themux is a multi-theme, themeable UI layer for the tmux status line. It began
+as a fork of [catppuccin/tmux] and keeps that project's core idea — a palette
+exposed as plain tmux options — but deliberately takes a different stance on
+configurability. Where the upstream doc below argued for *fewer* options,
+themux argues for a *small set of orthogonal* ones plus curated presets.
 
-### History
+[catppuccin/tmux]: https://github.com/catppuccin/tmux
 
-This plugin kept on growing essentially because no one was there to push back on
-changes that went against, for example, parts of the UNIX philosophy. This lead to
-a state where there were almost an infinite number of configuration options,
-and combining them in unique ways would almost certainly break something.
-Maintaining the options for everyone's setup was impossible, and fixing
-one bug would cause several others to appear. Eventually the addition
-of more and more things that didn't relate to colors, such as status line modules,
-took time away from getting the basics right.
+### A palette first
 
-Moving forward, we will be trying to align with the philosophies listed below.
-This is in contrast to what the plugin has historically offered in terms of functionality.
+A theme is, first and foremost, a palette. Every theme under `themes/` defines
+the same `@thm_*` colors, and everything else is expressed in terms of them. A
+theme switch is just a different palette; pick one with `@themux_theme`.
 
-### UNIX Philosphy
+Because the palette is plain tmux options, it composes with any other tmux
+configuration: `#{@thm_blue}` works in your own `status-left`, a custom module,
+or anywhere a format string is accepted.
 
-1. Write programs that do one thing and do it well.
-    - Do colors, and do colors well. Other things like displaying the weather
-    are not the responsibility of this plugin.
-1. Write programs to work together.
-    - The full palette is exposed as user options, allowing
-    easy integration with any other kind of tmux configuration.
-1. Write programs to handle text streams, because that is a universal interface.
-    - TMUX is a text based program. Each of the palette options are strings
-    in user options that can be piped into other programs and options.
+### Orthogonal variants over endless options
 
-### Configurability is the root of all evil
+The historical failure mode of a status-line plugin is an explosion of
+inter-dependent options where specific combinations break. themux avoids that
+not by removing configurability but by keeping the configurable surface
+**orthogonal**: each UI item (status modules, the window list, panes) selects a
+*variant* from the same small, shared vocabulary.
 
-Adopted from "[Fish Shell's design philophy](https://fishshell.com/docs/current/design.html)".
+| Variant    | Meaning                                                       |
+| ---------- | ------------------------------------------------------------ |
+| `squared`  | Solid block with full-block edges.                           |
+| `rounded`  | Solid block with rounded caps.                               |
+| `slanted`  | Solid block with slanted caps.                               |
+| `flat`     | Transparent text on the bar; no block background.            |
+| `unstyled` | themux leaves the item alone so you can build it by hand.    |
 
-Every configuration option in a program is a place where the program is too
-stupid to figure out for itself what the user really wants, and should be
-considered a failure of both the program and the programmer who implemented it.
+The variants are orthogonal: `@themux_status_variant`, `@themux_windows_variant`
+and `@themux_panes_variant` are chosen independently, and any combination is
+valid. New looks are added by dropping a file under `variants/`, not by adding
+a flag that interacts with every other flag.
 
-Rationale: Different configuration options are a nightmare to maintain, since
-the number of potential bugs caused by specific configuration combinations
-quickly becomes an issue. Configuration options often imply assumptions about
-the code which change when reimplementing the code, causing issues with
-backwards compatibility. But mostly, configuration options should be avoided
-since they simply should not exist, as the program should be smart enough to do
-what is best, or at least a good enough approximation of it.
+`unstyled` is the escape hatch: it makes the law of orthogonality hold even at
+the edges. Anything themux's variants do not cover, you build yourself with the
+exposed palette, and themux stays out of the way.
 
-### The law of orthogonality
+### Presets are defaults, not features
 
-The set of options that do exist should have a small set of orthogonal features.
-Any situation where two options are related but not identical, one of them
-should be removed, and the other should be made powerful and general enough to
-handle all common use cases of either feature.
+A preset is a named bundle of the options above — a curated starting point, not
+a new mechanism. `@themux_preset` selects a `presets/<name>.conf` that sets
+variant choices and a status-line composition using the same options a user
+would. Presets are applied with non-destructive defaults, so any option you set
+yourself still wins. This keeps the "smart defaults" benefit (a good look from
+one line) without hiding the knobs underneath.
 
-Rationale: Related features make the configuration options larger, which makes
-it harder to use. It also increases the size of the source code, making the
-program harder to maintain and update.
+### Build for composition
+
+tmux is a text-based program and its options are a universal interface. themux
+leans into that: modules, separators and the palette are all just strings you
+can read, pipe and recombine. Reset (`themux_reset.conf`) makes re-sourcing
+idempotent, so iterating on a config never requires killing the server.
