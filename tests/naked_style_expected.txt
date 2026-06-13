@@ -1,5 +1,5 @@
 
-@themux_status_application #[fg=#eba0ac,bg=default] #{E:@themux_application_text}
+@themux_status_application #[fg=#11111b,bg=#eba0ac] #[fg=#cdd6f4,bg=default]#{E:@themux_application_text}
 
 @themux_status_session #{?client_prefix,#{E:@themux_session_prefix_style},#{E:@themux_session_style}}#{E:@themux_session_icon}#{E:@themux_session_text} 
 
@@ -7,12 +7,12 @@
 
 @themux_status_zoom #{?window_zoomed_flag,#{E:@themux_status_zoom_content},}
 
-window-status-format  #I #W 
+window-status-format #[fg=#11111b,bg=#f5e0dc]#I#[fg=#cdd6f4,bg=default] #W 
 
-window-status-current-format  #I #W 
+window-status-current-format #[fg=#11111b,bg=#fab387]#I#[fg=#cdd6f4,bg=default,bold] #W 
 
-window-status-style fg=#f5e0dc,bg=default
+window-status-style default
 
-window-status-current-style fg=#fab387,bg=default,bold
+window-status-current-style default
 
 window-status-separator #[fg=#6c7086,bg=default] │ 

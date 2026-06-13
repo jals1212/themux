@@ -82,8 +82,8 @@ accent color — `all` (the whole block, one solid color) or `icon` (only the
 icon/index, the rest stays neutral):
 
 ```sh
-set -g @themux_status_fill  "all"  # all, icon
-set -g @themux_windows_fill "all"  # all, icon
+set -g @themux_status_fill  "icon" # all, icon
+set -g @themux_windows_fill "icon" # all, icon
 set -g @themux_panes_fill   "icon" # all, icon, none
 ```
 
@@ -122,8 +122,7 @@ set -g @themux_divider_color "#{@thm_overlay_0}"
 # Optional: naked window list colors
 set -g @themux_window_naked_text_color "#{@thm_rosewater}"  # inactive windows
 set -g @themux_window_naked_last_color "#{@thm_peach}"      # last window
-set -g @themux_window_naked_current_fg "#{@thm_bg}"         # current window
-set -g @themux_window_naked_current_bg "#{@thm_peach}"
+set -g @themux_window_naked_current_color "#{@thm_peach}"  # current window
 ```
 
 In naked mode each module's icon and text take the module color
