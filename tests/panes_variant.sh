@@ -13,14 +13,14 @@ print_option pane-active-border-style
 
 # Rounded panes: cap glyphs in the pane-status separators
 tmux set -g @themux_panes_variant "rounded"
-tmux set -g @themux_pane_status_enabled "yes"
+tmux set -g @themux_pane_status "top"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 print_option @themux_pane_left_separator
 print_option @themux_pane_right_separator
 
 # Unstyled panes: themux leaves pane styling untouched
-tmux set -gu @themux_pane_status_enabled
+tmux set -gu @themux_pane_status
 tmux set -g @themux_panes_variant "unstyled"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"

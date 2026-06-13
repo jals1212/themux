@@ -73,8 +73,7 @@ set -g @themux_menu_selected_style "fg=#{@thm_surface_0},bg=#{@thm_yellow}"
 set -g @themux_menu_selected_style "fg=#{@thm_fg},bold,bg=#{@thm_overlay_0}"
 
 # Pane styling options
-set -g @themux_pane_status_enabled "no" # set to "yes" to enable
-set -g @themux_pane_border_status "off" # set to "yes" to enable
+set -g @themux_pane_status "off" # set to "yes" to enable
 set -g @themux_pane_border_style "fg=#{@thm_overlay_0}"
 set -g @themux_pane_active_border_style "##{?pane_in_mode,fg=#{@thm_lavender},##{?pane_synchronized,fg=#{@thm_mauve},fg=#{@thm_lavender}}}"
 set -g @themux_pane_left_separator "█"

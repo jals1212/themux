@@ -4,7 +4,7 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 # shellcheck disable=SC1091
 source "${script_dir}/helpers.sh"
 
-tmux set -g @themux_pane_status_enabled "yes"
+tmux set -g @themux_pane_status "top"
 
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
