@@ -82,7 +82,7 @@ set -g @themux_pane_right_separator "█"
 set -g @themux_pane_color "#{@thm_green}"
 set -g @themux_pane_background_color "#{@thm_surface_0}"
 set -g @themux_pane_default_text "##{b:pane_current_path}"
-set -g @themux_pane_default_fill "number"
+set -g @themux_panes_fill "number"
 set -g @themux_pane_number_position "left" # right, left
 
 set -g @themux_windows_variant "squared" # squared, rounded, slanted, naked, unstyled
