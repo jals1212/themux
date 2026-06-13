@@ -1,2 +1,2 @@
 
-@themux_status_battery #[fg=#b4befe]#[bg=default]#[fg=#11111b,bg=#b4befe]#{l:#{battery_icon}} #[fg=#11111b,bg=#b4befe]#{E:@themux_battery_text}#[fg=#b4befe]#[bg=default]
+@themux_status_battery #[fg=#b4befe]#[bg=default]#[fg=#11111b,bg=#b4befe]#{l:#{battery_icon}} #[fg=#11111b,bg=#b4befe]#{E:@themux_battery_text}#[fg=#b4befe]#[bg=default]

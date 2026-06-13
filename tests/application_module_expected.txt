@@ -1,2 +1,2 @@
 
-@themux_status_application #[fg=#eba0ac]#[bg=default]#[fg=#11111b,bg=#eba0ac] #[fg=#11111b,bg=#eba0ac]#{E:@themux_application_text}#[fg=#eba0ac]#[bg=default]
+@themux_status_application #[fg=#eba0ac]#[bg=default]#[fg=#11111b,bg=#eba0ac] #[fg=#11111b,bg=#eba0ac]#{E:@themux_application_text}#[fg=#eba0ac]#[bg=default]
