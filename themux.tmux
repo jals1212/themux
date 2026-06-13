@@ -17,7 +17,7 @@ if [ -n "$(tmux show -gqv @thm_bg)" ]; then
     @themux_window_left_border @themux_window_right_border @themux_window_middle_separator \
     @themux_window_current_left_border @themux_window_current_right_border @themux_window_current_middle_separator \
     @themux_status_left_border @themux_status_right_border \
-    status 'status-format[0]' 'status-format[1]' 'status-format[2]' \
+    status status-format \
     window-status-format window-status-current-format window-status-style \
     window-status-current-style window-status-last-style window-status-separator \
     window-status-activity-style window-status-bell-style \
