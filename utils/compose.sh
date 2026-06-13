@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # Expand a themux module list into a status option.
 #
-# Usage: compose.sh <status-left|status-right> "<space-separated module list>"
+# Usage: compose.sh <status-left|status-right> "<module list>"
+#
+# Modules are separated by spaces; a "|" between two modules inserts a divider
+# (@themux_status_divider). So "session|application directory" renders
+# session, a divider, application, then directory with no divider.
 #
 # Each token NAME becomes the segment #{E:@themux_status_NAME}, resolved at
 # draw time. Modules that set @themux_NAME_expand "yes" are expanded inline at
@@ -9,7 +13,7 @@
 # are surfaced into the option value.
 
 option="$1"
-list="$2"
+list="${2//|/ divider }"
 
 tmux set -g "$option" ""
 for m in $list; do

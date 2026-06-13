@@ -77,28 +77,16 @@ set -g @themux_panes_variant   "squared" # squared, rounded, slanted, flat, unst
 Window and pane variants live one file per look under `variants/windows/`
 and `variants/panes/`, so adding a new look is dropping a file there.
 
-### Presets (themux)
-
-A preset is a curated bundle of option "props" — variants, layout and the
-module lists below. `@themux_preset` applies one before the defaults, with
-`-ogq`, so any option you set yourself still wins:
-
-```sh
-set -g @themux_preset "minimal" # classic (solid blocks) or minimal (flat)
-```
-
-Presets are plain files under `presets/`; copy one to make your own.
-
 ### Composition (themux)
 
 Each item of tmux is a component you compose declaratively. List the
 component names and themux builds `status-left`/`status-right` for you — a
-token `NAME` becomes the `@themux_status_NAME` segment, and `divider` is a
-valid token:
+token `NAME` becomes the `@themux_status_NAME` segment. Separate modules with
+a space; put a `|` between two of them to insert a divider:
 
 ```sh
-set -g @themux_status_left_modules  "session divider application divider directory zoom"
-set -g @themux_status_right_modules "gitmux divider ram divider date_time"
+set -g @themux_status_left_modules  "session|application|directory zoom"
+set -g @themux_status_right_modules "gitmux|ram|date_time"
 ```
 
 Leave them empty to compose `status-left`/`status-right` by hand instead.
