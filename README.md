@@ -158,19 +158,18 @@ set -g @themux_windows_position "bottom" # top, bottom
 - `spaced` does the same with a blank line between them.
 - `@themux_windows_position` chooses which line the window list takes.
 
-### Reset pattern (themux)
+### Clean reloads (themux)
 
-Source `themux_reset.conf` at the top of your theme config, before setting
-any `@themux_*` option. On a running server it wipes all themux-derived
-state (palette, options, built segments, status/window formats), so
-re-sourcing your config switches theme or style cleanly — no
-`tmux kill-server` needed. On fresh servers it is a no-op.
+themux resets its own derived state automatically when it loads: on a running
+server `themux.tmux` clears the palette, internals, the variant-set separators
+and the status/window/pane formats *before* rebuilding — but never your
+`@themux_*` config. So switching theme, variant or style is just a config
+reload; no `tmux kill-server`, no reset file to source.
 
 ```sh
-source ~/.config/tmux/plugins/themux/themux_reset.conf
 set -g @themux_theme 'kanagawa_dragon'
 # ... options ...
-run ~/.config/tmux/plugins/themux/themux.tmux
+run ~/.config/tmux/plugins/themux/themux.tmux  # resets + rebuilds
 ```
 
 
@@ -263,12 +262,10 @@ hooks in your tmux configuration file like so:
 
 ```conf
 set-hook -g client-dark-theme {
-  source ~/code/github.com/catppuccin/tmux/themux_reset.conf
   set -g @themux_theme "catppuccin_frappe"
   run ~/code/github.com/catppuccin/tmux/themux.tmux
 }
 set-hook -g client-light-theme {
-  source ~/code/github.com/catppuccin/tmux/themux_reset.conf
   set -g @themux_theme "catppuccin_latte"
   run ~/code/github.com/catppuccin/tmux/themux.tmux
 }
