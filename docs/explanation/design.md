@@ -50,5 +50,5 @@ leans into that: each UI item is a component, and you compose the bar yourself
 from a declarative module list (`@themux_status_left_modules` /
 `_right_modules`) — there are no opaque presets hiding the knobs. Modules,
 dividers and the palette are all just strings you can read, pipe and recombine.
-Reset (`themux_reset.conf`) makes re-sourcing idempotent, so iterating on a
+An internal reset (in `themux.tmux`) makes re-sourcing idempotent, so iterating on a
 config never requires killing the server.
