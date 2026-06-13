@@ -132,15 +132,20 @@ This fork also adds a `zoom` status module
 (`#{E:@themux_status_zoom}`) that renders only while the active pane
 is zoomed, in both pill and flat styles.
 
-### Two-line status (themux)
+### Multi-line status (themux)
 
-Move the window list to its own status line (aligned by `status-justify`),
-leaving line 0 to `status-left`/`status-right`:
+Give the window list its own status line (aligned by `status-justify`),
+leaving the other line to `status-left`/`status-right`:
 
 ```sh
-set -g @themux_windows_line "1" # 0 = stock single line; 2 = leave a
-                                # blank spacer line between the two
+set -g @themux_windows_line "stacked"    # inline (default), stacked, spaced
+set -g @themux_windows_position "bottom" # top, bottom
 ```
+
+- `inline` keeps the stock single line (windows between left and right).
+- `stacked` puts the window list on its own line.
+- `spaced` does the same with a blank line between them.
+- `@themux_windows_position` chooses which line the window list takes.
 
 ### Reset pattern (themux)
 

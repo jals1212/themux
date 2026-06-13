@@ -1,8 +1,10 @@
 
-status 2
-format1 #[list=on align=#{status-justify}]#[list=left-marker]<#[list
-format0_has_list 0
+stacked_status 2
+stacked_line1_has_list 1
+stacked_line0_has_list 0
 
-status_spacer 3
-format1_blank []
-format2 #[list=on align=#{status-justify}]#[list
+top_line0_has_list 1
+
+spaced_status 3
+spaced_line1_blank []
+spaced_line2_has_list 1
