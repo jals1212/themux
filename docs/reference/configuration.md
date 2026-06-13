@@ -50,9 +50,9 @@ before the plugin loads):
 
 ```bash
 set -g @themux_windows_variant "rounded"
-set -g @themux_window_left_separator ""
+set -g @themux_window_left_border ""
 set -g @themux_window_middle_separator ""
-set -g @themux_window_right_separator ""
+set -g @themux_window_right_border ""
 ```
 
 </details>

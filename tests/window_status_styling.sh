@@ -3,9 +3,9 @@
 # Unsets (removes) any styling options that will contaminate
 # subsequent test runs.
 function reset() {
-  tmux set -gu @themux_window_current_left_separator
+  tmux set -gu @themux_window_current_left_border
   tmux set -gu @themux_window_current_middle_separator
-  tmux set -gu @themux_window_current_right_separator
+  tmux set -gu @themux_window_current_right_border
   tmux set -gu @themux_windows_variant
 }
 

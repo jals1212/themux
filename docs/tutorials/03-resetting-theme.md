@@ -60,9 +60,9 @@ setting a global option called `@themux_reset` to `true.
 @themux_status_right_border
 @themux_status_connect_separator
 @themux_status_module_text_bg
-@themux_window_current_left_separator
+@themux_window_current_left_border
 @themux_window_current_middle_separator
-@themux_window_current_right_separator
+@themux_window_current_right_border
 ```
 
 </details>
