@@ -1,2 +1,2 @@
 
-E:@themux_module_ram #[fg=#{ram_bg_color}]#[bg=default]#[fg=#{ram_fg_color},bg=#{ram_bg_color}]  #[fg=#{ram_bg_color},bg=#313244] #{ram_percentage}#[fg=#313244]#[bg=default]
+E:@themux_module_ram #[fg=#{ram_bg_color}]#[bg=default]#[fg=#{ram_fg_color},bg=#{ram_bg_color}]   #[fg=#{ram_bg_color},bg=#313244] #{ram_percentage}#[fg=#313244]#[bg=default]
