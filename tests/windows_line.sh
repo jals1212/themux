@@ -19,11 +19,11 @@ tmux show -gv status
 printf "one_zones "
 tmux show -gv 'status-format[0]' | grep -oE '#\[nolist align=(left|centre|right)\]' | tr '\n' ' '
 printf "\none_left_divider "
-tmux show -gv 'status-format[0]' | grep -c '@themux_status_session}#{E:@_tmx_status_divider}#{E:@themux_status_application' || true
+tmux show -gv 'status-format[0]' | grep -c '@themux_module_session}#{E:@_tmx_module_divider}#{E:@themux_module_application' || true
 printf "one_windows_centre "
 tmux show -gv 'status-format[0]' | grep -c 'list=on align=centre' || true
 printf "one_right_module "
-tmux show -gv 'status-format[0]' | grep -c 'nolist align=right]#{E:@themux_status_host}' || true
+tmux show -gv 'status-format[0]' | grep -c 'nolist align=right]#{E:@themux_module_host}' || true
 
 # Two lines: windows alone on the second row, right-aligned.
 tmux set -g @themux_status_line_1 "session / / host"

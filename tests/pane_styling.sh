@@ -19,13 +19,13 @@ print_option pane-border-format
 tmux set -g @themux_pane_number_position "left" # reset
 
 # Fill option "all"
-tmux set -g @themux_panes_fill "all"
+tmux set -g @themux_pane_fill "all"
 tmux source "${script_dir}/../themux.conf"
 print_option pane-border-format
 
-tmux set -g @themux_panes_fill "icon" # reset
+tmux set -g @themux_pane_fill "icon" # reset
 
 # Fill option "none"
-tmux set -g @themux_panes_fill "none"
+tmux set -g @themux_pane_fill "none"
 tmux source "${script_dir}/../themux.conf"
 print_option pane-border-format

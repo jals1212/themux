@@ -34,8 +34,8 @@ not by removing configurability but by keeping the configurable surface
 | `naked`     | Transparent text on the bar; no block background.            |
 | `unstyled` | themux leaves the item alone so you can build it by hand.    |
 
-The variants are orthogonal: `@themux_status_variant`, `@themux_windows_variant`
-and `@themux_panes_variant` are chosen independently, and any combination is
+The variants are orthogonal: `@themux_module_variant`, `@themux_window_variant`
+and `@themux_pane_variant` are chosen independently, and any combination is
 valid. New looks are added by dropping a file under `variants/`, not by adding
 a flag that interacts with every other flag.
 

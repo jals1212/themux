@@ -5,15 +5,15 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 source "${script_dir}/helpers.sh"
 
 # Tests that unstyled variants leave every item untouched
-tmux set -g @themux_status_variant "unstyled"
-tmux set -g @themux_windows_variant "unstyled"
-tmux set -g @themux_panes_variant "unstyled"
+tmux set -g @themux_module_variant "unstyled"
+tmux set -g @themux_window_variant "unstyled"
+tmux set -g @themux_pane_variant "unstyled"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 
 # Modules are not rendered (grep exits 1 on zero matches)
 printf "\nstatus_application_set "
-tmux show -g | grep -c "@themux_status_application" || true
+tmux show -g | grep -c "@themux_module_application" || true
 
 # Window and pane styling stay at tmux defaults
 print_option window-status-format

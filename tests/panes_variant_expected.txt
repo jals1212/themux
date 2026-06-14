@@ -1,7 +1,7 @@
 
-pane-border-style bg=default,fg=#313244
+pane-border-style default
 
-pane-active-border-style bg=default,fg=#6c7086
+pane-active-border-style #{?pane_in_mode,fg=yellow,#{?synchronize-panes,fg=red,fg=green}}
 
 @themux_pane_left_border 
 

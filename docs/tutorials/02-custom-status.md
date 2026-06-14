@@ -37,5 +37,5 @@ set -g "@themux_${MODULE_NAME}_text" "#{pane_current_command}"
 
 source "<path to catppuccin plugin>/utils/status_module.conf"
 
-set -g status-right "#{E:@themux_status_application}#{E:@themux_status_my_custom_module}"
+set -g status-right "#{E:@themux_module_application}#{E:@themux_module_my_custom_module}"
 ```

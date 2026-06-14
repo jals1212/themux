@@ -8,7 +8,7 @@ source "${script_dir}/helpers.sh"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 
-print_option @themux_status_application | grep -q "@thm_" &&
-  echo "@themux_status_application did not expand all colors"
+print_option @themux_module_application | grep -q "@thm_" &&
+  echo "@themux_module_application did not expand all colors"
 
-print_option @themux_status_application | sed -E 's/(bash|fish|zsh)/<application>/'
+print_option @themux_module_application | sed -E 's/(bash|fish|zsh)/<application>/'

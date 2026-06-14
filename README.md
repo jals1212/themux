@@ -69,9 +69,9 @@ themux leave that item completely untouched, so you can build it by hand
 with the `@thm_*` palette colors:
 
 ```sh
-set -g @themux_status_variant  "rounded" # squared, rounded, slanted, naked, unstyled
-set -g @themux_windows_variant "squared" # squared, rounded, slanted, naked, unstyled
-set -g @themux_panes_variant   "squared" # squared, rounded, slanted, naked, unstyled
+set -g @themux_module_variant  "rounded" # squared, rounded, slanted, naked, unstyled
+set -g @themux_window_variant "squared" # squared, rounded, slanted, naked, unstyled
+set -g @themux_pane_variant   "squared" # squared, rounded, slanted, naked, unstyled
 ```
 
 Window and pane variants live one file per look under `variants/windows/`
@@ -82,42 +82,69 @@ accent color — `all` (the whole block, one solid color) or `icon` (only the
 icon/index, the rest stays neutral):
 
 ```sh
-set -g @themux_status_fill  "icon" # all, icon
-set -g @themux_windows_fill "icon" # all, icon
-set -g @themux_panes_fill   "icon" # all, icon, none
+set -g @themux_module_fill  "icon" # all, icon
+set -g @themux_window_fill "icon" # all, icon
+set -g @themux_pane_fill   "icon" # all, icon, none
 ```
 
 ### Composition (themux)
 
-The status line is built from up to five rows. Each `@themux_status_line_N`
-(N = 1..5) is split into three zones — left, centre, right — by `/`, and a zone
-is either a list of component names (a token `NAME` becomes the
-`@themux_status_NAME` segment) or the special token `windows` (the window
-list). Separate modules with a space; put a `|` between two of them to insert
-the modules divider:
+The status line is built from up to five rows (`@themux_status_line_1` … `_5`).
+Each row is split into zones by `/` — none gives one left column, one gives
+**left + right**, two gives left / center / right. A zone is a list of component
+names (a token `NAME` becomes the `@themux_module_NAME` segment) or the special
+token `windows` (the window list). Separate modules with a space; put a `|`
+between two of them to insert the modules divider:
 
 ```sh
 set -g @themux_status_line_1 "session|application|directory / windows / gitmux|ram|date_time"
 ```
 
-The number of non-empty lines sets how many status rows are shown, and the
-window list aligns to its zone. A multi-row layout is just more lines — e.g.
-give the window list its own row:
+Rows render up to the last non-empty line, so a blank (`""`) line in between
+becomes an empty row — handy for spacing. The window list aligns to its zone:
 
 ```sh
-set -g @themux_status_line_1 "session / / gitmux date_time"
-set -g @themux_status_line_2 " / windows / "
+set -g @themux_status_line_1 "session / gitmux date_time"   # left + right
+set -g @themux_status_line_2 ""                             # blank row
+set -g @themux_status_line_3 "windows"                      # windows, own row
 ```
 
 The divider between status modules and the divider between windows are
 configured independently:
 
 ```sh
-set -g @themux_status_modules_divider " | "            # what "|" inserts
-set -g @themux_status_modules_divider_color "#{@thm_overlay_0}"
-set -g @themux_windows_divider " "                     # window-status-separator
-set -g @themux_windows_divider_color "#{@thm_overlay_0}"
+set -g @themux_module_divider " | "            # what "|" inserts
+set -g @themux_module_divider_color "#{@thm_overlay_0}"
+set -g @themux_window_divider " "                     # window-status-separator
+set -g @themux_window_divider_color "#{@thm_overlay_0}"
 ```
+
+### Pane status (themux)
+
+Off by default. `@themux_pane_status` is the master switch for the styled label
+on each pane border — set it to `top` or `bottom` to enable (the variant only
+picks the shape, never turns it on). With `off`, themux leaves pane borders at
+tmux's defaults.
+
+```sh
+set -g @themux_pane_status "top"                          # off | top | bottom
+set -g @themux_pane_color "#{@thm_green}"                 # active accent
+set -g @themux_pane_default_text "#{b:pane_current_path}" # label text
+set -g @themux_pane_number_position "left"                # left | right
+```
+
+### Window names (themux)
+
+`@themux_window_text_mode` controls when a window shows its name:
+
+```sh
+set -g @themux_window_text_mode "always"  # always | never | manual
+```
+
+- `always` — the name is always shown.
+- `never` — only the number block.
+- `manual` — the name shows only on windows you renamed by hand (tmux's
+  `automatic-rename` off); auto-named windows show just the number.
 
 ### Naked style (themux)
 
@@ -129,8 +156,8 @@ the default background.
 
 ```sh
 # Before loading the plugin
-set -g @themux_status_variant "naked"  # transparent modules
-set -g @themux_windows_variant "naked" # naked window list to match
+set -g @themux_module_variant "naked"  # transparent modules
+set -g @themux_window_variant "naked" # naked window list to match
 set -g @themux_status_background "none"
 ```
 
@@ -152,7 +179,7 @@ set -g @themux_status_line_1 "session dot application / windows / date_time"
 ```
 
 This fork also adds a `zoom` status module
-(`#{E:@themux_status_zoom}`) that renders only while the active pane
+(`#{E:@themux_module_zoom}`) that renders only while the active pane
 is zoomed, in both pill and naked styles.
 
 ### Clean reloads (themux)
@@ -305,7 +332,7 @@ set -g default-terminal "tmux-256color"
 
 # Configure the catppuccin plugin
 set -g @themux_theme "catppuccin_mocha"
-set -g @themux_windows_variant "rounded"
+set -g @themux_window_variant "rounded"
 
 # Load catppuccin
 run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
@@ -315,12 +342,12 @@ run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
 set -g status-right-length 100
 set -g status-left-length 100
 set -g status-left ""
-set -g status-right "#{E:@themux_status_application}"
-set -agF status-right "#{E:@themux_status_cpu}"
-set -agF status-right "#{E:@themux_status_ram}"
-set -ag status-right "#{E:@themux_status_session}"
-set -ag status-right "#{E:@themux_status_uptime}"
-set -agF status-right "#{E:@themux_status_battery}"
+set -g status-right "#{E:@themux_module_application}"
+set -agF status-right "#{E:@themux_module_cpu}"
+set -agF status-right "#{E:@themux_module_ram}"
+set -ag status-right "#{E:@themux_module_session}"
+set -ag status-right "#{E:@themux_module_uptime}"
+set -agF status-right "#{E:@themux_module_battery}"
 
 run ~/.config/tmux/plugins/tmux-plugins/tmux-cpu/cpu.tmux
 run ~/.config/tmux/plugins/tmux-plugins/tmux-battery/battery.tmux

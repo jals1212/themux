@@ -8,4 +8,4 @@ source "${script_dir}/helpers.sh"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 
-print_option @themux_status_battery
+print_option @themux_module_battery

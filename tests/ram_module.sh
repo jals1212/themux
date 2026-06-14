@@ -8,4 +8,4 @@ source "${script_dir}/helpers.sh"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 
-print_option E:@themux_status_ram
+print_option E:@themux_module_ram
