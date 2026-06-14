@@ -1,4 +1,10 @@
+.DS_Store
+.fseventsd
+.Spotlight-V100
+
 custom
 !custom/README.md
 !custom/example.sh
-.DS_Store
+
+# Local AI runtime state
+.atl/
