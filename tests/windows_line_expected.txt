@@ -1,6 +1,6 @@
 
 one_status on
-one_zones #[align=left] #[align=centre] #[align=right] 
+one_zones #[nolist align=left] #[nolist align=centre] #[nolist align=right] 
 one_left_divider 1
 one_windows_centre 1
 one_right_module 1

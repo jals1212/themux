@@ -10,3 +10,7 @@ window-status-current-format #[fg=#11111b,bg=#cba6f7]#[fg=#{@thm_mauve},bg=#1818
 window-status-format #[fg=#9399b2,bg=#313244] #[fg=#9399b2,bg=#313244] #W #[fg=#11111b,bg=#9399b2] #I 
 
 window-status-current-format #[fg=#cba6f7,bg=#45475a] #[fg=#cba6f7,bg=#45475a] #W #[fg=#11111b,bg=#cba6f7] #I 
+
+window-status-format #[fg=#11111b,bg=#9399b2] #I 
+
+window-status-current-format #[fg=#11111b,bg=#cba6f7] #I 

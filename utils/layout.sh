@@ -52,10 +52,13 @@ for i in 1 2 3 4 5; do
     *) continue ;;     # blank line: skip
   esac
 
+  # "nolist" leaves the window-list region the "windows" token turns on, so a
+  # zone after it still pins to its own edge (otherwise the right zone stays
+  # glued to the window list instead of the right edge).
   IFS='/' read -r left center right <<<"$line"
-  fmt="#[align=left]$(expand_zone "$left" left)"
-  fmt+="#[align=centre]$(expand_zone "$center" centre)"
-  fmt+="#[align=right]$(expand_zone "$right" right)"
+  fmt="#[nolist align=left]$(expand_zone "$left" left)"
+  fmt+="#[nolist align=centre]$(expand_zone "$center" centre)"
+  fmt+="#[nolist align=right]$(expand_zone "$right" right)"
 
   tmux set -g "status-format[${n}]" "$fmt"
   n=$((n + 1))
