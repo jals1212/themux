@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
-# Assemble pane-border-format for the squared/rounded/slanted pane variants,
-# mirroring utils/window_render.sh so the active pane reads like the active
-# window — number block then a padded name block, each centred, with the variant
-# cap glyphs — only the accent colour differs (pane_color vs the window colour).
+# Assemble pane-border-format from the v3 props: @themux_pane_{shape,indicator,
+# text,notch}. The indicator (pane number) and text blocks are styled
+# independently through the shared resolver; the shape draws the caps; notch
+# shapes the indicator<->text seam.
 #
-# Unlike windows (two separate options for inactive/current), a pane has ONE
-# format whose accent is chosen per pane at draw time via #{?pane_active,...}.
-# As in window_render.sh: load-time colours are resolved through one `tmux set -F`
-# pass and captured; draw-time refs stay literal #{...} (no ## doubling), since
-# the format is stored with `tmux set` (no -F).
+# A pane has ONE format whose accent brightens for the active pane at draw time
+# via #{?pane_active,...}. As in window_render.sh, load-time colours are resolved
+# through one `tmux set -F` pass and captured; draw-time refs stay literal #{...}
+# (no ## doubling), since the format is stored with `tmux set` (no -F).
+
+# shellcheck source=render_style.sh
+. "$(dirname "$0")/render_style.sh"
 
 expand() {
   tmux set -gF @_tmx_render_tmp "$1"
@@ -16,78 +18,61 @@ expand() {
 }
 
 position=$(tmux show -gqv @themux_pane_number_position)
-fill=$(tmux show -gqv @_tmx_pane_fill)
-notch=$(tmux show -gqv @_tmx_pane_notch)
-shape=$(tmux show -gqv @_tmx_pane_shape)
+indicator=$(tmux show -gqv @themux_pane_indicator)
+text_style=$(tmux show -gqv @themux_pane_text)
+notch=$(tmux show -gqv @themux_pane_notch)
+shape=$(tmux show -gqv @themux_pane_shape)
 left_glyph=$(tmux show -gqv @themux_pane_left_border)
 right_glyph=$(tmux show -gqv @themux_pane_right_border)
 
-# The notch seam glyph mirrors the shape's right cap (octal UTF-8, as in
-# window_render.sh): slanted  E0BC, rounded  E0B4, squared █ block. It only
-# matters for the number-on-the-left layout, where the number block's edge
-# tapers into the text block instead of meeting it on a flat colour boundary.
+# Colour roles. The accent brightens per pane at draw time (pane_color when
+# active, overlay_0 when not); surface, crust and the plain fg are static.
+accent="#{?pane_active,$(expand "#{E:@themux_pane_color}"),$(expand "#{@thm_overlay_0}")}"
+surface=$(expand "#{E:@themux_pane_background_color}")
+crust=$(expand "#{@thm_crust}")
+fg=$(expand "#{@thm_fg}")
+
+index='#{pane_index}'
+text=$(expand "#{E:@themux_pane_default_text}")
+
+# Resolve the indicator and text blocks independently.
+resolve_style "$indicator" "$accent" "$surface" "$crust" "$fg"
+ind_bg="$RS_BG" ind_fg="$RS_FG"
+resolve_style "$text_style" "$accent" "$surface" "$crust" "$fg"
+txt_bg="$RS_BG" txt_fg="$RS_FG"
+
+# The notch seam glyph mirrors the shape's right cap (octal UTF-8): slanted E0BC,
+# rounded E0B4, squared █ block.
 seam_glyph=""
-[ "$notch" = yes ] && case "$shape" in
+[ "$notch" = on ] && case "$shape" in
   slanted) seam_glyph=$(printf '\356\202\274') ;;
   rounded) seam_glyph=$(printf '\356\202\264') ;;
   squared) seam_glyph=$(printf '\342\226\210') ;;
 esac
 
-panebg=$(expand "#{E:@themux_pane_background_color}")
-fg=$(expand "#{@thm_fg}")
-surface0=$(expand "#{@thm_surface_0}")
-# Per-pane accent: pane_color when active, overlay_0 when not (resolved at draw).
-accent="#{?pane_active,$(expand "#{E:@themux_pane_color}"),$(expand "#{@thm_overlay_0}")}"
-# Drawn per pane; keep #{pane_index} / the default-text template as draw-time refs.
-index='#{pane_index}'
-text=$(expand "#{E:@themux_pane_default_text}")
+# Centred blocks: " idx " on the indicator bg, " text " on the text bg.
+ind_block="#[fg=$ind_fg,bg=$ind_bg] $index "
+txt_block="#[fg=$txt_fg,bg=$txt_bg] $text "
 
-# naked: inactive panes are accent text on the transparent border; the active pane
-# is a solid pane_color block capped with the shape's glyphs, so it reads like the
-# active naked window. The caps belong to the active block only, so they are gated
-# on pane_active: a #{?} can't carry the commas of a #[fg=,bg=] style, but it nests
-# inside the fg= value and wraps a bare glyph. Squared has no glyph -> no cap, the
-# block is its own fill.
-if [ "$fill" = naked ]; then
-  pc=$(expand "#{E:@themux_pane_color}")
-  cr=$(expand "#{@thm_crust}")
-  acap() { [ -n "$1" ] && printf '#[fg=#{?pane_active,%s,default},bg=default]#{?pane_active,%s,}' "$pc" "$1"; }
-  tmux set -wg pane-border-format \
-    "$(acap "$left_glyph")#[fg=#{?pane_active,${cr},${pc}},bg=#{?pane_active,${pc},default}] ${index} ${text} $(acap "$right_glyph")"
-  tmux set -gu @_tmx_render_tmp
-  exit 0
-fi
-
-# Block styles + their bg colour (used as the cap fg so the cap tapers the block
-# into the transparent border). icon: only the number takes the accent; fill: the
-# whole label does; none: no accent, a neutral surface block.
-case "$fill" in
-  none)
-    nstyle="#[fg=$fg,bg=$surface0]"; tstyle="$nstyle"; ncol="$surface0"; tcol="$surface0" ;;
-  fill)
-    nstyle="#[fg=$panebg,bg=$accent]"; tstyle="$nstyle"; ncol="$accent"; tcol="$accent" ;;
-  *) # icon
-    nstyle="#[fg=$panebg,bg=$accent]"; tstyle="#[fg=$accent,bg=$panebg]"; ncol="$accent"; tcol="$panebg" ;;
-esac
-
-# A cap is the variant glyph in its block colour over the transparent border;
-# empty glyph (squared) -> just the block's own bg fill, no cap.
+# A cap is the shape glyph over the bare border, coloured by the block it tapers:
+# the block's own bg, or the accent when that bg is transparent (the outline edge
+# of a naked block / capsule). Empty glyph (squared) -> no cap, the block fills
+# its own edge.
+capcol() { [ "$1" = default ] && printf '%s' "$accent" || printf '%s' "$1"; }
 cap() { [ -n "$1" ] && printf '#[fg=%s,bg=default]%s' "$2" "$1"; }
 
-# Centred blocks: " idx " on the number bg, " text " on the text bg.
-num_block="$nstyle $index "
-txt_block="$tstyle $text "
+# Notch seam: the indicator's right cap tapering into the text bg, only on the
+# number-on-the-left layout (matching windows) and only when the two blocks
+# differ — same bg would render an invisible phantom cell.
+seam() {
+  [ -n "$seam_glyph" ] && [ "$ind_bg" != "$txt_bg" ] &&
+    printf '#[fg=%s,bg=%s]%s' "$ind_bg" "$txt_bg" "$seam_glyph"
+}
 
-# Notch seam: the number block's right cap ($ncol) tapering into the text bg
-# ($tcol), in place of the flat boundary. Only the number-on-the-left layout has
-# the number flowing into the name, so the seam is left-position only (matching
-# windows); empty glyph (no notch) collapses to nothing.
-seam() { [ -n "$seam_glyph" ] && printf '#[fg=%s,bg=%s]%s' "$ncol" "$tcol" "$seam_glyph"; }
-
-if [ "$position" = "right" ]; then
-  fmt="$(cap "$left_glyph" "$tcol")$txt_block$num_block$(cap "$right_glyph" "$ncol")"
+if [ "$position" = right ]; then
+  fmt="$(cap "$left_glyph" "$(capcol "$txt_bg")")$txt_block$ind_block$(cap "$right_glyph" "$(capcol "$ind_bg")")"
 else
-  fmt="$(cap "$left_glyph" "$ncol")$num_block$(seam)$txt_block$(cap "$right_glyph" "$tcol")"
+  fmt="$(cap "$left_glyph" "$(capcol "$ind_bg")")$ind_block$(seam)$txt_block$(cap "$right_glyph" "$(capcol "$txt_bg")")"
 fi
 
 tmux set -wg pane-border-format "$fmt"

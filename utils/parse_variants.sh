@@ -8,7 +8,7 @@
 #   notch : "yes" when present — the icon<->text seam inherits the cap glyph
 #
 # Order-independent: each token is matched by what it is, not its position.
-for scope in module window pane; do
+for scope in module window; do
   read -ra toks <<<"$(tmux show -gqv "@themux_${scope}_variant")"
   shape="" fill="icon" notch="no"
   for tok in "${toks[@]}"; do

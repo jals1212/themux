@@ -18,14 +18,14 @@ print_option pane-border-format
 
 tmux set -g @themux_pane_number_position "left" # reset
 
-# Fill "fill" (whole label one color), via the variant grammar
-tmux set -g @themux_pane_variant "squared fill"
+# Whole label one colour: both blocks solid
+tmux set -g @themux_pane_indicator "solid"
+tmux set -g @themux_pane_text "solid"
 tmux source "${script_dir}/../themux.conf"
 print_option pane-border-format
 
-tmux set -g @themux_pane_variant "squared" # reset
-
-# Fill "none" (neutral, no accent)
-tmux set -g @themux_pane_variant "squared none"
+# Neutral, no accent: both blocks soft
+tmux set -g @themux_pane_indicator "soft"
+tmux set -g @themux_pane_text "soft"
 tmux source "${script_dir}/../themux.conf"
 print_option pane-border-format
