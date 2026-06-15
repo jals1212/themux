@@ -7,8 +7,8 @@ loads** unless noted. Colors accept a hex code (`#ff0000`) or a palette token
 (`#{@thm_<name>}`, e.g. `#{@thm_mauve}`). themux re-derives its state on every
 load, so changing an option and reloading is enough — no `kill-server`.
 
-The three UI items — **status modules**, **windows**, **panes** — share the
-same vocabulary: a *variant* (shape) and a *fill* (how much takes the color).
+The three UI items — **status modules**, **windows**, **panes** — share one
+*variant grammar*: a space-separated `"<shape> [fill] [notch]"` string.
 
 ---
 
@@ -18,34 +18,48 @@ same vocabulary: a *variant* (shape) and a *fill* (how much takes the color).
 | --- | --- | --- |
 | `@themux_theme` | `catppuccin_mocha` | Palette: `catppuccin_{latte,frappe,macchiato,mocha}` or `kanagawa_{wave,dragon,lotus}`. Loads `themes/<theme>_tmux.conf`, which exposes the `@thm_*` colors. |
 
-### Variants (shape) — per item
+### Variant grammar — per item
 
-Each item picks its variant independently.
+Each item picks its look independently through one option whose value is up to
+three tokens, in any order: a **shape**, a **fill**, and the **notch** flag.
 
-| Option | Default | Values |
+```sh
+set -g @themux_module_variant "rounded"             # shape only
+set -g @themux_window_variant "slanted fill"        # shape + fill
+set -g @themux_pane_variant   "rounded naked notch" # shape + fill + notch
+```
+
+| Option | Default |
+| --- | --- |
+| `@themux_module_variant` | `rounded` |
+| `@themux_window_variant` | `squared` |
+| `@themux_pane_variant` | `squared` |
+
+**shape** — the block and its caps. Default `squared`.
+
+| Token | Effect |
+| --- | --- |
+| `squared` / `rounded` / `slanted` | Solid block with square / round / slant caps. |
+| `unstyled` | themux leaves the item untouched so you can style it by hand. |
+
+**fill** — how much of the badge takes the accent color. Default `icon`.
+
+| Token | Effect | Items |
 | --- | --- | --- |
-| `@themux_module_variant` | `rounded` | `squared` \| `rounded` \| `slanted` \| `naked` \| `unstyled` |
-| `@themux_window_variant` | `squared` | same |
-| `@themux_pane_variant` | `squared` | same |
+| `icon` | Only the icon/number block is colored; the rest stays neutral. | all |
+| `fill` | The whole badge is one solid accent block. | all |
+| `none` | Fully neutral, no accent. | modules, panes |
+| `naked` | Transparent: accent *text* on the bare bar, and only the **active** window/pane is a solid block with the shape's caps. Pair with `@themux_status_background "none"`. | all |
 
-- `squared` / `rounded` / `slanted` — solid blocks with square / round / slant caps.
-- `naked` — transparent colored text, no block (pair with `@themux_status_background "none"`).
-- `unstyled` — themux leaves that item untouched so you can style it by hand.
-
-### Fill (how much takes the accent) — per item
-
-| Option | Default | Values |
-| --- | --- | --- |
-| `@themux_module_fill` | `icon` | `all` \| `icon` \| `none` |
-| `@themux_window_fill` | `icon` | `all` \| `icon` |
-| `@themux_pane_fill` | `icon` | `all` \| `icon` \| `none` |
-
-- `all` — the whole badge takes the accent color (one solid block).
-- `icon` — only the icon/number block is colored; the rest stays neutral.
-- `none` — fully neutral, no accent (status/panes only).
+**notch** — present or absent. With it the icon↔text seam (number↔name for
+windows) inherits the shape's cap glyph instead of meeting on a flat boundary.
 
 For windows/panes, only the **active** item keeps the bright accent; inactive
 ones dim (windows → `@themux_window_number_color`, panes → `overlay_0`).
+
+> The old `@themux_<item>_fill` options are gone — fill is now a token in the
+> variant string (e.g. `@themux_window_fill "all"` becomes
+> `@themux_window_variant "<shape> fill"`).
 
 ### Status line background
 
@@ -156,8 +170,8 @@ the inactive caps unless their `_current_` form is set.
 
 #### Naked windows
 
-The `naked` variant reuses the same `@themux_window_(current_)number_color` as
-the block variants — no separate options.
+The `naked` fill reuses the same `@themux_window_(current_)number_color` as the
+block fills — no separate options.
 
 ---
 

@@ -23,21 +23,23 @@ or anywhere a format string is accepted.
 The historical failure mode of a status-line plugin is an explosion of
 inter-dependent options where specific combinations break. themux avoids that
 not by removing configurability but by keeping the configurable surface
-**orthogonal**: each UI item (status modules, the window list, panes) selects a
-*variant* from the same small, shared vocabulary.
+**orthogonal**: each UI item (status modules, the window list, panes) is named
+by one *variant* string — `"<shape> [fill] [notch]"` — whose tokens are drawn
+from the same small, shared vocabulary.
 
-| Variant    | Meaning                                                       |
-| ---------- | ------------------------------------------------------------ |
-| `squared`  | Solid block with full-block edges.                           |
-| `rounded`  | Solid block with rounded caps.                               |
-| `slanted`  | Solid block with slanted caps.                               |
-| `naked`     | Transparent text on the bar; no block background.            |
-| `unstyled` | themux leaves the item alone so you can build it by hand.    |
+| Axis | Tokens | Meaning |
+| --- | --- | --- |
+| **shape** | `squared` / `rounded` / `slanted` | Solid block with full / rounded / slanted caps. |
+| | `unstyled` | themux leaves the item alone so you can build it by hand. |
+| **fill** | `icon` / `fill` / `none` | The icon only / the whole badge / nothing takes the accent. |
+| | `naked` | Transparent text on the bar; only the active window/pane is a block. |
+| **notch** | `notch` | The icon↔text seam inherits the shape's cap. |
 
-The variants are orthogonal: `@themux_module_variant`, `@themux_window_variant`
-and `@themux_pane_variant` are chosen independently, and any combination is
-valid. New looks are added by dropping a file under `variants/`, not by adding
-a flag that interacts with every other flag.
+The axes are orthogonal: `@themux_module_variant`, `@themux_window_variant` and
+`@themux_pane_variant` are chosen independently, and within each the shape, fill
+and notch combine freely — any combination is valid. New shapes are added by
+dropping a file under `variants/`, not by adding a flag that interacts with
+every other flag.
 
 `unstyled` is the escape hatch: it makes the law of orthogonality hold even at
 the edges. Anything themux's variants do not cover, you build yourself with the

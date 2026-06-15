@@ -64,28 +64,26 @@ Available themes: `catppuccin_latte`, `catppuccin_frappe`,
 
 ### Style variants (themux)
 
-Every item of the UI selects its style independently. `unstyled` makes
-themux leave that item completely untouched, so you can build it by hand
-with the `@thm_*` palette colors:
+Every item of the UI selects its style independently through one option, a
+space-separated `"<shape> [fill] [notch]"` string (tokens in any order):
 
 ```sh
-set -g @themux_module_variant  "rounded" # squared, rounded, slanted, naked, unstyled
-set -g @themux_window_variant "squared" # squared, rounded, slanted, naked, unstyled
-set -g @themux_pane_variant   "squared" # squared, rounded, slanted, naked, unstyled
+set -g @themux_module_variant "rounded"       # shape only
+set -g @themux_window_variant "squared fill"  # shape + fill
+set -g @themux_pane_variant   "slanted notch" # shape + notch
 ```
 
-Window and pane variants live one file per look under `variants/windows/`
-and `variants/panes/`, so adding a new look is dropping a file there.
+- **shape** — `squared`, `rounded`, `slanted` (solid blocks with square / round
+  / slant caps) or `unstyled` to leave the item untouched and build it by hand
+  with the `@thm_*` palette colors.
+- **fill** — how much takes the accent color: `icon` (default, only the
+  icon/index), `fill` (the whole block, one solid color), `none` (neutral,
+  modules/panes only) or `naked` (transparent text — only the active
+  window/pane is a block; pair with `@themux_status_background "none"`).
+- **notch** — the icon↔text seam inherits the shape's cap instead of a flat edge.
 
-Each item also takes a `fill`, which picks how much of the badge gets the
-accent color — `all` (the whole block, one solid color) or `icon` (only the
-icon/index, the rest stays neutral):
-
-```sh
-set -g @themux_module_fill  "icon" # all, icon
-set -g @themux_window_fill "icon" # all, icon
-set -g @themux_pane_fill   "icon" # all, icon, none
-```
+Window and pane shapes live one file per look under `variants/windows/` and
+`variants/panes/`, so adding a new look is dropping a file there.
 
 ### Composition (themux)
 
@@ -148,11 +146,10 @@ set -g @themux_window_text_mode "always"  # always | never | manual
 
 ### Naked style (themux)
 
-By default status modules render as "pills" — icon and text blocks with
-their own backgrounds — even when `@themux_status_background` is set to
-`"none"` (that option only clears the bar itself). For a fully transparent
-status line, this fork adds a naked variant: modules become colored text on
-the default background.
+By default status modules render as "pills" — icon and text blocks with their
+own backgrounds — even when `@themux_status_background` is `"none"` (that option
+only clears the bar itself). For a fully transparent status line, add the `naked`
+fill: modules become colored text on the default background.
 
 ```sh
 # Before loading the plugin
@@ -161,11 +158,12 @@ set -g @themux_window_variant "naked" # naked window list to match
 set -g @themux_status_background "none"
 ```
 
-In naked mode each module's icon and text take the module color
-(`@themux_<module>_color`), so all the existing modules and the per-module
-options keep working — only the rendering changes. Naked windows reuse the
-same `@themux_window_number_color` / `@themux_window_current_number_color` as
-the block variants.
+`naked` is a fill, so it pairs with any shape: `"rounded naked"` keeps the bare
+bar but gives the active window/pane the rounded caps. Each module's icon and
+text take the module color (`@themux_<module>_color`), so all the existing
+modules and per-module options keep working — only the rendering changes. Naked
+windows reuse the same `@themux_window_number_color` /
+`@themux_window_current_number_color` as the block fills.
 
 Extra named dividers can be created from the template (after loading the
 plugin) and then dropped into a zone as a token:

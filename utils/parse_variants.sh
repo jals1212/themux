@@ -3,8 +3,8 @@
 # options the renderers read: @_tmx_<scope>_{shape,fill,notch}. Doing the parse
 # once here means the window/pane/module renderers never split strings in tmux.
 #
-#   shape : squared | rounded | slanted | naked | unstyled   (default squared)
-#   fill  : icon (default) | fill | none
+#   shape : squared | rounded | slanted | unstyled            (default squared)
+#   fill  : icon (default) | fill | none | naked
 #   notch : "yes" when present — the icon<->text seam inherits the cap glyph
 #
 # Order-independent: each token is matched by what it is, not its position.
