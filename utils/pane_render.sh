@@ -17,8 +17,21 @@ expand() {
 
 position=$(tmux show -gqv @themux_pane_number_position)
 fill=$(tmux show -gqv @_tmx_pane_fill)
+notch=$(tmux show -gqv @_tmx_pane_notch)
+shape=$(tmux show -gqv @_tmx_pane_shape)
 left_glyph=$(tmux show -gqv @themux_pane_left_border)
 right_glyph=$(tmux show -gqv @themux_pane_right_border)
+
+# The notch seam glyph mirrors the shape's right cap (octal UTF-8, as in
+# window_render.sh): slanted  E0BC, rounded  E0B4, squared █ block. It only
+# matters for the number-on-the-left layout, where the number block's edge
+# tapers into the text block instead of meeting it on a flat colour boundary.
+seam_glyph=""
+[ "$notch" = yes ] && case "$shape" in
+  slanted) seam_glyph=$(printf '\356\202\274') ;;
+  rounded) seam_glyph=$(printf '\356\202\264') ;;
+  squared) seam_glyph=$(printf '\342\226\210') ;;
+esac
 
 panebg=$(expand "#{E:@themux_pane_background_color}")
 fg=$(expand "#{@thm_fg}")
@@ -65,10 +78,16 @@ cap() { [ -n "$1" ] && printf '#[fg=%s,bg=default]%s' "$2" "$1"; }
 num_block="$nstyle $index "
 txt_block="$tstyle $text "
 
+# Notch seam: the number block's right cap ($ncol) tapering into the text bg
+# ($tcol), in place of the flat boundary. Only the number-on-the-left layout has
+# the number flowing into the name, so the seam is left-position only (matching
+# windows); empty glyph (no notch) collapses to nothing.
+seam() { [ -n "$seam_glyph" ] && printf '#[fg=%s,bg=%s]%s' "$ncol" "$tcol" "$seam_glyph"; }
+
 if [ "$position" = "right" ]; then
   fmt="$(cap "$left_glyph" "$tcol")$txt_block$num_block$(cap "$right_glyph" "$ncol")"
 else
-  fmt="$(cap "$left_glyph" "$ncol")$num_block$txt_block$(cap "$right_glyph" "$tcol")"
+  fmt="$(cap "$left_glyph" "$ncol")$num_block$(seam)$txt_block$(cap "$right_glyph" "$tcol")"
 fi
 
 tmux set -wg pane-border-format "$fmt"

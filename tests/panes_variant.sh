@@ -35,6 +35,14 @@ tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 print_option pane-border-format
 
+# Rounded notch panes: the number block's right cap seams into the text block
+# (number-on-the-left layout), instead of a flat colour boundary.
+tmux set -g @themux_pane_variant "rounded notch"
+tmux set -g @themux_pane_status "top"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+print_option pane-border-format
+
 # Unstyled panes: themux leaves pane styling untouched
 tmux set -gu @themux_pane_status
 tmux set -g @themux_pane_variant "unstyled"
