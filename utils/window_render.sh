@@ -20,6 +20,17 @@ expand() {
 
 position=$(tmux show -gqv @themux_window_number_position)
 fill=$(tmux show -gqv @_tmx_window_fill)
+notch=$(tmux show -gqv @_tmx_window_notch)
+shape=$(tmux show -gqv @_tmx_window_shape)
+# The notch seam glyph mirrors the shape's right cap (octal UTF-8 so it does not
+# depend on printf's \u support): slanted  E0BC, rounded  E0B4, squared █ block.
+seam_glyph=""
+[ "$notch" = yes ] && case "$shape" in
+  slanted) seam_glyph=$(printf '\356\202\274') ;;
+  rounded) seam_glyph=$(printf '\356\202\264') ;;
+  squared) seam_glyph=$(printf '\342\226\210') ;;
+esac
+
 # @_tmx_w_flags is shared by both sides and unset once the formats are built.
 flags=$(expand "#{@_tmx_w_flags}")
 
@@ -46,12 +57,17 @@ render_side() {
   text=$(tmux show -gqv "@_tmx_${p}_text")
   text_style="#{E:@_tmx_${p}_text_style}"
 
+  # The name container. With notch the icon<->name seam takes the shape's cap
+  # (the number colour tapering into the name bg) instead of the plain separator.
+  local namepart="#{E:@_tmx_${p}_namepart}"
+  [ -n "$seam_glyph" ] && namepart="#[fg=$(expand "#{E:@themux_window_${o}number_color}"),bg=#{E:@_tmx_${p}t_bg}]${seam_glyph}#{E:@_tmx_${p}_text_style}#{E:@_tmx_${p}_text}"
+
   if [ "$position" = "left" ]; then
     # number block (with a right pad so the index stays centred whether or not a
     # name follows), then the name container — itself right-padded (on the text
     # bg) so the name block is symmetric — only when the window has text.
-    printf '%s%s%s #{?#{E:@_tmx_%s_text},#{E:@_tmx_%s_namepart} ,}%s%s' \
-      "$number_style" "$left" "$number" "$p" "$p" "$flags" "$right"
+    printf '%s%s%s #{?#{E:@_tmx_%s_text},%s ,}%s%s' \
+      "$number_style" "$left" "$number" "$p" "$namepart" "$flags" "$right"
   elif [ -n "$text" ]; then
     # number on the right: name block first, number block after the separator.
     mid=$(expand "#{E:@themux_window_${o}middle_separator}")
