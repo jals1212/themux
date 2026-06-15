@@ -11,6 +11,14 @@ tmux source "${script_dir}/../themux.conf"
 print_option pane-border-style
 print_option pane-active-border-style
 
+# Naked panes render a status label when the status is enabled (regression: the
+# naked variant used to set no pane-border-format at all).
+tmux set -g @themux_pane_status "top"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+print_option pane-border-status
+print_option pane-border-format
+
 # Rounded panes: cap glyphs in the pane-status separators
 tmux set -g @themux_pane_variant "rounded"
 tmux set -g @themux_pane_status "top"

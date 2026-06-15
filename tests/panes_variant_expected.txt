@@ -3,6 +3,10 @@ pane-border-style default
 
 pane-active-border-style #{?pane_in_mode,fg=yellow,#{?synchronize-panes,fg=red,fg=green}}
 
+pane-border-status top
+
+pane-border-format #[fg=#{?pane_active,#11111b,#a6e3a1},bg=#{?pane_active,#a6e3a1,default}] #{pane_index} #{b:pane_current_path} 
+
 @themux_pane_left_border 
 
 @themux_pane_right_border 
