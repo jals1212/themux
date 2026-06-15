@@ -9,7 +9,7 @@
 
 window-status-format #[fg=#9399b2,bg=default] #I#{E:@_tmx_w_text} 
 
-window-status-current-format #[fg=#11111b,bg=#cba6f7,bold] #I#{E:@_tmx_cw_text} 
+window-status-current-format #[fg=#11111b,bg=#cba6f7] #I #{?#{E:@_tmx_cw_text},#{E:@_tmx_cw_namepart} ,}#{E:@themux_window_current_right_border}
 
 window-status-style default
 

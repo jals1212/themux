@@ -19,6 +19,7 @@ expand() {
 }
 
 position=$(tmux show -gqv @themux_window_number_position)
+fill=$(tmux show -gqv @_tmx_window_fill)
 # @_tmx_w_flags is shared by both sides and unset once the formats are built.
 flags=$(expand "#{@_tmx_w_flags}")
 
@@ -27,10 +28,17 @@ flags=$(expand "#{@_tmx_w_flags}")
 render_side() {
   local p="$1" o="$2"
   local number_style left mid number right text text_style
+  number=$(expand "#{@themux_window_${o}number}")
+
+  if [ "$fill" = naked ] && [ "$p" = w ]; then
+    # naked inactive: accent text on the transparent bar, no caps or block.
+    printf '#[fg=%s,bg=default] %s#{E:@_tmx_w_text}%s ' \
+      "$(expand "#{E:@themux_window_number_color}")" "$number" "$flags"
+    return
+  fi
 
   number_style=$(expand "#{E:@_tmx_${p}_number_style}")
   left=$(expand "#{E:@themux_window_${o}left_border}")
-  number=$(expand "#{@themux_window_${o}number}")
   right="#{E:@themux_window_${o}right_border}"
   # Text is configured when its raw template is non-empty (never -> ""). Read the
   # raw value so a bare #W is NOT expanded here: at config-parse #W resolves empty,

@@ -13,8 +13,8 @@ for scope in module window pane; do
   shape="" fill="icon" notch="no"
   for tok in "${toks[@]}"; do
     case "$tok" in
-      squared | rounded | slanted | naked | unstyled) shape="$tok" ;;
-      icon | fill | none) fill="$tok" ;;
+      squared | rounded | slanted | unstyled) shape="$tok" ;;
+      icon | fill | none | naked) fill="$tok" ;;
       notch) notch="yes" ;;
     esac
   done
