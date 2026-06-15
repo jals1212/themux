@@ -29,14 +29,18 @@ accent="#{?pane_active,$(expand "#{E:@themux_pane_color}"),$(expand "#{@thm_over
 index='#{pane_index}'
 text=$(expand "#{E:@themux_pane_default_text}")
 
-# naked: inactive panes are accent text on the transparent border; the active
-# pane is a solid accent block. (The shape's caps on the active pane are added in
-# a later step.)
+# naked: inactive panes are accent text on the transparent border; the active pane
+# is a solid pane_color block capped with the shape's glyphs, so it reads like the
+# active naked window. The caps belong to the active block only, so they are gated
+# on pane_active: a #{?} can't carry the commas of a #[fg=,bg=] style, but it nests
+# inside the fg= value and wraps a bare glyph. Squared has no glyph -> no cap, the
+# block is its own fill.
 if [ "$fill" = naked ]; then
   pc=$(expand "#{E:@themux_pane_color}")
   cr=$(expand "#{@thm_crust}")
+  acap() { [ -n "$1" ] && printf '#[fg=#{?pane_active,%s,default},bg=default]#{?pane_active,%s,}' "$pc" "$1"; }
   tmux set -wg pane-border-format \
-    "#[fg=#{?pane_active,${cr},${pc}},bg=#{?pane_active,${pc},default}] ${index} ${text} "
+    "$(acap "$left_glyph")#[fg=#{?pane_active,${cr},${pc}},bg=#{?pane_active,${pc},default}] ${index} ${text} $(acap "$right_glyph")"
   tmux set -gu @_tmx_render_tmp
   exit 0
 fi

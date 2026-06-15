@@ -27,6 +27,14 @@ tmux source "${script_dir}/../themux.conf"
 print_option @themux_pane_left_border
 print_option @themux_pane_right_border
 
+# Rounded naked panes: the active pane block takes the shape's caps (gated on
+# pane_active) while inactive panes stay bare accent text; squared naked gets none.
+tmux set -g @themux_pane_variant "rounded naked"
+tmux set -g @themux_pane_status "top"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+print_option pane-border-format
+
 # Unstyled panes: themux leaves pane styling untouched
 tmux set -gu @themux_pane_status
 tmux set -g @themux_pane_variant "unstyled"

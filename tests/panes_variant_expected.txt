@@ -10,4 +10,6 @@ pane-border-format #[fg=#{?pane_active,#11111b,#a6e3a1},bg=#{?pane_active,#a6e3a
 @themux_pane_left_border 
 
 @themux_pane_right_border 
+
+pane-border-format #[fg=#{?pane_active,#a6e3a1,default},bg=default]#{?pane_active,,}#[fg=#{?pane_active,#11111b,#a6e3a1},bg=#{?pane_active,#a6e3a1,default}] #{pane_index} #{b:pane_current_path} #[fg=#{?pane_active,#a6e3a1,default},bg=default]#{?pane_active,,}
 pane_border_style_unstyled fg=#6c7086
