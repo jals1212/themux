@@ -37,8 +37,10 @@ render_side() {
   text_style="#{E:@_tmx_${p}_text_style}"
 
   if [ "$position" = "left" ]; then
-    # number block, then the name container only when the window has text.
-    printf '%s%s%s#{?#{E:@_tmx_%s_text},#{E:@_tmx_%s_namepart}, }%s%s' \
+    # number block (with a right pad so the index stays centred whether or not a
+    # name follows), then the name container — itself right-padded (on the text
+    # bg) so the name block is symmetric — only when the window has text.
+    printf '%s%s%s #{?#{E:@_tmx_%s_text},#{E:@_tmx_%s_namepart} ,}%s%s' \
       "$number_style" "$left" "$number" "$p" "$p" "$flags" "$right"
   elif [ "$has_text" = 1 ]; then
     # number on the right: name block first, number block after the separator.
