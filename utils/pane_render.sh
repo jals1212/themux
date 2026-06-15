@@ -16,7 +16,7 @@ expand() {
 }
 
 position=$(tmux show -gqv @themux_pane_number_position)
-fill=$(tmux show -gqv @themux_pane_fill)
+fill=$(tmux show -gqv @_tmx_pane_fill)
 left_glyph=$(tmux show -gqv @themux_pane_left_border)
 right_glyph=$(tmux show -gqv @themux_pane_right_border)
 
@@ -29,13 +29,25 @@ accent="#{?pane_active,$(expand "#{E:@themux_pane_color}"),$(expand "#{@thm_over
 index='#{pane_index}'
 text=$(expand "#{E:@themux_pane_default_text}")
 
+# naked: inactive panes are accent text on the transparent border; the active
+# pane is a solid accent block. (The shape's caps on the active pane are added in
+# a later step.)
+if [ "$fill" = naked ]; then
+  pc=$(expand "#{E:@themux_pane_color}")
+  cr=$(expand "#{@thm_crust}")
+  tmux set -wg pane-border-format \
+    "#[fg=#{?pane_active,${cr},${pc}},bg=#{?pane_active,${pc},default}] ${index} ${text} "
+  tmux set -gu @_tmx_render_tmp
+  exit 0
+fi
+
 # Block styles + their bg colour (used as the cap fg so the cap tapers the block
-# into the transparent border). icon: only the number takes the accent; all: the
+# into the transparent border). icon: only the number takes the accent; fill: the
 # whole label does; none: no accent, a neutral surface block.
 case "$fill" in
   none)
     nstyle="#[fg=$fg,bg=$surface0]"; tstyle="$nstyle"; ncol="$surface0"; tcol="$surface0" ;;
-  all)
+  fill)
     nstyle="#[fg=$panebg,bg=$accent]"; tstyle="$nstyle"; ncol="$accent"; tcol="$accent" ;;
   *) # icon
     nstyle="#[fg=$panebg,bg=$accent]"; tstyle="#[fg=$accent,bg=$panebg]"; ncol="$accent"; tcol="$panebg" ;;
