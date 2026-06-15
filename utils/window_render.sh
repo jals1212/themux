@@ -26,14 +26,16 @@ flags=$(expand "#{@_tmx_w_flags}")
 # (""|current_). The name container only appears when the side has text.
 render_side() {
   local p="$1" o="$2"
-  local number_style left mid number right has_text text_style
+  local number_style left mid number right text text_style
 
   number_style=$(expand "#{E:@_tmx_${p}_number_style}")
   left=$(expand "#{E:@themux_window_${o}left_border}")
   number=$(expand "#{@themux_window_${o}number}")
   right="#{E:@themux_window_${o}right_border}"
-  # Parse-time flag from window_block.conf (see its note on #W timing).
-  has_text=$(tmux show -gqv "@_tmx_${p}_has_text")
+  # Text is configured when its raw template is non-empty (never -> ""). Read the
+  # raw value so a bare #W is NOT expanded here: at config-parse #W resolves empty,
+  # which used to drop the name in number-on-the-right position.
+  text=$(tmux show -gqv "@_tmx_${p}_text")
   text_style="#{E:@_tmx_${p}_text_style}"
 
   if [ "$position" = "left" ]; then
@@ -42,7 +44,7 @@ render_side() {
     # bg) so the name block is symmetric — only when the window has text.
     printf '%s%s%s #{?#{E:@_tmx_%s_text},#{E:@_tmx_%s_namepart} ,}%s%s' \
       "$number_style" "$left" "$number" "$p" "$p" "$flags" "$right"
-  elif [ "$has_text" = 1 ]; then
+  elif [ -n "$text" ]; then
     # number on the right: name block first, number block after the separator.
     mid=$(expand "#{E:@themux_window_${o}middle_separator}")
     printf '%s%s%s#{E:@_tmx_%s_text}%s%s%s %s%s' \
@@ -58,6 +60,4 @@ tmux set -g window-status-current-format "$(render_side cw current_)"
 
 tmux set -gu @_tmx_render_tmp
 tmux set -ug @_tmx_w_flags
-tmux set -gu @_tmx_w_has_text
-tmux set -gu @_tmx_cw_has_text
 exit 0
