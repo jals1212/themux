@@ -18,28 +18,27 @@ Because the palette is plain tmux options, it composes with any other tmux
 configuration: `#{@thm_blue}` works in your own `status-left`, a custom module,
 or anywhere a format string is accepted.
 
-### Orthogonal variants over endless options
+### Orthogonal props over endless options
 
 The historical failure mode of a status-line plugin is an explosion of
 inter-dependent options where specific combinations break. themux avoids that
 not by removing configurability but by keeping the configurable surface
-**orthogonal**: each UI item (status modules, the window list, panes) is named
-by one *variant* string — `"<shape> [fill] [notch]"` — whose tokens are drawn
-from the same small, shared vocabulary.
+**orthogonal**: each UI item (status modules, the window list, panes) is a
+*component* with a handful of independent props, drawn from one small, shared
+vocabulary.
 
-| Axis | Tokens | Meaning |
+| Prop | Values | Meaning |
 | --- | --- | --- |
-| **shape** | `squared` / `rounded` / `slanted` | Solid block with full / rounded / slanted caps. |
+| **shape** | `squared` / `rounded` / `slanted` | Block with square / round / slant caps. |
 | | `unstyled` | themux leaves the item alone so you can build it by hand. |
-| **fill** | `icon` / `fill` / `none` | The icon only / the whole badge / nothing takes the accent. |
-| | `naked` | Transparent text on the bar; only the active window/pane is a block. |
-| **notch** | `notch` | The icon↔text seam inherits the shape's cap. |
+| **indicator** / **text** | `solid` / `soft` / `subtle` / `naked` | The icon-or-number block and the text block each pick a style: accent block / grey block / grey block with accent text / transparent. |
+| **notch** | `on` / `off` | The indicator↔text seam inherits the shape's cap. |
 
-The axes are orthogonal: `@themux_module_variant`, `@themux_window_variant` and
-`@themux_pane_variant` are chosen independently, and within each the shape, fill
-and notch combine freely — any combination is valid. New shapes are added by
-dropping a file under `variants/`, not by adding a flag that interacts with
-every other flag.
+The props are orthogonal: each item's `shape`, `indicator`, `text` and `notch`
+are chosen independently, and any combination is valid — a colored chip with a
+transparent label, a rounded outline capsule, a plain grey pill. A common
+renderer resolves the two block styles, so a new shape is a few cap glyphs, not
+a flag that interacts with every other flag.
 
 `unstyled` is the escape hatch: it makes the law of orthogonality hold even at
 the edges. Anything themux's variants do not cover, you build yourself with the

@@ -7,8 +7,9 @@ loads** unless noted. Colors accept a hex code (`#ff0000`) or a palette token
 (`#{@thm_<name>}`, e.g. `#{@thm_mauve}`). themux re-derives its state on every
 load, so changing an option and reloading is enough — no `kill-server`.
 
-The three UI items — **status modules**, **windows**, **panes** — share one
-*variant grammar*: a space-separated `"<shape> [fill] [notch]"` string.
+The three UI items — **status modules**, **windows**, **panes** — are each a
+*component* styled through a few independent props: a **shape**, an
+**indicator** style, a **text** style, and a **notch** flag.
 
 ---
 
@@ -18,48 +19,58 @@ The three UI items — **status modules**, **windows**, **panes** — share one
 | --- | --- | --- |
 | `@themux_theme` | `catppuccin_mocha` | Palette: `catppuccin_{latte,frappe,macchiato,mocha}` or `kanagawa_{wave,dragon,lotus}`. Loads `themes/<theme>_tmux.conf`, which exposes the `@thm_*` colors. |
 
-### Variant grammar — per item
+### Component props — per item
 
-Each item picks its look independently through one option whose value is up to
-three tokens, in any order: a **shape**, a **fill**, and the **notch** flag.
+Each item is styled by independent props, so any combination is valid: the
+shape draws the border/caps, the indicator (icon/number) and text blocks each
+pick a style on their own, and notch shapes the seam between them.
 
 ```sh
-set -g @themux_module_variant "rounded"             # shape only
-set -g @themux_window_variant "slanted fill"        # shape + fill
-set -g @themux_pane_variant   "rounded naked notch" # shape + fill + notch
+set -g @themux_module_shape     "rounded"
+set -g @themux_module_indicator "solid"
+set -g @themux_module_text      "naked"  # colored icon chip, transparent label
+set -g @themux_module_notch     "off"
 ```
 
-| Option | Default |
-| --- | --- |
-| `@themux_module_variant` | `rounded` |
-| `@themux_window_variant` | `squared` |
-| `@themux_pane_variant` | `squared` |
-
-**shape** — the block and its caps. Default `squared`.
-
-| Token | Effect |
-| --- | --- |
-| `squared` / `rounded` / `slanted` | Solid block with square / round / slant caps. |
-| `unstyled` | themux leaves the item untouched so you can style it by hand. |
-
-**fill** — how much of the badge takes the accent color. Default `icon`.
-
-| Token | Effect | Items |
+| Prop | Values | Default |
 | --- | --- | --- |
-| `icon` | Only the icon/number block is colored; the rest stays neutral. | all |
-| `fill` | The whole badge is one solid accent block. | all |
-| `none` | Fully neutral, no accent. | modules, panes |
-| `naked` | Transparent: accent *text* on the bare bar, and only the **active** window/pane is a solid block with the shape's caps. Pair with `@themux_status_background "none"`. | all |
+| `@themux_<item>_shape` | `squared` · `rounded` · `slanted` · `unstyled` | `squared` |
+| `@themux_<item>_indicator` | `solid` · `soft` · `subtle` · `naked` | `solid` |
+| `@themux_<item>_text` † | `solid` · `soft` · `subtle` · `naked` | `soft` |
+| `@themux_<item>_notch` | `on` · `off` | `off` |
 
-**notch** — present or absent. With it the icon↔text seam (number↔name for
-windows) inherits the shape's cap glyph instead of meeting on a flat boundary.
+`<item>` is `module`, `window`, or `pane`. † On windows the text-block prop is
+`@themux_window_name`, because the name content already owns
+`@themux_window_text`.
 
-For windows/panes, only the **active** item keeps the bright accent; inactive
-ones dim (windows → `@themux_window_number_color`, panes → `overlay_0`).
+**shape** — `squared` / `rounded` / `slanted` are blocks with square / round /
+slant caps; `unstyled` makes themux leave the item alone so you build it by hand
+with the `@thm_*` palette.
 
-> The old `@themux_<item>_fill` options are gone — fill is now a token in the
-> variant string (e.g. `@themux_window_fill "all"` becomes
-> `@themux_window_variant "<shape> fill"`).
+**indicator / text** — the icon-or-number block and the text block each take a
+style:
+
+| Style | Background | Text |
+| --- | --- | --- |
+| `solid` | accent | crust — a solid colored block |
+| `soft` | surface (grey) | normal |
+| `subtle` | surface (grey) | accent |
+| `naked` | transparent | accent — no block |
+
+A `naked` block keeps the shape's caps as an outline, so a `rounded` indicator +
+`naked` text reads as a capsule. Pair naked styles with
+`@themux_status_background "none"` for a fully bare bar.
+
+**notch** — `on` makes the indicator↔text seam inherit the shape's cap (the
+indicator color tapering into the text background) instead of a flat boundary;
+it collapses to nothing when the two blocks share a background.
+
+For windows and panes, only the **active** item keeps the bright accent;
+inactive ones dim (windows → `@themux_window_number_color`, panes → `overlay_0`).
+
+> **Migration** from the old `@themux_<item>_variant` / `_fill` options (both
+> removed): map the old fill to the new pair — `icon` → indicator `solid` + text
+> `soft`, `fill` → both `solid`, `none` → both `soft`, `naked` → both `naked`.
 
 ### Status line background
 
@@ -158,20 +169,14 @@ active window.
 | `@themux_window_flags_icon_bell` | bell (`!`) |
 | `@themux_window_flags_icon_format` | order/format of the icons above |
 
-#### Window caps (block variants)
+#### Window colors
 
-Override to keep a base variant but change the cap glyphs. Active windows reuse
-the inactive caps unless their `_current_` form is set.
-
-| Option | Effect |
-| --- | --- |
-| `@themux_window_left_border` / `_middle_separator` / `_right_border` | Inactive left cap / inner separator / right cap. |
-| `@themux_window_current_left_border` / `_current_middle_separator` / `_current_right_border` | Active versions. |
-
-#### Naked windows
-
-The `naked` fill reuses the same `@themux_window_(current_)number_color` as the
-block fills — no separate options.
+The window caps follow the shape (`@themux_window_shape`); they are drawn from
+the block colors, so there are no separate cap-glyph options. The number and
+name blocks take their accent from `@themux_window_number_color` (inactive) and
+`@themux_window_current_number_color` (active), and their grey from
+`@themux_window_text_color` / `@themux_window_current_text_color`; a `naked`
+style reuses the same accents — no separate options.
 
 ---
 
@@ -186,7 +191,7 @@ block fills — no separate options.
 | `@themux_pane_number_position` | `left` | `left` \| `right`. |
 | `@themux_pane_border_style` | `fg=#{@thm_overlay_0}` | Inactive pane border style. |
 | `@themux_pane_active_border_style` | lavender (mauve when synced) | Active pane border style. |
-| `@themux_pane_left_border` / `_middle_separator` / `_right_border` | per variant | Cap glyphs (override like the window caps). |
+| `@themux_pane_left_border` / `_right_border` | per shape | Cap glyphs (set by the shape; override to customize). |
 
 ---
 
