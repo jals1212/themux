@@ -1,81 +1,85 @@
 #!/usr/bin/env bash
-# Assemble window-status-format and window-status-current-format from the per-side
-# style vars computed in utils/window_block.conf.
-#
-# This replaces the in-config format assembly, whose tmux two-stage expansion was
-# the debt: draw-time refs had to be written as "##{?##{E:...}}" (counting set-time
-# vs draw-time "#" levels), and the inactive and current blocks duplicated the
-# whole structure. In shell the two stages separate cleanly:
-#   load-time -> resolved now via a single `tmux set -F` pass, captured as a string
-#   draw-time -> emitted literally as #{...} (no ## doubling) for tmux to resolve
-#                per window
-# and inactive/current collapse to one function called twice. The produced option
-# values are byte-identical to the previous assembly.
+# Assemble window-status-format and window-status-current-format from the v3
+# props @themux_window_{shape,indicator,name,notch}, mirroring pane_render.sh:
+# the indicator (number) and name blocks are styled independently through the
+# shared resolver. The two sides differ only by their accent/surface brightness
+# (inactive: number_color/text_color; active: current_number_color/
+# current_text_color). Load-time colours are resolved now; draw-time refs (the
+# per-window name, its visibility) stay literal #{...} for tmux to resolve.
 
-# Expand $1 through a single tmux format pass (the load-time stage).
+# shellcheck source=render_style.sh
+. "$(dirname "$0")/render_style.sh"
+
 expand() {
   tmux set -gF @_tmx_render_tmp "$1"
   tmux show -gv @_tmx_render_tmp
 }
 
 position=$(tmux show -gqv @themux_window_number_position)
-fill=$(tmux show -gqv @_tmx_window_fill)
-notch=$(tmux show -gqv @_tmx_window_notch)
-shape=$(tmux show -gqv @_tmx_window_shape)
-# The notch seam glyph mirrors the shape's right cap (octal UTF-8 so it does not
-# depend on printf's \u support): slanted  E0BC, rounded  E0B4, squared █ block.
+indicator=$(tmux show -gqv @themux_window_indicator)
+name_style=$(tmux show -gqv @themux_window_name)
+notch=$(tmux show -gqv @themux_window_notch)
+shape=$(tmux show -gqv @themux_window_shape)
+crust=$(expand "#{@thm_crust}")
+fg=$(expand "#{@thm_fg}")
+flags=$(expand "#{@_tmx_w_flags}")
+
+# Shape glyphs (octal UTF-8). squared has none — the block padding is its edge.
+case "$shape" in
+  rounded) lglyph=$(printf '\356\202\266'); rglyph=$(printf '\356\202\264') ;;
+  slanted) lglyph=$(printf '\356\202\272'); rglyph=$(printf '\356\202\274') ;;
+  *)       lglyph=""; rglyph="" ;;
+esac
+# The notch seam mirrors the shape's right cap; left layout only (like panes).
 seam_glyph=""
-[ "$notch" = yes ] && case "$shape" in
+[ "$notch" = on ] && case "$shape" in
   slanted) seam_glyph=$(printf '\356\202\274') ;;
   rounded) seam_glyph=$(printf '\356\202\264') ;;
   squared) seam_glyph=$(printf '\342\226\210') ;;
 esac
 
-# @_tmx_w_flags is shared by both sides and unset once the formats are built.
-flags=$(expand "#{@_tmx_w_flags}")
+# A cap is the shape glyph over the bare bar in a block's colour (empty glyph ->
+# none). cap_col falls back to the accent when a block is transparent (naked).
+cap() { [ -n "$1" ] && printf '#[fg=%s,bg=default]%s' "$2" "$1"; }
 
-# Render one window side's format. $1: var prefix (w|cw); $2: option infix
-# (""|current_). The name container only appears when the side has text.
+# Render one side. $1: var prefix (w|cw); $2: option infix (""|current_).
 render_side() {
   local p="$1" o="$2"
-  local number_style left mid number right text text_style
+  local accent surface ibg ifg tbg tfg icap tcap number text seam lcap rcap nblock nameblock
+  accent=$(expand "#{E:@themux_window_${o}number_color}")
+  surface=$(expand "#{E:@themux_window_${o}text_color}")
+  resolve_style "$indicator" "$accent" "$surface" "$crust" "$fg"
+  ibg="$RS_BG" ifg="$RS_FG"
+  resolve_style "$name_style" "$accent" "$surface" "$crust" "$fg"
+  tbg="$RS_BG" tfg="$RS_FG"
+  icap="$ibg"; [ "$ibg" = default ] && icap="$accent"
+  tcap="$tbg"; [ "$tbg" = default ] && tcap="$accent"
   number=$(expand "#{@themux_window_${o}number}")
+  text="#{E:@_tmx_${p}_text}" # draw-time; "" when the name is hidden
 
-  if [ "$fill" = naked ] && [ "$p" = w ]; then
-    # naked inactive: accent text on the transparent bar, no caps or block.
-    printf '#[fg=%s,bg=default] %s#{E:@_tmx_w_text}%s ' \
-      "$(expand "#{E:@themux_window_number_color}")" "$number" "$flags"
-    return
-  fi
+  nblock="#[fg=$ifg,bg=$ibg] $number "
 
-  number_style=$(expand "#{E:@_tmx_${p}_number_style}")
-  left=$(expand "#{E:@themux_window_${o}left_border}")
-  right="#{E:@themux_window_${o}right_border}"
-  # Text is configured when its raw template is non-empty (never -> ""). Read the
-  # raw value so a bare #W is NOT expanded here: at config-parse #W resolves empty,
-  # which used to drop the name in number-on-the-right position.
-  text=$(tmux show -gqv "@_tmx_${p}_text")
-  text_style="#{E:@_tmx_${p}_text_style}"
-
-  # The name container. With notch the icon<->name seam takes the shape's cap
-  # (the number colour tapering into the name bg) instead of the plain separator.
-  local namepart="#{E:@_tmx_${p}_namepart}"
-  [ -n "$seam_glyph" ] && namepart="#[fg=$(expand "#{E:@themux_window_${o}number_color}"),bg=#{E:@_tmx_${p}t_bg}]${seam_glyph}#{E:@_tmx_${p}_text_style}#{E:@_tmx_${p}_text}"
-
-  if [ "$position" = "left" ]; then
-    # number block (with a right pad so the index stays centred whether or not a
-    # name follows), then the name container — itself right-padded (on the text
-    # bg) so the name block is symmetric — only when the window has text.
-    printf '%s%s%s #{?#{E:@_tmx_%s_text},%s ,}%s%s' \
-      "$number_style" "$left" "$number" "$p" "$namepart" "$flags" "$right"
-  elif [ -n "$text" ]; then
-    # number on the right: name block first, number block after the separator.
-    mid=$(expand "#{E:@themux_window_${o}middle_separator}")
-    printf '%s%s%s#{E:@_tmx_%s_text}%s%s%s %s%s' \
-      "$text_style" "$left" "$text_style" "$p" "$flags" "$mid" "$number_style" "$number" "$right"
+  if [ "$position" = left ]; then
+    # number block, then the name block (only when the window has a name). The
+    # right cap follows the rightmost block: the name bg when a name shows, the
+    # number bg when it does not.
+    lcap=$(cap "$lglyph" "$icap")
+    seam=""
+    [ -n "$seam_glyph" ] && [ "$ibg" != "$tbg" ] && seam="#[fg=$icap,bg=$tbg]$seam_glyph"
+    nameblock="#{?${text},${seam}#[fg=$tfg,bg=$tbg] ${text} ,}"
+    rcap=$(cap "$rglyph" "#{?${text},${tcap},${icap}}")
+    printf '%s%s%s%s%s' "$lcap" "$nblock" "$nameblock" "$flags" "$rcap"
+  elif [ -n "$(tmux show -gqv "@_tmx_${p}_text")" ]; then
+    # number on the right: name block first, then the number block.
+    lcap=$(cap "$lglyph" "$tcap")
+    nameblock="#[fg=$tfg,bg=$tbg] ${text} "
+    rcap=$(cap "$rglyph" "$icap")
+    printf '%s%s%s%s%s' "$lcap" "$nameblock" "$flags" "$nblock" "$rcap"
   else
-    # number on the right, but no text: just the number block.
-    printf '%s%s%s%s%s' "$number_style" "$left" "$number" "$flags" "$right"
+    # number on the right, no name: just the number block.
+    lcap=$(cap "$lglyph" "$icap")
+    rcap=$(cap "$rglyph" "$icap")
+    printf '%s%s%s%s' "$lcap" "$nblock" "$flags" "$rcap"
   fi
 }
 

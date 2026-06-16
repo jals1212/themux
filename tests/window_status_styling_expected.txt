@@ -1,16 +1,16 @@
 
-window-status-format #[fg=#11111b,bg=#9399b2] #I #{?#{E:@_tmx_w_text},#{E:@_tmx_w_namepart} ,}#{E:@themux_window_right_border}
+window-status-format #[fg=#11111b,bg=#9399b2] #I #{?#{E:@_tmx_w_text},#[fg=#cdd6f4,bg=#313244] #{E:@_tmx_w_text} ,}
 
-window-status-current-format #[fg=#11111b,bg=#cba6f7] #I #{?#{E:@_tmx_cw_text},#{E:@_tmx_cw_namepart} ,}#{E:@themux_window_current_right_border}
+window-status-current-format #[fg=#11111b,bg=#cba6f7] #I #{?#{E:@_tmx_cw_text},#[fg=#cdd6f4,bg=#45475a] #{E:@_tmx_cw_text} ,}
 
-window-status-format #[fg=#11111b,bg=#9399b2]#[fg=#{@thm_overlay_2},bg=#181825]#[fg=#11111b,bg=#{@thm_overlay_2}] #I #{?#{E:@_tmx_w_text},#{E:@_tmx_w_namepart} ,}#{E:@themux_window_right_border}
+window-status-format #[fg=#9399b2,bg=default]#[fg=#11111b,bg=#9399b2] #I #{?#{E:@_tmx_w_text},#[fg=#cdd6f4,bg=#313244] #{E:@_tmx_w_text} ,}#[fg=#{?#{E:@_tmx_w_text},#313244,#9399b2},bg=default]
 
-window-status-current-format #[fg=#11111b,bg=#cba6f7]#[fg=#{@thm_mauve},bg=#181825]#[fg=#11111b,bg=#{@thm_mauve}] #I #{?#{E:@_tmx_cw_text},#{E:@_tmx_cw_namepart} ,}#{E:@themux_window_current_right_border}
+window-status-current-format #[fg=#cba6f7,bg=default]#[fg=#11111b,bg=#cba6f7] #I #{?#{E:@_tmx_cw_text},#[fg=#cdd6f4,bg=#45475a] #{E:@_tmx_cw_text} ,}#[fg=#{?#{E:@_tmx_cw_text},#45475a,#cba6f7},bg=default]
 
-window-status-format #{E:@_tmx_w_text_style} #{E:@_tmx_w_text_style}#{E:@_tmx_w_text}#[fg=#11111b,bg=#9399b2] #I#{E:@themux_window_right_border}
+window-status-format #[fg=#cdd6f4,bg=#313244] #{E:@_tmx_w_text} #[fg=#11111b,bg=#9399b2] #I 
 
-window-status-current-format #{E:@_tmx_cw_text_style} #{E:@_tmx_cw_text_style}#{E:@_tmx_cw_text}#[fg=#11111b,bg=#cba6f7] #I#{E:@themux_window_current_right_border}
+window-status-current-format #[fg=#cdd6f4,bg=#45475a] #{E:@_tmx_cw_text} #[fg=#11111b,bg=#cba6f7] #I 
 
-window-status-format #[fg=#11111b,bg=#9399b2] #I #{?#{E:@_tmx_w_text},#{E:@_tmx_w_namepart} ,}#{E:@themux_window_right_border}
+window-status-format #[fg=#11111b,bg=#9399b2] #I #{?#{E:@_tmx_w_text},#[fg=#cdd6f4,bg=#313244] #{E:@_tmx_w_text} ,}
 
-window-status-current-format #[fg=#11111b,bg=#cba6f7] #I #{?#{E:@_tmx_cw_text},#{E:@_tmx_cw_namepart} ,}#{E:@themux_window_current_right_border}
+window-status-current-format #[fg=#11111b,bg=#cba6f7] #I #{?#{E:@_tmx_cw_text},#[fg=#cdd6f4,bg=#45475a] #{E:@_tmx_cw_text} ,}

@@ -7,7 +7,8 @@ source "${script_dir}/helpers.sh"
 # Tests the naked status module and window status style
 tmux set -g @themux_module_indicator "naked"
 tmux set -g @themux_module_text "naked"
-tmux set -g @themux_window_variant "naked"
+tmux set -g @themux_window_indicator "naked"
+tmux set -g @themux_window_name "naked"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 

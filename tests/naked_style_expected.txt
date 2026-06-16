@@ -7,12 +7,12 @@
 
 @themux_module_zoom #{?window_zoomed_flag,#{E:@_tmx_module_zoom_seg},}
 
-window-status-format #[fg=#9399b2,bg=default] #I#{E:@_tmx_w_text} 
+window-status-format #[fg=#9399b2,bg=default] #I #{?#{E:@_tmx_w_text},#[fg=#9399b2,bg=default] #{E:@_tmx_w_text} ,}
 
-window-status-current-format #[fg=#11111b,bg=#cba6f7] #I #{?#{E:@_tmx_cw_text},#{E:@_tmx_cw_namepart} ,}#{E:@themux_window_current_right_border}
+window-status-current-format #[fg=#cba6f7,bg=default] #I #{?#{E:@_tmx_cw_text},#[fg=#cba6f7,bg=default] #{E:@_tmx_cw_text} ,}
 
 window-status-style default
 
 window-status-current-style default
 
-window-status-separator #[fg=#6c7086,bg=default] 
+window-status-separator #[fg=#6c7086,bg=#181825] 

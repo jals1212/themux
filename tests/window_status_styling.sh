@@ -3,10 +3,10 @@
 # Unsets (removes) any styling options that will contaminate
 # subsequent test runs.
 function reset() {
-  tmux set -gu @themux_window_current_left_border
-  tmux set -gu @themux_window_current_middle_separator
-  tmux set -gu @themux_window_current_right_border
-  tmux set -gu @themux_window_variant
+  tmux set -gu @themux_window_shape
+  tmux set -gu @themux_window_indicator
+  tmux set -gu @themux_window_name
+  tmux set -gu @themux_window_notch
 }
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
@@ -21,7 +21,7 @@ print_option window-status-current-format
 
 # Test the rounded style
 reset
-tmux set -g @themux_window_variant "rounded"
+tmux set -g @themux_window_shape "rounded"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 
