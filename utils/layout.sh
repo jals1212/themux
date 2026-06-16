@@ -58,16 +58,26 @@ full_pill() { # $1 module -> its own pill, caps included (inlined for tmux-cpu)
 # module's bare core, a connector between neighbours (the left module's right
 # colour tapering into the right module's left background), then a right cap.
 powerline_run() {
-  local m out2="" first=1 prev_rcol=""
+  local m out2="" first=1 prev_rcol="" cond seg
   for m in "$@"; do
+    cond=$(tmux show -gqv "@themux_${m}_when")
     if [ "$first" = 1 ]; then
-      out2+="#[fg=$(mod_field "$m" lcol),bg=default]${mpll}"
+      out2+="#[fg=$(mod_field "$m" lcol),bg=default]${mpll}$(mod_core "$m")"
       first=0
+      prev_rcol=$(mod_field "$m" rcol)
+    elif [ -n "$cond" ]; then
+      # A conditional module (e.g. zoom) only joins the run while its condition
+      # holds; when hidden the run connects straight through, so the next
+      # connector's colour falls back to the previous visible module. The
+      # connector+core carry commas, so stash them in a helper and gate the ref.
+      seg="#[fg=${prev_rcol},bg=$(mod_field "$m" lbg)]${mprr}$(mod_core "$m")"
+      tmux set -g "@_tmx_pl_${m}" "$seg"
+      out2+="#{?${cond},#{E:@_tmx_pl_${m}},}"
+      prev_rcol="#{?${cond},$(mod_field "$m" rcol),${prev_rcol}}"
     else
-      out2+="#[fg=${prev_rcol},bg=$(mod_field "$m" lbg)]${mprr}"
+      out2+="#[fg=${prev_rcol},bg=$(mod_field "$m" lbg)]${mprr}$(mod_core "$m")"
+      prev_rcol=$(mod_field "$m" rcol)
     fi
-    out2+="$(mod_core "$m")"
-    prev_rcol=$(mod_field "$m" rcol)
   done
   out2+="#[fg=${prev_rcol},bg=default]${mprr}"
   printf '%s' "$out2"
@@ -100,11 +110,10 @@ expand_zone() {
         out+="#{E:@_tmx_module_divider}"
         ;;
       *)
-        # squared/unstyled has no connector glyph, and a conditional module
-        # (one with @themux_<name>_when, e.g. zoom) appears/disappears so it
-        # cannot sit inside a connected run — both keep their own full pill.
-        # rounded/slanted accumulate the rest into a connected run.
-        if [ -z "$mpll" ] || [ -n "$(tmux show -gqv "@themux_${token}_when")" ]; then
+        # squared/unstyled has no connector glyph, so each module is its own
+        # pill; rounded/slanted accumulate into a connected run (conditional
+        # modules connect through draw-time gating inside powerline_run).
+        if [ -z "$mpll" ]; then
           flush
           out+="$(full_pill "$token")"
         else
