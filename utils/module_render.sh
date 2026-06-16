@@ -89,6 +89,18 @@ else
   seam=$(tmux show -gqv @themux_module_middle_separator)
 fi
 
+# Expose the bare core (blocks + seam, no outer caps) and the edge cap colours
+# so utils/layout.sh can connect adjacent modules powerline-style: between two
+# modules the slant/bulge is one module's right colour tapering into the next
+# module's left background. A transparent (naked) edge falls back to the accent.
+lcol="$ibg"; [ "$ibg" = default ] && lcol="$accent"
+rcol="$tbg"; [ "$tbg" = default ] && rcol="$accent"
+tmux set -g "@_tmx_module_${name}_core" "${iblock}${seam}${tblock}"
+tmux set -g "@_tmx_module_${name}_lcol" "$lcol"
+tmux set -g "@_tmx_module_${name}_rcol" "$rcol"
+tmux set -g "@_tmx_module_${name}_lbg" "$ibg"
+tmux set -g "@_tmx_module_${name}_rbg" "$tbg"
+
 out="$(cap "$lglyph" "$ibg")${iblock}${seam}${tblock}$(cap "$rglyph" "$tbg")"
 
 # A module may only appear under a condition (@themux_<name>_when, e.g. zoom).

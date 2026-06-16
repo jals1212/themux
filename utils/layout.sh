@@ -17,31 +17,80 @@ type do_interpolation >/dev/null 2>&1 || do_interpolation() { printf '%s' "$1"; 
 
 windows_block=$(tmux show -gqv @_tmx_fmt_windows)
 
+# Powerline cap glyphs for the module shape. Empty for squared/unstyled, where
+# modules abut as their own full pills; rounded/slanted connect adjacent modules.
+mshape=$(tmux show -gqv @themux_module_shape)
+case "$mshape" in
+  rounded) mpll=$(printf '\356\202\266'); mprr=$(printf '\356\202\264') ;;
+  slanted) mpll=$(printf '\356\202\272'); mprr=$(printf '\356\202\274') ;;
+  *)       mpll=""; mprr="" ;;
+esac
+
+# Connect a run of adjacent modules ($@) powerline-style: a left cap, each
+# module's bare core, a connector between neighbours (the left module's right
+# colour tapering into the right module's left background), then a right cap.
+powerline_run() {
+  local m out2="" first=1 prev_rcol="" lcol lbg
+  for m in "$@"; do
+    lcol=$(tmux show -gqv "@_tmx_module_${m}_lcol")
+    lbg=$(tmux show -gqv "@_tmx_module_${m}_lbg")
+    if [ "$first" = 1 ]; then
+      out2+="#[fg=${lcol},bg=default]${mpll}"
+      first=0
+    else
+      out2+="#[fg=${prev_rcol},bg=${lbg}]${mprr}"
+    fi
+    out2+="#{E:@_tmx_module_${m}_core}"
+    prev_rcol=$(tmux show -gqv "@_tmx_module_${m}_rcol")
+  done
+  out2+="#[fg=${prev_rcol},bg=default]${mprr}"
+  printf '%s' "$out2"
+}
+
 # Expand one zone ($1) into a format fragment, aligned per $2 (left|centre|right).
+# A run of adjacent modules connects powerline-style (rounded/slanted only); a
+# lone module, a tmux-cpu module, or a squared shape keeps its own full pill.
 expand_zone() {
-  local zone align out token seg
+  local zone align out token run=()
   zone="${1//|/ divider }"
   align="$2"
   out=""
+  flush() {
+    case ${#run[@]} in
+      0) ;;
+      1) out+="#{E:@themux_module_${run[0]}}" ;;
+      *) out+="$(powerline_run "${run[@]}")" ;;
+    esac
+    run=()
+  }
   for token in $zone; do
     case "$token" in
       windows)
+        flush
         out+="${windows_block//%ALIGN%/$align}"
         ;;
       divider)
+        flush
         out+="#{E:@_tmx_module_divider}"
         ;;
       *)
-        if [ "$(tmux show -gqv "@themux_${token}_expand")" = "yes" ]; then
-          tmux set -gF @_tmx_layout_tmp "#{E:@themux_module_${token}}"
-          seg=$(tmux show -gv @_tmx_layout_tmp)
-          out+="$(do_interpolation "$seg")"
+        if [ -z "$mpll" ] || [ "$(tmux show -gqv "@themux_${token}_expand")" = "yes" ]; then
+          # squared/unstyled shape, or a tmux-cpu module: a self-contained pill
+          # that also breaks any powerline run.
+          flush
+          if [ "$(tmux show -gqv "@themux_${token}_expand")" = "yes" ]; then
+            tmux set -gF @_tmx_layout_tmp "#{E:@themux_module_${token}}"
+            out+="$(do_interpolation "$(tmux show -gv @_tmx_layout_tmp)")"
+          else
+            out+="#{E:@themux_module_${token}}"
+          fi
         else
-          out+="#{E:@themux_module_${token}}"
+          run+=("$token")
         fi
         ;;
     esac
   done
+  flush
   printf '%s' "$out"
 }
 
