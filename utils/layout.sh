@@ -26,6 +26,11 @@ case "$mshape" in
   *)       mpll=""; mprr="" ;;
 esac
 
+# Emptying the divider ("") connects across "|" too: the divider token becomes
+# transparent so modules on either side join the same run, mirroring how an
+# empty window divider connects the window list.
+mdiv=$(tmux show -gqv @themux_module_divider)
+
 # tmux-cpu modules (cpu/ram) carry #{cpu_*}/#{ram_*} literals that only resolve
 # in status-left/right, so do_interpolation rewrites them to #(...) form. These
 # helpers apply it for those modules and pass everything else through unchanged.
@@ -57,35 +62,66 @@ full_pill() { # $1 module -> its own pill, caps included (inlined for tmux-cpu)
 # Connect a run of adjacent modules ($@) powerline-style: a left cap, each
 # module's bare core, a connector between neighbours (the left module's right
 # colour tapering into the right module's left background), then a right cap.
+#
+# A conditional module (@themux_<name>_when, e.g. gitmux/zoom) only joins while
+# its condition holds, at ANY position: the head cap reflows to whichever module
+# is first visible, the connector colour falls back to the previous visible
+# module, and a run whose every module is hidden collapses to nothing (no stray
+# cap left on the bar).
 powerline_run() {
-  local m out2="" first=1 prev_rcol="" cond seg
+  local m cond lcol lbg rcol core head conn seg
+  local out2="" prc=""          # prc: right colour of the last visible module
+  local shown="0" shown_fixed=1 # shown: anything visible yet? (fixed while constant)
   for m in "$@"; do
     cond=$(tmux show -gqv "@themux_${m}_when")
-    if [ "$first" = 1 ]; then
-      out2+="#[fg=$(mod_field "$m" lcol),bg=default]${mpll}$(mod_core "$m")"
-      first=0
-      prev_rcol=$(mod_field "$m" rcol)
-    elif [ -n "$cond" ]; then
-      # A conditional module (e.g. zoom) only joins the run while its condition
-      # holds; when hidden the run connects straight through, so the next
-      # connector's colour falls back to the previous visible module. The
-      # connector+core carry commas, so stash them in a helper and gate the ref.
-      seg="#[fg=${prev_rcol},bg=$(mod_field "$m" lbg)]${mprr}$(mod_core "$m")"
+    lcol=$(mod_field "$m" lcol); lbg=$(mod_field "$m" lbg); rcol=$(mod_field "$m" rcol)
+    core=$(mod_core "$m")
+    head="#[fg=${lcol},bg=default]${mpll}${core}"
+    conn="#[fg=${prc},bg=${lbg}]${mprr}${core}"
+
+    # Head cap for the first visible module, connector once something precedes
+    # it. While "shown" is still constant the choice is static; once a
+    # conditional makes it dynamic, both forms are stashed (they carry commas)
+    # and the draw-time #{?} picks one.
+    if [ "$shown_fixed" = 1 ]; then
+      [ "$shown" = 0 ] && seg="$head" || seg="$conn"
+    else
+      tmux set -g "@_tmx_plh_${m}" "$head"
+      tmux set -g "@_tmx_plc_${m}" "$conn"
+      seg="#{?${shown},#{E:@_tmx_plc_${m}},#{E:@_tmx_plh_${m}}}"
+    fi
+
+    if [ -n "$cond" ]; then
       tmux set -g "@_tmx_pl_${m}" "$seg"
       out2+="#{?${cond},#{E:@_tmx_pl_${m}},}"
-      prev_rcol="#{?${cond},$(mod_field "$m" rcol),${prev_rcol}}"
+      prc="#{?${cond},${rcol},${prc}}"
+      if [ "$shown_fixed" = 1 ] && [ "$shown" = 1 ]; then
+        :                               # an earlier module is always visible
+      elif [ "$shown_fixed" = 1 ]; then
+        shown="${cond}"; shown_fixed=0
+      else
+        shown="#{?${cond},1,${shown}}"
+      fi
     else
-      out2+="#[fg=${prev_rcol},bg=$(mod_field "$m" lbg)]${mprr}$(mod_core "$m")"
-      prev_rcol=$(mod_field "$m" rcol)
+      out2+="$seg"
+      prc="$rcol"; shown="1"; shown_fixed=1
     fi
   done
-  out2+="#[fg=${prev_rcol},bg=default]${mprr}"
+
+  # Right cap, only when the run has a visible module.
+  if [ "$shown_fixed" = 1 ]; then
+    [ "$shown" = 1 ] && out2+="#[fg=${prc},bg=default]${mprr}"
+  else
+    tmux set -g "@_tmx_plt_${m}" "#[fg=${prc},bg=default]${mprr}"
+    out2+="#{?${shown},#{E:@_tmx_plt_${m}},}"
+  fi
   printf '%s' "$out2"
 }
 
 # Expand one zone ($1) into a format fragment, aligned per $2 (left|centre|right).
-# Consecutive modules connect powerline-style (rounded/slanted); a lone module
-# ('|' divider) or a squared shape keeps its own full pill.
+# Consecutive modules connect powerline-style (rounded/slanted); a squared shape
+# keeps its own full pill. A non-empty '|' divider breaks the run and draws the
+# divider; an empty divider connects through it (see mdiv above).
 expand_zone() {
   local zone align out token run=()
   zone="${1//|/ divider }"
@@ -106,8 +142,11 @@ expand_zone() {
         out+="${windows_block//%ALIGN%/$align}"
         ;;
       divider)
-        flush
-        out+="#{E:@_tmx_module_divider}"
+        # An empty divider connects through "|": stay in the run, emit nothing.
+        if [ -n "$mdiv" ]; then
+          flush
+          out+="#{E:@_tmx_module_divider}"
+        fi
         ;;
       *)
         # squared/unstyled has no connector glyph, so each module is its own

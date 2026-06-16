@@ -43,3 +43,20 @@ tmux source "${script_dir}/../themux.conf"
 run_layout
 printf "\nsingle_status "
 tmux show -gv status
+
+# An empty module divider connects across "|" (rounded): the run joins into one
+# powerline run — bare cores, no divider segment between the modules.
+tmux set -g @themux_status_line_1 "session|application"
+tmux set -g @themux_module_shape "rounded"
+tmux set -g @themux_module_divider ""
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "\nconnect_uses_core "
+tmux show -gv 'status-format[0]' | grep -c '@_tmx_module_session_core' || true
+printf "connect_no_divider "
+tmux show -gv 'status-format[0]' | grep -c '@_tmx_module_divider' || true
+
+# Lazy render: a module never referenced in any status line is not rendered.
+printf "unused_not_rendered "
+tmux show -gqv @themux_module_weather | grep -c . || true

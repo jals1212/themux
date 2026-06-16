@@ -9,3 +9,7 @@ two_status 2
 two_line2_windows_right 1
 
 single_status on
+
+connect_uses_core 1
+connect_no_divider 0
+unused_not_rendered 0
