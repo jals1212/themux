@@ -1,5 +1,5 @@
 
-@themux_module_application #[fg=#eba0ac,bg=default]   #[fg=#eba0ac,bg=default]#{E:@themux_application_text}
+@themux_module_application #[fg=#eba0ac,bg=default]   #[fg=#eba0ac,bg=default]#{E:@themux_application_text}#[bg=default] 
 
 @themux_module_session #{?client_prefix,#{E:@themux_session_prefix_style},#{E:@themux_session_style}}#{E:@themux_session_icon}#{E:@themux_session_text} 
 
@@ -7,9 +7,9 @@
 
 @themux_module_zoom #{?window_zoomed_flag,#{E:@_tmx_module_zoom_seg},}
 
-window-status-format #[fg=#9399b2,bg=default] #I #{?#{E:@_tmx_w_text},#[fg=#9399b2,bg=default] #{E:@_tmx_w_text} ,}
+window-status-format #[fg=#9399b2,bg=default] #I #{?#{E:@_tmx_w_text},#[fg=#9399b2]#[bg=default]#{E:@_tmx_w_text} ,}
 
-window-status-current-format #[fg=#cba6f7,bg=default] #I #{?#{E:@_tmx_cw_text},#[fg=#cba6f7,bg=default] #{E:@_tmx_cw_text} ,}
+window-status-current-format #[fg=#cba6f7,bg=default] #I #{?#{E:@_tmx_cw_text},#[fg=#cba6f7]#[bg=default]#{E:@_tmx_cw_text} ,}
 
 window-status-style default
 

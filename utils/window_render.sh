@@ -65,14 +65,16 @@ render_side() {
     # number bg when it does not.
     lcap=$(cap "$lglyph" "$icap")
     seam=""
-    [ -n "$seam_glyph" ] && [ "$ibg" != "$tbg" ] && seam="#[fg=$icap,bg=$tbg]$seam_glyph"
-    nameblock="#{?${text},${seam}#[fg=$tfg,bg=$tbg] ${text} ,}"
+    # Styles inside the #{?name,...} conditional must not carry a literal comma
+    # (#{?} splits on commas), so set fg and bg as separate #[...] directives.
+    [ -n "$seam_glyph" ] && [ "$ibg" != "$tbg" ] && seam="#[fg=$icap]#[bg=$tbg]$seam_glyph"
+    nameblock="#{?${text},${seam}#[fg=$tfg]#[bg=$tbg]${text} ,}"
     rcap=$(cap "$rglyph" "#{?${text},${tcap},${icap}}")
     printf '%s%s%s%s%s' "$lcap" "$nblock" "$nameblock" "$flags" "$rcap"
   elif [ -n "$(tmux show -gqv "@_tmx_${p}_text")" ]; then
     # number on the right: name block first, then the number block.
     lcap=$(cap "$lglyph" "$tcap")
-    nameblock="#[fg=$tfg,bg=$tbg] ${text} "
+    nameblock="#[fg=$tfg,bg=$tbg]${text} "
     rcap=$(cap "$rglyph" "$icap")
     printf '%s%s%s%s%s' "$lcap" "$nameblock" "$flags" "$nblock" "$rcap"
   else

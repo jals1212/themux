@@ -65,7 +65,12 @@ cap() { # $1 glyph, $2 block bg
 }
 
 iblock="#[fg=$ifg,bg=$ibg] $icon "
-tblock="#[fg=$tfg,bg=$tbg]$text"
+# The text value carries its own leading space; add a trailing one so the block
+# is padded both sides (the icon block is) and the right cap — squared █, rounded
+# bulge, or the inward slant — has a cell to sit against. Re-assert the block bg
+# first, so a self-styled text (e.g. gitmux, which paints its own segments)
+# cannot leak its last colour into the pad and the cap.
+tblock="#[fg=$tfg,bg=$tbg]$text#[bg=$tbg] "
 
 # Notch seam: the icon block's right cap into the text bg, only when the blocks
 # differ (matching bg would be an invisible phantom cell); else the separator.
