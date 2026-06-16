@@ -68,9 +68,16 @@ iblock="#[fg=$ifg,bg=$ibg] $icon "
 # The text value carries its own leading space; add a trailing one so the block
 # is padded both sides (the icon block is) and the right cap — squared █, rounded
 # bulge, or the inward slant — has a cell to sit against. Re-assert the block bg
-# first, so a self-styled text (e.g. gitmux, which paints its own segments)
-# cannot leak its last colour into the pad and the cap.
-tblock="#[fg=$tfg,bg=$tbg]$text#[bg=$tbg] "
+# first, so a self-styled text cannot leak its last colour into the pad/cap.
+#
+# A self-styled text (e.g. gitmux) sets its own colours and resets to default
+# between segments; #[push-default] makes those resets fall back to the block's
+# style instead of the bare bar, so the whole pill keeps one background.
+text_open="" text_close="#[bg=$tbg]"
+if [ "$(tmux show -gqv "@themux_${name}_self_styled")" = yes ]; then
+  text_open="#[push-default]" text_close="#[pop-default]#[bg=$tbg]"
+fi
+tblock="#[fg=$tfg,bg=$tbg]${text_open}${text}${text_close} "
 
 # Notch seam: the icon block's right cap into the text bg, only when the blocks
 # differ (matching bg would be an invisible phantom cell); else the separator.
