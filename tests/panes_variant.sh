@@ -20,13 +20,12 @@ tmux source "${script_dir}/../themux.conf"
 print_option pane-border-status
 print_option pane-border-format
 
-# Rounded panes: cap glyphs in the pane-status separators
+# Rounded panes: the shape adds its cap glyphs to the pane-status format.
 tmux set -g @themux_pane_shape "rounded"
 tmux set -g @themux_pane_status "top"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
-print_option @themux_pane_left_border
-print_option @themux_pane_right_border
+print_option pane-border-format
 
 # Rounded capsule: a solid indicator and a naked text framed by the rounded caps
 # (the caps outline in the accent when the block background is transparent).

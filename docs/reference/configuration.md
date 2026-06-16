@@ -191,7 +191,6 @@ style reuses the same accents — no separate options.
 | `@themux_pane_number_position` | `left` | `left` \| `right`. |
 | `@themux_pane_border_style` | `fg=#{@thm_overlay_0}` | Inactive pane border style. |
 | `@themux_pane_active_border_style` | lavender (mauve when synced) | Active pane border style. |
-| `@themux_pane_left_border` / `_right_border` | per shape | Cap glyphs (set by the shape; override to customize). |
 
 ---
 

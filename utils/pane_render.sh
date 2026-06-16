@@ -22,8 +22,13 @@ indicator=$(tmux show -gqv @themux_pane_indicator)
 text_style=$(tmux show -gqv @themux_pane_text)
 notch=$(tmux show -gqv @themux_pane_notch)
 shape=$(tmux show -gqv @themux_pane_shape)
-left_glyph=$(tmux show -gqv @themux_pane_left_border)
-right_glyph=$(tmux show -gqv @themux_pane_right_border)
+
+# Shape glyphs (octal UTF-8). squared has none — the block padding is its edge.
+case "$shape" in
+  rounded) left_glyph=$(printf '\356\202\266'); right_glyph=$(printf '\356\202\264') ;;
+  slanted) left_glyph=$(printf '\356\202\272'); right_glyph=$(printf '\356\202\274') ;;
+  *)       left_glyph=""; right_glyph="" ;;
+esac
 
 # Colour roles. The accent brightens per pane at draw time (pane_color when
 # active, overlay_0 when not); surface, crust and the plain fg are static.

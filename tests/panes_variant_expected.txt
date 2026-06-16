@@ -7,9 +7,7 @@ pane-border-status top
 
 pane-border-format #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default] #{pane_index} #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default] #{b:pane_current_path} 
 
-@themux_pane_left_border 
-
-@themux_pane_right_border 
+pane-border-format #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default]#[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default] #{pane_index} #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default] #{b:pane_current_path} #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default]
 
 pane-border-format #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default]#[fg=#11111b,bg=#{?pane_active,#a6e3a1,#6c7086}] #{pane_index} #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default] #{b:pane_current_path} #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default]
 
