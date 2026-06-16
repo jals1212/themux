@@ -6,7 +6,7 @@
 # Colours are read raw and embedded as-is, and the option is stored with `tmux
 # set` (no -F): theme hex stays literal, while the draw-time refs — the module
 # text and the alert modules' #{l:...} threshold overrides — resolve per draw.
-# This is in shell (not status_module.conf's %if branches) because tmux's %if is
+# This is in shell (not module_block.conf's %if branches) because tmux's %if is
 # a parse-time test that does NOT see options set earlier in the same file.
 
 name="$1"
