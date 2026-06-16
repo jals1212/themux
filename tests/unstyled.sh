@@ -5,9 +5,9 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 source "${script_dir}/helpers.sh"
 
 # Tests that unstyled variants leave every item untouched
-tmux set -g @themux_module_variant "unstyled"
+tmux set -g @themux_module_shape "unstyled"
 tmux set -g @themux_window_variant "unstyled"
-tmux set -g @themux_pane_variant "unstyled"
+tmux set -g @themux_pane_shape "unstyled"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 

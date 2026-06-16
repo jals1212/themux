@@ -5,7 +5,8 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 source "${script_dir}/helpers.sh"
 
 # Tests the naked status module and window status style
-tmux set -g @themux_module_variant "naked"
+tmux set -g @themux_module_indicator "naked"
+tmux set -g @themux_module_text "naked"
 tmux set -g @themux_window_variant "naked"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
