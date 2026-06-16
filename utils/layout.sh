@@ -100,9 +100,11 @@ expand_zone() {
         out+="#{E:@_tmx_module_divider}"
         ;;
       *)
-        # squared/unstyled has no connector glyph, so each module is its own
-        # pill; rounded/slanted accumulate into a connected run.
-        if [ -z "$mpll" ]; then
+        # squared/unstyled has no connector glyph, and a conditional module
+        # (one with @themux_<name>_when, e.g. zoom) appears/disappears so it
+        # cannot sit inside a connected run — both keep their own full pill.
+        # rounded/slanted accumulate the rest into a connected run.
+        if [ -z "$mpll" ] || [ -n "$(tmux show -gqv "@themux_${token}_when")" ]; then
           flush
           out+="$(full_pill "$token")"
         else
