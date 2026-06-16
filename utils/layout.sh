@@ -26,30 +26,56 @@ case "$mshape" in
   *)       mpll=""; mprr="" ;;
 esac
 
+# tmux-cpu modules (cpu/ram) carry #{cpu_*}/#{ram_*} literals that only resolve
+# in status-left/right, so do_interpolation rewrites them to #(...) form. These
+# helpers apply it for those modules and pass everything else through unchanged.
+mod_field() { # $1 module, $2 edge option (lcol|rcol|lbg) -> a usable colour
+  if [ "$(tmux show -gqv "@themux_${1}_expand")" = "yes" ]; then
+    tmux set -gF @_tmx_layout_tmp "#{E:@_tmx_module_${1}_${2}}"
+    do_interpolation "$(tmux show -gv @_tmx_layout_tmp)"
+  else
+    tmux show -gqv "@_tmx_module_${1}_${2}"
+  fi
+}
+mod_core() { # $1 module -> its bare core (a ref normally; inlined for tmux-cpu)
+  if [ "$(tmux show -gqv "@themux_${1}_expand")" = "yes" ]; then
+    tmux set -gF @_tmx_layout_tmp "#{E:@_tmx_module_${1}_core}"
+    do_interpolation "$(tmux show -gv @_tmx_layout_tmp)"
+  else
+    printf '%s' "#{E:@_tmx_module_${1}_core}"
+  fi
+}
+full_pill() { # $1 module -> its own pill, caps included (inlined for tmux-cpu)
+  if [ "$(tmux show -gqv "@themux_${1}_expand")" = "yes" ]; then
+    tmux set -gF @_tmx_layout_tmp "#{E:@themux_module_${1}}"
+    do_interpolation "$(tmux show -gv @_tmx_layout_tmp)"
+  else
+    printf '%s' "#{E:@themux_module_${1}}"
+  fi
+}
+
 # Connect a run of adjacent modules ($@) powerline-style: a left cap, each
 # module's bare core, a connector between neighbours (the left module's right
 # colour tapering into the right module's left background), then a right cap.
 powerline_run() {
-  local m out2="" first=1 prev_rcol="" lcol lbg
+  local m out2="" first=1 prev_rcol=""
   for m in "$@"; do
-    lcol=$(tmux show -gqv "@_tmx_module_${m}_lcol")
-    lbg=$(tmux show -gqv "@_tmx_module_${m}_lbg")
     if [ "$first" = 1 ]; then
-      out2+="#[fg=${lcol},bg=default]${mpll}"
+      out2+="#[fg=$(mod_field "$m" lcol),bg=default]${mpll}"
       first=0
     else
-      out2+="#[fg=${prev_rcol},bg=${lbg}]${mprr}"
+      out2+="#[fg=${prev_rcol},bg=$(mod_field "$m" lbg)]${mprr}"
     fi
-    out2+="#{E:@_tmx_module_${m}_core}"
-    prev_rcol=$(tmux show -gqv "@_tmx_module_${m}_rcol")
+    out2+="$(mod_core "$m")"
+    prev_rcol=$(mod_field "$m" rcol)
   done
   out2+="#[fg=${prev_rcol},bg=default]${mprr}"
   printf '%s' "$out2"
 }
 
 # Expand one zone ($1) into a format fragment, aligned per $2 (left|centre|right).
-# A run of adjacent modules connects powerline-style (rounded/slanted only); a
-# lone module, a tmux-cpu module, or a squared shape keeps its own full pill.
+# Consecutive modules connect powerline-style (rounded/slanted); a lone module
+# ('|' divider) or a squared shape keeps its own full pill.
 expand_zone() {
   local zone align out token run=()
   zone="${1//|/ divider }"
@@ -58,7 +84,7 @@ expand_zone() {
   flush() {
     case ${#run[@]} in
       0) ;;
-      1) out+="#{E:@themux_module_${run[0]}}" ;;
+      1) out+="$(full_pill "${run[0]}")" ;;
       *) out+="$(powerline_run "${run[@]}")" ;;
     esac
     run=()
@@ -74,16 +100,11 @@ expand_zone() {
         out+="#{E:@_tmx_module_divider}"
         ;;
       *)
-        if [ -z "$mpll" ] || [ "$(tmux show -gqv "@themux_${token}_expand")" = "yes" ]; then
-          # squared/unstyled shape, or a tmux-cpu module: a self-contained pill
-          # that also breaks any powerline run.
+        # squared/unstyled has no connector glyph, so each module is its own
+        # pill; rounded/slanted accumulate into a connected run.
+        if [ -z "$mpll" ]; then
           flush
-          if [ "$(tmux show -gqv "@themux_${token}_expand")" = "yes" ]; then
-            tmux set -gF @_tmx_layout_tmp "#{E:@themux_module_${token}}"
-            out+="$(do_interpolation "$(tmux show -gv @_tmx_layout_tmp)")"
-          else
-            out+="#{E:@themux_module_${token}}"
-          fi
+          out+="$(full_pill "$token")"
         else
           run+=("$token")
         fi
