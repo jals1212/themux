@@ -121,6 +121,22 @@ set -g @themux_window_divider " "                     # window-status-separator
 set -g @themux_window_divider_color "#{@thm_overlay_0}"
 ```
 
+Emptying a divider connects the items into a continuous powerline ribbon:
+modules joined with `|` (or listed adjacent) merge into one run, and the window
+list becomes a single ribbon with the active window raised over its neighbours.
+
+> [!NOTE]
+> The connected window ribbon (rounded/slanted shapes) colours each seam from
+> its neighbour and caps the first window using the window index, both of which
+> assume **contiguous** window indices. Pair it with:
+>
+> ```sh
+> set -g renumber-windows on
+> ```
+>
+> so killing a middle window never leaves a gap. Without it, the seam and left
+> cap next to a gap render incorrectly until you renumber.
+
 ### Pane status (themux)
 
 Off by default. `@themux_pane_status` is the master switch for the styled label

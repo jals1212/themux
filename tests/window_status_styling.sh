@@ -7,6 +7,7 @@ function reset() {
   tmux set -gu @themux_window_indicator
   tmux set -gu @themux_window_name
   tmux set -gu @themux_window_notch
+  tmux set -gu @themux_window_divider
 }
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
@@ -47,3 +48,18 @@ tmux source "${script_dir}/../themux.conf"
 
 print_option window-status-format
 print_option window-status-current-format
+
+# Connected ribbon: an empty divider drops the inline caps (the separator joins
+# windows), the first window (window_index == base-index) opens with a left cap,
+# the last closes with a tail cap, and the separator is neighbour-aware so the
+# active window's caps overlay both sides.
+reset
+tmux set -g @themux_window_number_position "left"
+tmux set -g @themux_window_shape "rounded"
+tmux set -g @themux_window_divider ""
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+
+print_option window-status-format
+print_option window-status-current-format
+print_option window-status-separator

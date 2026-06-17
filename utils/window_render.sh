@@ -30,6 +30,20 @@ case "$shape" in
   slanted) lglyph=$(printf '\356\202\272'); rglyph=$(printf '\356\202\274') ;;
   *)       lglyph=""; rglyph="" ;;
 esac
+
+# Connected (powerline) ribbon: when the inter-window divider is emptied and the
+# shape has caps (rounded/slanted, left numbers), windows draw blocks only and a
+# neighbour-aware separator carries the seam. tmux exposes active_window_index
+# inside #{W:}, so each window knows whether its neighbour is the active one;
+# that lets the seam be bi-coloured (gapless) and the active window's caps overlay
+# both neighbours, so it reads as raised. Index math (window_index ± 1) assumes
+# contiguous indices — pair with `renumber-windows on` to avoid gaps.
+divider=$(tmux show -gqv @themux_window_divider)
+connected=0
+[ -z "$divider" ] && [ -n "$lglyph" ] && [ "$position" = left ] && connected=1
+# First window index (for the ribbon's opening left cap). With contiguous indices
+# it is base-index; baked as a literal so the draw-time test stays cheap.
+base=$(tmux show -gwv base-index 2>/dev/null); [ -n "$base" ] || base=0
 # The notch seam mirrors the shape's right cap; left layout only (like panes).
 seam_glyph=""
 [ "$notch" = on ] && case "$shape" in
@@ -38,14 +52,25 @@ seam_glyph=""
   squared) seam_glyph=$(printf '\342\226\210') ;;
 esac
 
-# A cap is the shape glyph over the bare bar in a block's colour (empty glyph ->
-# none). cap_col falls back to the accent when a block is transparent (naked).
-cap() { [ -n "$1" ] && printf '#[fg=%s,bg=default]%s' "$2" "$1"; }
+# A cap. With a glyph (rounded/slanted) it is the shape glyph over the bare bar
+# in the cap colour $2 ($2 falls back to the accent when a block is naked). With
+# no glyph (squared) it is an equal-width colour pad in the block bg $3, so a
+# squared window matches the other shapes' cap width — a default $3 (naked) keeps
+# the pad transparent.
+cap() {
+  if [ -n "$1" ]; then
+    printf '#[fg=%s,bg=default]%s' "$2" "$1"
+  else
+    printf '#[bg=%s] ' "$3"
+  fi
+}
 
-# Render one side. $1: var prefix (w|cw); $2: option infix (""|current_).
+# Render one side into option $3. $1: var prefix (w|cw); $2: option infix
+# (""|current_). Sets the option directly (no command substitution) so the cap
+# colours it stashes survive for the connected separator built afterwards.
 render_side() {
-  local p="$1" o="$2"
-  local accent surface ibg ifg tbg tfg icap tcap number text seam lcap rcap nblock nameblock
+  local p="$1" o="$2" opt="$3"
+  local accent surface ibg ifg tbg tfg icap tcap number text seam lcap rcap nblock nameblock out
   accent=$(expand "#{E:@themux_window_${o}number_color}")
   surface=$(expand "#{E:@themux_window_${o}text_color}")
   resolve_style "$indicator" "$accent" "$surface" "$crust" "$fg"
@@ -57,36 +82,70 @@ render_side() {
   number=$(expand "#{@themux_window_${o}number}")
   text="#{E:@_tmx_${p}_text}" # draw-time; "" when the name is hidden
 
+  # Stash cap colours per side for the connected separator (built after both).
+  if [ "$p" = w ]; then W_ICAP="$icap" W_TCAP="$tcap"; else CW_ICAP="$icap" CW_TCAP="$tcap"; fi
+
   nblock="#[fg=$ifg,bg=$ibg] $number "
 
   if [ "$position" = left ]; then
     # number block, then the name block (only when the window has a name). The
     # right cap follows the rightmost block: the name bg when a name shows, the
     # number bg when it does not.
-    lcap=$(cap "$lglyph" "$icap")
     seam=""
     # Styles inside the #{?name,...} conditional must not carry a literal comma
     # (#{?} splits on commas), so set fg and bg as separate #[...] directives.
     [ -n "$seam_glyph" ] && [ "$ibg" != "$tbg" ] && seam="#[fg=$icap]#[bg=$tbg]$seam_glyph"
     nameblock="#{?${text},${seam}#[fg=$tfg]#[bg=$tbg]${text} ,}"
-    rcap=$(cap "$rglyph" "#{?${text},${tcap},${icap}}")
-    printf '%s%s%s%s%s' "$lcap" "$nblock" "$nameblock" "$flags" "$rcap"
+    if [ "$connected" = 1 ]; then
+      # Inner seams come from the separator. The first window opens the ribbon
+      # with a left cap and the last closes it with a tail cap, both over the bar.
+      lcap="#{?#{==:#{window_index},${base}},#[fg=${icap}]#[bg=default]${lglyph},}"
+      rcap="#{?loop_last_flag,#[fg=#{?${text},${tcap},${icap}}]#[bg=default]${rglyph},}"
+      out="${lcap}${nblock}${nameblock}${flags}${rcap}"
+    else
+      lcap=$(cap "$lglyph" "$icap" "$ibg")
+      rcap=$(cap "$rglyph" "#{?${text},${tcap},${icap}}" "#{?${text},${tbg},${ibg}}")
+      out="${lcap}${nblock}${nameblock}${flags}${rcap}"
+    fi
   elif [ -n "$(tmux show -gqv "@_tmx_${p}_text")" ]; then
     # number on the right: name block first, then the number block.
-    lcap=$(cap "$lglyph" "$tcap")
+    lcap=$(cap "$lglyph" "$tcap" "$tbg")
     nameblock="#[fg=$tfg,bg=$tbg]${text} "
-    rcap=$(cap "$rglyph" "$icap")
-    printf '%s%s%s%s%s' "$lcap" "$nameblock" "$flags" "$nblock" "$rcap"
+    rcap=$(cap "$rglyph" "$icap" "$ibg")
+    out="${lcap}${nameblock}${flags}${nblock}${rcap}"
   else
     # number on the right, no name: just the number block.
-    lcap=$(cap "$lglyph" "$icap")
-    rcap=$(cap "$rglyph" "$icap")
-    printf '%s%s%s%s' "$lcap" "$nblock" "$flags" "$rcap"
+    lcap=$(cap "$lglyph" "$icap" "$ibg")
+    rcap=$(cap "$rglyph" "$icap" "$ibg")
+    out="${lcap}${nblock}${flags}${rcap}"
   fi
+  tmux set -g "$opt" "$out"
 }
 
-tmux set -g window-status-format "$(render_side w "")"
-tmux set -g window-status-current-format "$(render_side cw current_)"
+render_side w "" window-status-format
+render_side cw current_ window-status-current-format
+
+# Neighbour-aware separator for the connected ribbon. Drawn after each window in
+# that window's draw context, so window_active is the left window and a small
+# index check tells whether the right window is the active one:
+#   - left window active  -> its right cap (active colour) bulges over the next
+#   - right window active  -> the active's left cap bulges back over this window
+#   - neither             -> a plain inactive->inactive taper
+# All four colours are known (the off side is always the opposite active state,
+# and both states' colours are theme constants), so the seam is gapless and the
+# active window's caps overlay both neighbours (raised).
+if [ "$connected" = 1 ]; then
+  w_rcol="#{?#{E:@_tmx_w_text},${W_TCAP},${W_ICAP}}"   # this (inactive) window's right colour
+  cw_rcol="#{?#{E:@_tmx_cw_text},${CW_TCAP},${CW_ICAP}}" # the active window's right colour
+  nextact="#{==:#{active_window_index},#{e|+:#{window_index},1}}"
+  sep="#{?window_active,"
+  sep+="#[fg=${cw_rcol}]#[bg=${W_ICAP}]${rglyph},"
+  sep+="#{?${nextact},"
+  sep+="#[fg=${CW_ICAP}]#[bg=${w_rcol}]${lglyph},"
+  sep+="#[fg=${w_rcol}]#[bg=${W_ICAP}]${rglyph}"
+  sep+="}}"
+  tmux set -g window-status-separator "$sep"
+fi
 
 tmux set -gu @_tmx_render_tmp
 tmux set -ug @_tmx_w_flags
