@@ -8,24 +8,27 @@
 # text and the alert modules' #{l:...} threshold overrides — resolve per draw.
 # This is in shell (not module_block.conf's %if branches) because tmux's %if is
 # a parse-time test that does NOT see options set earlier in the same file.
+#
+# Every option is read in ONE tmux round-trip and every result written in one
+# more (chained `set`), so a used module costs ~3 forks instead of ~20 — this is
+# the bulk of themux load time. The read uses a US-delimited display: it keeps
+# empty values aligned by position and leaves the raw #{...} refs intact (unlike
+# a plain #{option}, display does not re-expand the value).
 
 name="$1"
 # shellcheck source=render_style.sh
 . "$(dirname "$0")/render_style.sh"
 
-shape=$(tmux show -gqv @themux_module_shape)
-[ "$shape" = unstyled ] && exit 0
-indicator=$(tmux show -gqv @themux_module_indicator)
-text_style=$(tmux show -gqv @themux_module_text)
-notch=$(tmux show -gqv @themux_module_notch)
-connect=$(tmux show -gqv @themux_module_connect_separator)
+US=$(printf '\037')
+IFS="$US" read -ra V < <(tmux display -p \
+"#{@themux_module_shape}${US}#{@themux_module_indicator}${US}#{@themux_module_text}${US}#{@themux_module_notch}${US}#{@themux_module_connect_separator}${US}#{@themux_${name}_color}${US}#{@thm_surface_0}${US}#{@thm_crust}${US}#{@thm_fg}${US}#{@themux_${name}_icon}${US}#{@themux_${name}_icon_bg}${US}#{@themux_${name}_icon_fg}${US}#{@themux_${name}_text_bg}${US}#{@themux_${name}_text_fg}${US}#{@themux_${name}_self_styled}${US}#{@themux_module_middle_separator}${US}#{@themux_${name}_when}${US}END")
+shape=${V[0]} indicator=${V[1]} text_style=${V[2]} notch=${V[3]} connect=${V[4]}
+accent=${V[5]} surface=${V[6]} crust=${V[7]} fg=${V[8]} icon=${V[9]}
+ibg=${V[10]} ifg=${V[11]} tbg=${V[12]} tfg=${V[13]} self_styled=${V[14]}
+midsep=${V[15]} when=${V[16]}
 
-# Colour roles (raw: hex for normal modules, a #{l:...} ref for alert modules).
-accent=$(tmux show -gqv "@themux_${name}_color")
-surface=$(tmux show -gqv @thm_surface_0)
-crust=$(tmux show -gqv @thm_crust)
-fg=$(tmux show -gqv @thm_fg)
-icon=$(tmux show -gqv "@themux_${name}_icon")
+[ "$shape" = unstyled ] && exit 0
+
 text="#{E:@themux_${name}_text}"
 
 # Shape glyphs (octal UTF-8). squared is a full block; rounded/slanted taper.
@@ -37,13 +40,9 @@ esac
 
 # Indicator/text colours: a module-set override wins (alert modules inject their
 # live threshold colours), else resolve from the style.
-ibg=$(tmux show -gqv "@themux_${name}_icon_bg")
-ifg=$(tmux show -gqv "@themux_${name}_icon_fg")
 resolve_style "$indicator" "$accent" "$surface" "$crust" "$fg"
 [ -z "$ibg" ] && ibg="$RS_BG"
 [ -z "$ifg" ] && ifg="$RS_FG"
-tbg=$(tmux show -gqv "@themux_${name}_text_bg")
-tfg=$(tmux show -gqv "@themux_${name}_text_fg")
 resolve_style "$text_style" "$accent" "$surface" "$crust" "$fg"
 [ -z "$tbg" ] && tbg="$RS_BG"
 [ -z "$tfg" ] && tfg="$RS_FG"
@@ -74,7 +73,7 @@ iblock="#[fg=$ifg,bg=$ibg] $icon "
 # between segments; #[push-default] makes those resets fall back to the block's
 # style instead of the bare bar, so the whole pill keeps one background.
 text_open="" text_close="#[bg=$tbg]"
-if [ "$(tmux show -gqv "@themux_${name}_self_styled")" = yes ]; then
+if [ "$self_styled" = yes ]; then
   text_open="#[push-default]" text_close="#[pop-default]#[bg=$tbg]"
 fi
 tblock="#[fg=$tfg,bg=$tbg]${text_open}${text}${text_close} "
@@ -86,7 +85,7 @@ if [ "$notch" = on ] && [ "$ibg" != "$tbg" ]; then
   [ "$ibg" = default ] && seamcol="$accent"
   seam="#[fg=$seamcol,bg=$tbg]$rglyph"
 else
-  seam=$(tmux show -gqv @themux_module_middle_separator)
+  seam="$midsep"
 fi
 
 # Expose the bare core (blocks + seam, no outer caps) and the edge cap colours
@@ -95,24 +94,24 @@ fi
 # module's left background. A transparent (naked) edge falls back to the accent.
 lcol="$ibg"; [ "$ibg" = default ] && lcol="$accent"
 rcol="$tbg"; [ "$tbg" = default ] && rcol="$accent"
-tmux set -g "@_tmx_module_${name}_core" "${iblock}${seam}${tblock}"
-tmux set -g "@_tmx_module_${name}_lcol" "$lcol"
-tmux set -g "@_tmx_module_${name}_rcol" "$rcol"
-tmux set -g "@_tmx_module_${name}_lbg" "$ibg"
-tmux set -g "@_tmx_module_${name}_rbg" "$tbg"
 
 out="$(cap "$lglyph" "$ibg")${iblock}${seam}${tblock}$(cap "$rglyph" "$tbg")"
 
 # A module may only appear under a condition (@themux_<name>_when, e.g. zoom).
 # The segment carries commas (styles), so stash it and gate via #{E:}; in a
 # naked text it also keeps its own leading divider so it can vanish without
-# leaving a dangling separator.
-when=$(tmux show -gqv "@themux_${name}_when")
+# leaving a dangling separator. All outputs go out in one chained `set`.
+set_args=(set -g "@_tmx_module_${name}_core" "${iblock}${seam}${tblock}"
+  ';' set -g "@_tmx_module_${name}_lcol" "$lcol"
+  ';' set -g "@_tmx_module_${name}_rcol" "$rcol"
+  ';' set -g "@_tmx_module_${name}_lbg" "$ibg"
+  ';' set -g "@_tmx_module_${name}_rbg" "$tbg")
 if [ -n "$when" ]; then
   prefix=""
   [ "$text_style" = naked ] && prefix="#{@_tmx_module_divider}"
-  tmux set -g "@_tmx_module_${name}_seg" "${prefix}${out}"
+  set_args+=(';' set -g "@_tmx_module_${name}_seg" "${prefix}${out}")
   out="#{?${when},#{E:@_tmx_module_${name}_seg},}"
 fi
-tmux set -g "@themux_module_${name}" "$out"
+set_args+=(';' set -g "@themux_module_${name}" "$out")
+tmux "${set_args[@]}"
 exit 0
