@@ -17,7 +17,7 @@ expand() {
   tmux show -gv @_tmx_render_tmp
 }
 
-position=$(tmux show -gqv @themux_pane_number_position)
+position=$(tmux show -gqv @themux_pane_indicator_position)
 indicator=$(tmux show -gqv @themux_pane_indicator)
 text_style=$(tmux show -gqv @themux_pane_text)
 notch=$(tmux show -gqv @themux_pane_notch)

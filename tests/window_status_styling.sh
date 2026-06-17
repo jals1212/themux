@@ -33,7 +33,7 @@ print_option window-status-current-format
 
 # Test the basic style with the number on the right
 reset
-tmux set -g @themux_window_number_position "right"
+tmux set -g @themux_window_indicator_position "right"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 
@@ -42,7 +42,7 @@ print_option window-status-current-format
 
 # Empty window text drops the text container: only the number block shows.
 reset
-tmux set -g @themux_window_number_position "left"
+tmux set -g @themux_window_indicator_position "left"
 tmux set -g @themux_window_text ""
 tmux set -g @themux_window_current_text ""
 tmux source "${script_dir}/../themux_options.conf"
@@ -56,7 +56,7 @@ print_option window-status-current-format
 # the last closes with a tail cap, and the separator is neighbour-aware so the
 # active window's caps overlay both sides.
 reset
-tmux set -g @themux_window_number_position "left"
+tmux set -g @themux_window_indicator_position "left"
 tmux set -g @themux_window_shape "rounded"
 tmux set -g @themux_window_divider ""
 tmux source "${script_dir}/../themux_options.conf"

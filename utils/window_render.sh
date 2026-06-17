@@ -15,7 +15,7 @@ expand() {
   tmux show -gv @_tmx_render_tmp
 }
 
-position=$(tmux show -gqv @themux_window_number_position)
+position=$(tmux show -gqv @themux_window_indicator_position)
 indicator=$(tmux show -gqv @themux_window_indicator)
 name_style=$(tmux show -gqv @themux_window_name)
 notch=$(tmux show -gqv @themux_window_notch)

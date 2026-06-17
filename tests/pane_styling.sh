@@ -12,11 +12,11 @@ tmux source "${script_dir}/../themux.conf"
 print_option pane-border-format
 
 # Switch the number position to the right
-tmux set -g @themux_pane_number_position "right"
+tmux set -g @themux_pane_indicator_position "right"
 tmux source "${script_dir}/../themux.conf"
 print_option pane-border-format
 
-tmux set -g @themux_pane_number_position "left" # reset
+tmux set -g @themux_pane_indicator_position "left" # reset
 
 # Whole label one colour: both blocks solid
 tmux set -g @themux_pane_indicator "solid"

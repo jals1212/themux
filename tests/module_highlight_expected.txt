@@ -8,3 +8,5 @@ cpu_off_calm 1
 session_both_prefix 1
 
 session_off_prefix 0
+
+position_swaps_edges Y

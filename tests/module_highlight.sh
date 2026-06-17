@@ -40,3 +40,17 @@ tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 printf "\nsession_off_prefix "
 core session | grep -c 'client_prefix' || true
+
+# Indicator position: right swaps the block order, so the left/right edge colours
+# swap too (icon-then-text -> text-then-icon).
+tmux set -g @themux_status_line_1 "host"
+tmux set -g @themux_module_indicator_position "left"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+ll=$(tmux show -gqv @_tmx_module_host_lbg) lr=$(tmux show -gqv @_tmx_module_host_rbg)
+tmux set -g @themux_module_indicator_position "right"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+rl=$(tmux show -gqv @_tmx_module_host_lbg) rr=$(tmux show -gqv @_tmx_module_host_rbg)
+printf "\nposition_swaps_edges "
+{ [ "$ll" = "$rr" ] && [ "$lr" = "$rl" ] && [ "$ll" != "$lr" ]; } && printf "Y" || printf "n"

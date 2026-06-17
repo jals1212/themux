@@ -150,7 +150,7 @@ set -g @themux_pane_indicator_highlight_color "#{@thm_green}"     # active numbe
 set -g @themux_pane_text_highlight_color "#{@thm_green}"          # active label accent
 set -g @themux_pane_indicator_highlight "both"                    # off | bg | fg | both
 set -g @themux_pane_default_text "#{b:pane_current_path}"         # label text
-set -g @themux_pane_number_position "left"                        # left | right
+set -g @themux_pane_indicator_position "left"                     # left | right
 ```
 
 ### Window names (themux)

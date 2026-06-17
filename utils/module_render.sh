@@ -21,11 +21,11 @@ name="$1"
 
 US=$(printf '\037')
 IFS="$US" read -ra V < <(tmux display -p \
-"#{@themux_module_shape}${US}#{@themux_module_indicator}${US}#{@themux_module_text}${US}#{@themux_module_notch}${US}#{@themux_module_connect_separator}${US}#{@themux_${name}_color}${US}#{@thm_surface_0}${US}#{@thm_crust}${US}#{@thm_fg}${US}#{@themux_${name}_icon}${US}#{@themux_${name}_icon_bg}${US}#{@themux_${name}_icon_fg}${US}#{@themux_${name}_text_bg}${US}#{@themux_${name}_text_fg}${US}#{@themux_${name}_self_styled}${US}#{@themux_module_middle_separator}${US}#{@themux_${name}_when}${US}#{@themux_module_indicator_highlight}${US}#{@themux_module_text_highlight}${US}END")
+"#{@themux_module_shape}${US}#{@themux_module_indicator}${US}#{@themux_module_text}${US}#{@themux_module_notch}${US}#{@themux_module_connect_separator}${US}#{@themux_${name}_color}${US}#{@thm_surface_0}${US}#{@thm_crust}${US}#{@thm_fg}${US}#{@themux_${name}_icon}${US}#{@themux_${name}_icon_bg}${US}#{@themux_${name}_icon_fg}${US}#{@themux_${name}_text_bg}${US}#{@themux_${name}_text_fg}${US}#{@themux_${name}_self_styled}${US}#{@themux_module_middle_separator}${US}#{@themux_${name}_when}${US}#{@themux_module_indicator_highlight}${US}#{@themux_module_text_highlight}${US}#{@themux_module_indicator_position}${US}END")
 shape=${V[0]} indicator=${V[1]} text_style=${V[2]} notch=${V[3]} connect=${V[4]}
 accent=${V[5]} surface=${V[6]} crust=${V[7]} fg=${V[8]} icon=${V[9]}
 ibg_ov=${V[10]} ifg_ov=${V[11]} tbg_ov=${V[12]} tfg_ov=${V[13]} self_styled=${V[14]}
-midsep=${V[15]} when=${V[16]} ind_hl=${V[17]} text_hl=${V[18]}
+midsep=${V[15]} when=${V[16]} ind_hl=${V[17]} text_hl=${V[18]} position=${V[19]}
 [ -n "$ind_hl" ] || ind_hl=both
 [ -n "$text_hl" ] || text_hl=both
 
@@ -83,12 +83,22 @@ if [ "$self_styled" = yes ]; then
 fi
 tblock="#[fg=$tfg,bg=$tbg]${text_open}${text}${text_close} "
 
-# Notch seam: the icon block's right cap into the text bg, only when the blocks
-# differ (matching bg would be an invisible phantom cell); else the separator.
-if [ "$notch" = on ] && [ "$ibg" != "$tbg" ]; then
-  seamcol="$ibg"
-  [ "$ibg" = default ] && seamcol="$accent"
-  seam="#[fg=$seamcol,bg=$tbg]$rglyph"
+# Block order follows the indicator position: icon-then-text (left, default) or
+# text-then-icon (right). first/second are the blocks in display order, fbg/sbg
+# their backgrounds; the rest of the assembly is order-agnostic.
+if [ "$position" = right ]; then
+  first="$tblock" fbg="$tbg" second="$iblock" sbg="$ibg"
+else
+  first="$iblock" fbg="$ibg" second="$tblock" sbg="$tbg"
+fi
+
+# Notch seam: the first block's right cap into the second block's bg, only when
+# the blocks differ (matching bg would be an invisible phantom cell); else the
+# plain separator.
+if [ "$notch" = on ] && [ "$fbg" != "$sbg" ]; then
+  seamcol="$fbg"
+  [ "$fbg" = default ] && seamcol="$accent"
+  seam="#[fg=$seamcol,bg=$sbg]$rglyph"
 else
   seam="$midsep"
 fi
@@ -97,20 +107,20 @@ fi
 # so utils/layout.sh can connect adjacent modules powerline-style: between two
 # modules the slant/bulge is one module's right colour tapering into the next
 # module's left background. A transparent (naked) edge falls back to the accent.
-lcol="$ibg"; [ "$ibg" = default ] && lcol="$accent"
-rcol="$tbg"; [ "$tbg" = default ] && rcol="$accent"
+lcol="$fbg"; [ "$fbg" = default ] && lcol="$accent"
+rcol="$sbg"; [ "$sbg" = default ] && rcol="$accent"
 
-out="$(cap "$lglyph" "$ibg")${iblock}${seam}${tblock}$(cap "$rglyph" "$tbg")"
+out="$(cap "$lglyph" "$fbg")${first}${seam}${second}$(cap "$rglyph" "$sbg")"
 
 # A module may only appear under a condition (@themux_<name>_when, e.g. zoom).
 # The segment carries commas (styles), so stash it and gate via #{E:}; in a
 # naked text it also keeps its own leading divider so it can vanish without
 # leaving a dangling separator. All outputs go out in one chained `set`.
-set_args=(set -g "@_tmx_module_${name}_core" "${iblock}${seam}${tblock}"
+set_args=(set -g "@_tmx_module_${name}_core" "${first}${seam}${second}"
   ';' set -g "@_tmx_module_${name}_lcol" "$lcol"
   ';' set -g "@_tmx_module_${name}_rcol" "$rcol"
-  ';' set -g "@_tmx_module_${name}_lbg" "$ibg"
-  ';' set -g "@_tmx_module_${name}_rbg" "$tbg")
+  ';' set -g "@_tmx_module_${name}_lbg" "$fbg"
+  ';' set -g "@_tmx_module_${name}_rbg" "$sbg")
 if [ -n "$when" ]; then
   prefix=""
   [ "$text_style" = naked ] && prefix="#{@_tmx_module_divider}"

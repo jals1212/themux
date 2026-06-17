@@ -38,10 +38,17 @@ set -g @themux_module_notch     "off"
 | `@themux_<item>_indicator` | `solid` · `soft` · `subtle` · `naked` | `solid` |
 | `@themux_<item>_text` † | `solid` · `soft` · `subtle` · `naked` | `soft` |
 | `@themux_<item>_notch` | `on` · `off` | `off` |
+| `@themux_<item>_indicator_position` | `left` · `right` | `left` |
+| `@themux_<item>_indicator_highlight` | `off` · `bg` · `fg` · `both` | `both` |
+| `@themux_<item>_text_highlight` | `off` · `bg` · `fg` · `both` | `both` |
 
 `<item>` is `module`, `window`, or `pane`. † On windows the text-block prop is
 `@themux_window_name`, because the name content already owns
 `@themux_window_text`.
+
+`*_indicator_highlight` / `*_text_highlight` choose which channels take the
+item's *highlight* color — for windows/panes that is the active item, for
+modules the alert state (cpu/ram threshold, session prefix).
 
 **shape** — `squared` / `rounded` / `slanted` are blocks with square / round /
 slant caps; `unstyled` makes themux leave the item alone so you build it by hand
@@ -139,7 +146,7 @@ set -g @themux_status_line_1 "session dot application / windows / date_time"
 | `@themux_window_background_color` | `#{@thm_surface_0}` | Shared neutral fill for `soft`/`subtle` blocks. |
 | `@themux_window_indicator_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — which channels of the number block switch to the active color. |
 | `@themux_window_text_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — same, for the name block. |
-| `@themux_window_number_position` | `left` | `left` \| `right` — number before or after the name. |
+| `@themux_window_indicator_position` | `left` | `left` \| `right` — number before or after the name. |
 
 #### Window name visibility
 
@@ -202,7 +209,7 @@ channels actually switch to the active color. This mirrors panes exactly.
 | `@themux_pane_text_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — same, for the label block. |
 | `@themux_pane_background_color` | `#{@thm_surface_0}` | Pane label neutral background. |
 | `@themux_pane_default_text` | `#{b:pane_current_path}` | Label text (any tmux format). |
-| `@themux_pane_number_position` | `left` | `left` \| `right`. |
+| `@themux_pane_indicator_position` | `left` | `left` \| `right`. |
 | `@themux_pane_border_style` | `fg=#{@thm_overlay_0}` | Inactive pane border style. |
 | `@themux_pane_active_border_style` | lavender (mauve when synced) | Active pane border style. |
 
