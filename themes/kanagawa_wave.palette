@@ -1,0 +1,34 @@
+
+# --> Kanagawa (Wave)
+# Semantic mapping from catppuccin's palette interface.
+# Palette source: rebelot/kanagawa.nvim (wave). First pass — pending semantic review.
+bg         #1f1f28
+fg         #dcd7ba
+
+# Colors
+rosewater  #c8c093
+flamingo   #d27e99
+pink       #d27e99
+mauve      #957fb8
+red        #e46876
+maroon     #c34043
+peach      #ffa066
+yellow     #e6c384
+green      #98bb6c
+teal       #7aa89f
+sky        #a3d4d5
+sapphire   #7fb4ca
+blue       #7e9cd8
+lavender   #9cabca
+
+# Surfaces and overlays
+subtext_1  #938aa9
+subtext_0  #c8c093
+overlay_2  #717c7c
+overlay_1  #727169
+overlay_0  #54546d
+surface_2  #54546d
+surface_1  #363646
+surface_0  #2a2a37
+mantle     #1a1a22
+crust      #16161d

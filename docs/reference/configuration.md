@@ -17,7 +17,7 @@ The three UI items — **status modules**, **windows**, **panes** — are each a
 
 | Option | Default | Effect |
 | --- | --- | --- |
-| `@themux_theme` | `catppuccin_mocha` | Palette: `catppuccin_{latte,frappe,macchiato,mocha}` or `kanagawa_{wave,dragon,lotus}`. Loads `themes/<theme>_tmux.conf`, which exposes the `@thm_*` colors. |
+| `@themux_theme` | `catppuccin_mocha` | Palette: `catppuccin_{latte,frappe,macchiato,mocha}` or `kanagawa_{wave,dragon,lotus}`. Loads `themes/<theme>.palette` (or a legacy `_tmux.conf`), which exposes the `@thm_*` colors. |
 
 ### Component props — per item
 

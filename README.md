@@ -48,7 +48,8 @@
 
 This fork is a multi-theme manager: besides the catppuccin flavors, other
 themes can be selected with `@themux_theme`, which loads
-`themes/<theme>_tmux.conf`:
+`themes/<theme>.palette` (a plain `name hex` palette — a legacy
+`themes/<theme>_tmux.conf` with `set -ogq @thm_*` still works for custom themes):
 
 ```sh
 # Kanagawa (wave, dragon or lotus)

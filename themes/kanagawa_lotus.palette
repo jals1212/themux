@@ -1,0 +1,34 @@
+
+# --> Kanagawa (Lotus) — light theme
+# Semantic mapping from catppuccin's palette interface.
+# Palette source: rebelot/kanagawa.nvim (lotus). First pass — pending semantic review.
+bg         #f2ecbc
+fg         #545464
+
+# Colors
+rosewater  #d9a594
+flamingo   #d9a594
+pink       #b35b79
+mauve      #624c83
+red        #c84053
+maroon     #d7474b
+peach      #cc6d00
+yellow     #de9800
+green      #6f894e
+teal       #597b75
+sky        #4e8ca2
+sapphire   #6693bf
+blue       #4d699b
+lavender   #766b90
+
+# Surfaces and overlays
+subtext_1  #716e61
+subtext_0  #43436c
+overlay_2  #8a8980
+overlay_1  #a09cac
+overlay_0  #c9cbd1
+surface_2  #b5cbd2
+surface_1  #c7d7e0
+surface_0  #d5cea3
+mantle     #e5ddb0
+crust      #dcd5ac
