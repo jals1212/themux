@@ -8,6 +8,8 @@ function reset() {
   tmux set -gu @themux_window_name
   tmux set -gu @themux_window_notch
   tmux set -gu @themux_window_divider
+  tmux set -gu @themux_window_indicator_highlight
+  tmux set -gu @themux_window_text_highlight
 }
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
@@ -63,3 +65,13 @@ tmux source "${script_dir}/../themux.conf"
 print_option window-status-format
 print_option window-status-current-format
 print_option window-status-separator
+
+# Active highlight: indicator_highlight=off freezes the active number block at
+# the inactive (base) colour; the name block still takes its highlight colour.
+reset
+tmux set -g @themux_window_shape "rounded"
+tmux set -g @themux_window_indicator_highlight "off"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+
+print_option window-status-current-format

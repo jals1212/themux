@@ -145,10 +145,12 @@ picks the shape, never turns it on). With `off`, themux leaves pane borders at
 tmux's defaults.
 
 ```sh
-set -g @themux_pane_status "top"                          # off | top | bottom
-set -g @themux_pane_color "#{@thm_green}"                 # active accent
-set -g @themux_pane_default_text "#{b:pane_current_path}" # label text
-set -g @themux_pane_number_position "left"                # left | right
+set -g @themux_pane_status "top"                                  # off | top | bottom
+set -g @themux_pane_indicator_highlight_color "#{@thm_green}"     # active number accent
+set -g @themux_pane_text_highlight_color "#{@thm_green}"          # active label accent
+set -g @themux_pane_indicator_highlight "both"                    # off | bg | fg | both
+set -g @themux_pane_default_text "#{b:pane_current_path}"         # label text
+set -g @themux_pane_number_position "left"                        # left | right
 ```
 
 ### Window names (themux)

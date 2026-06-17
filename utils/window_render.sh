@@ -20,6 +20,11 @@ indicator=$(tmux show -gqv @themux_window_indicator)
 name_style=$(tmux show -gqv @themux_window_name)
 notch=$(tmux show -gqv @themux_window_notch)
 shape=$(tmux show -gqv @themux_window_shape)
+# Active highlight per part/channel (off|bg|fg|both, default both): which of the
+# active window's colours actually switch; the rest stay frozen at the inactive
+# colour. Applied only to the active side (cw), mixing active vs inactive below.
+ind_hl=$(tmux show -gqv @themux_window_indicator_highlight); [ -n "$ind_hl" ] || ind_hl=both
+txt_hl=$(tmux show -gqv @themux_window_text_highlight); [ -n "$txt_hl" ] || txt_hl=both
 crust=$(expand "#{@thm_crust}")
 fg=$(expand "#{@thm_fg}")
 flags=$(expand "#{@_tmx_w_flags}")
@@ -71,19 +76,46 @@ cap() {
 render_side() {
   local p="$1" o="$2" opt="$3"
   local accent surface ibg ifg tbg tfg icap tcap number text seam lcap rcap nblock nameblock out
-  accent=$(expand "#{E:@themux_window_${o}number_color}")
-  surface=$(expand "#{E:@themux_window_${o}text_color}")
-  resolve_style "$indicator" "$accent" "$surface" "$crust" "$fg"
+  # Per-part accents over a shared surface (mirrors pane_render): the number and
+  # name each resolve from their own accent; the inactive side uses the base
+  # colours, the active side the _highlight_color variants (the toggles below
+  # then freeze the channels they exclude).
+  local ind_acc txt_acc
+  if [ "$p" = w ]; then
+    ind_acc=$(expand "#{E:@themux_window_indicator_color}")
+    txt_acc=$(expand "#{E:@themux_window_text_color}")
+  else
+    ind_acc=$(expand "#{E:@themux_window_indicator_highlight_color}")
+    txt_acc=$(expand "#{E:@themux_window_text_highlight_color}")
+  fi
+  surface=$(expand "#{E:@themux_window_background_color}")
+  resolve_style "$indicator" "$ind_acc" "$surface" "$crust" "$fg"
   ibg="$RS_BG" ifg="$RS_FG"
-  resolve_style "$name_style" "$accent" "$surface" "$crust" "$fg"
+  resolve_style "$name_style" "$txt_acc" "$surface" "$crust" "$fg"
   tbg="$RS_BG" tfg="$RS_FG"
   icap="$ibg"; [ "$ibg" = default ] && icap="$accent"
   tcap="$tbg"; [ "$tbg" = default ] && tcap="$accent"
   number=$(expand "#{@themux_window_${o}number}")
   text="#{E:@_tmx_${p}_text}" # draw-time; "" when the name is hidden
 
-  # Stash cap colours per side for the connected separator (built after both).
-  if [ "$p" = w ]; then W_ICAP="$icap" W_TCAP="$tcap"; else CW_ICAP="$icap" CW_TCAP="$tcap"; fi
+  # The inactive side is the baseline; the active side freezes the channels the
+  # highlight toggles exclude back to it (icap/tcap track the bg channel, since
+  # they are the block colour). Colours are stashed for the connected separator.
+  if [ "$p" = w ]; then
+    W_IBG="$ibg" W_IFG="$ifg" W_TBG="$tbg" W_TFG="$tfg" W_ICAP="$icap" W_TCAP="$tcap"
+  else
+    case "$ind_hl" in
+      bg)  ifg="$W_IFG" ;;
+      fg)  ibg="$W_IBG" icap="$W_ICAP" ;;
+      off) ibg="$W_IBG" ifg="$W_IFG" icap="$W_ICAP" ;;
+    esac
+    case "$txt_hl" in
+      bg)  tfg="$W_TFG" ;;
+      fg)  tbg="$W_TBG" tcap="$W_TCAP" ;;
+      off) tbg="$W_TBG" tfg="$W_TFG" tcap="$W_TCAP" ;;
+    esac
+    CW_ICAP="$icap" CW_TCAP="$tcap"
+  fi
 
   nblock="#[fg=$ifg,bg=$ibg] $number "
 

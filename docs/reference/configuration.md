@@ -65,8 +65,11 @@ A `naked` block keeps the shape's caps as an outline, so a `rounded` indicator +
 indicator color tapering into the text background) instead of a flat boundary;
 it collapses to nothing when the two blocks share a background.
 
-For windows and panes, only the **active** item keeps the bright accent;
-inactive ones dim (windows → `@themux_window_number_color`, panes → `overlay_0`).
+For windows and panes, each part has a base and a highlight (active) color, and
+`@themux_<item>_<part>_highlight` (`off`\|`bg`\|`fg`\|`both`) picks which channels
+switch on the active item (windows → `@themux_window_indicator_color` /
+`@themux_window_indicator_highlight_color`, panes → `@themux_pane_indicator_color`
+/ `@themux_pane_indicator_highlight_color`, and the matching `_text_` pair).
 
 > **Migration** from the old `@themux_<item>_variant` / `_fill` options (both
 > removed): map the old fill to the new pair — `icon` → indicator `solid` + text
@@ -129,10 +132,13 @@ set -g @themux_status_line_1 "session dot application / windows / date_time"
 | `@themux_window_number` | `#I` | Inactive window index. |
 | `@themux_window_current_text` | `" #W"` | Active window name. |
 | `@themux_window_current_number` | `#I` | Active window index. |
-| `@themux_window_number_color` | `#{@thm_overlay_2}` | Inactive number/accent color. |
-| `@themux_window_text_color` | `#{@thm_surface_0}` | Inactive name-block background. |
-| `@themux_window_current_number_color` | `#{@thm_mauve}` | Active number/accent color. |
-| `@themux_window_current_text_color` | `#{@thm_surface_1}` | Active name-block background. |
+| `@themux_window_indicator_color` | `#{@thm_overlay_2}` | Base (inactive) number accent. |
+| `@themux_window_indicator_highlight_color` | `#{@thm_mauve}` | Active number accent. |
+| `@themux_window_text_color` | `#{@thm_overlay_2}` | Base (inactive) name accent. |
+| `@themux_window_text_highlight_color` | `#{@thm_mauve}` | Active name accent. |
+| `@themux_window_background_color` | `#{@thm_surface_0}` | Shared neutral fill for `soft`/`subtle` blocks. |
+| `@themux_window_indicator_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — which channels of the number block switch to the active color. |
+| `@themux_window_text_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — same, for the name block. |
 | `@themux_window_number_position` | `left` | `left` \| `right` — number before or after the name. |
 
 #### Window name visibility
@@ -172,11 +178,14 @@ active window.
 #### Window colors
 
 The window caps follow the shape (`@themux_window_shape`); they are drawn from
-the block colors, so there are no separate cap-glyph options. The number and
-name blocks take their accent from `@themux_window_number_color` (inactive) and
-`@themux_window_current_number_color` (active), and their grey from
-`@themux_window_text_color` / `@themux_window_current_text_color`; a `naked`
-style reuses the same accents — no separate options.
+the block colors, so there are no separate cap-glyph options. Each part has its
+own accent with a base and a highlight (active) variant: the number block uses
+`@themux_window_indicator_color` / `@themux_window_indicator_highlight_color`,
+the name block `@themux_window_text_color` / `@themux_window_text_highlight_color`.
+`soft`/`subtle` blocks fill from the shared `@themux_window_background_color`
+instead of the accent. `@themux_window_indicator_highlight` and
+`@themux_window_text_highlight` (`off` \| `bg` \| `fg` \| `both`) pick which
+channels actually switch to the active color. This mirrors panes exactly.
 
 ---
 
@@ -185,7 +194,12 @@ style reuses the same accents — no separate options.
 | Option | Default | Effect |
 | --- | --- | --- |
 | `@themux_pane_status` | `off` | `off` \| `top` \| `bottom` — shows a styled label on each pane border. |
-| `@themux_pane_color` | `#{@thm_green}` | Active pane accent (inactive dim to `overlay_0`). |
+| `@themux_pane_indicator_color` | `#{@thm_overlay_0}` | Inactive pane number/accent color. |
+| `@themux_pane_indicator_highlight_color` | `#{@thm_green}` | Active pane number/accent color. |
+| `@themux_pane_text_color` | `#{@thm_overlay_0}` | Inactive pane label accent. |
+| `@themux_pane_text_highlight_color` | `#{@thm_green}` | Active pane label accent. |
+| `@themux_pane_indicator_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — which channels of the number block switch on the active pane. |
+| `@themux_pane_text_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — same, for the label block. |
 | `@themux_pane_background_color` | `#{@thm_surface_0}` | Pane label neutral background. |
 | `@themux_pane_default_text` | `#{b:pane_current_path}` | Label text (any tmux format). |
 | `@themux_pane_number_position` | `left` | `left` \| `right`. |

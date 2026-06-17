@@ -21,11 +21,13 @@ name="$1"
 
 US=$(printf '\037')
 IFS="$US" read -ra V < <(tmux display -p \
-"#{@themux_module_shape}${US}#{@themux_module_indicator}${US}#{@themux_module_text}${US}#{@themux_module_notch}${US}#{@themux_module_connect_separator}${US}#{@themux_${name}_color}${US}#{@thm_surface_0}${US}#{@thm_crust}${US}#{@thm_fg}${US}#{@themux_${name}_icon}${US}#{@themux_${name}_icon_bg}${US}#{@themux_${name}_icon_fg}${US}#{@themux_${name}_text_bg}${US}#{@themux_${name}_text_fg}${US}#{@themux_${name}_self_styled}${US}#{@themux_module_middle_separator}${US}#{@themux_${name}_when}${US}END")
+"#{@themux_module_shape}${US}#{@themux_module_indicator}${US}#{@themux_module_text}${US}#{@themux_module_notch}${US}#{@themux_module_connect_separator}${US}#{@themux_${name}_color}${US}#{@thm_surface_0}${US}#{@thm_crust}${US}#{@thm_fg}${US}#{@themux_${name}_icon}${US}#{@themux_${name}_icon_bg}${US}#{@themux_${name}_icon_fg}${US}#{@themux_${name}_text_bg}${US}#{@themux_${name}_text_fg}${US}#{@themux_${name}_self_styled}${US}#{@themux_module_middle_separator}${US}#{@themux_${name}_when}${US}#{@themux_module_indicator_highlight}${US}#{@themux_module_text_highlight}${US}END")
 shape=${V[0]} indicator=${V[1]} text_style=${V[2]} notch=${V[3]} connect=${V[4]}
 accent=${V[5]} surface=${V[6]} crust=${V[7]} fg=${V[8]} icon=${V[9]}
-ibg=${V[10]} ifg=${V[11]} tbg=${V[12]} tfg=${V[13]} self_styled=${V[14]}
-midsep=${V[15]} when=${V[16]}
+ibg_ov=${V[10]} ifg_ov=${V[11]} tbg_ov=${V[12]} tfg_ov=${V[13]} self_styled=${V[14]}
+midsep=${V[15]} when=${V[16]} ind_hl=${V[17]} text_hl=${V[18]}
+[ -n "$ind_hl" ] || ind_hl=both
+[ -n "$text_hl" ] || text_hl=both
 
 [ "$shape" = unstyled ] && exit 0
 
@@ -38,14 +40,17 @@ case "$shape" in
   *)       lglyph=$(printf '\342\226\210'); rglyph=$(printf '\342\226\210') ;;
 esac
 
-# Indicator/text colours: a module-set override wins (alert modules inject their
-# live threshold colours), else resolve from the style.
+# Indicator/text colours: a module-set override (alert modules inject their live
+# threshold colours) wins on the channels the highlight toggle includes, else the
+# style's resolved colour. Default both -> any override applies (as before).
 resolve_style "$indicator" "$accent" "$surface" "$crust" "$fg"
-[ -z "$ibg" ] && ibg="$RS_BG"
-[ -z "$ifg" ] && ifg="$RS_FG"
+ibg="$RS_BG" ifg="$RS_FG"
+case "$ind_hl" in bg|both) [ -n "$ibg_ov" ] && ibg="$ibg_ov" ;; esac
+case "$ind_hl" in fg|both) [ -n "$ifg_ov" ] && ifg="$ifg_ov" ;; esac
 resolve_style "$text_style" "$accent" "$surface" "$crust" "$fg"
-[ -z "$tbg" ] && tbg="$RS_BG"
-[ -z "$tfg" ] && tfg="$RS_FG"
+tbg="$RS_BG" tfg="$RS_FG"
+case "$text_hl" in bg|both) [ -n "$tbg_ov" ] && tbg="$tbg_ov" ;; esac
+case "$text_hl" in fg|both) [ -n "$tfg_ov" ] && tfg="$tfg_ov" ;; esac
 
 # Caps: the shape glyph in the adjacent block's colour. A transparent block
 # (naked) takes the accent as an outline; squared has no outline (a solid █ is
