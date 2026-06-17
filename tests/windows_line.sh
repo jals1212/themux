@@ -60,3 +60,18 @@ tmux show -gv 'status-format[0]' | grep -c '@_tmx_module_divider' || true
 # Lazy render: a module never referenced in any status line is not rendered.
 printf "unused_not_rendered "
 tmux show -gqv @themux_module_weather | grep -c . || true
+
+# Powerline direction follows the zone: a left run taper L->R (one mpll glyph,
+# the head cap), a right rounded run mirrors so the inner seam also bulges left
+# (two mpll glyphs: head + seam).
+tmux set -g @themux_status_line_1 "session host / / user uptime"
+tmux set -g @themux_module_shape "rounded"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+mpll=$(printf '\356\202\266')
+fmt=$(tmux show -gv 'status-format[0]')
+printf "\nleft_run_mpll "
+printf '%s' "$fmt" | sed -E 's/.*nolist align=left\]//; s/#\[nolist align=centre.*//' | grep -o "$mpll" | wc -l | tr -d ' '
+printf "right_run_mpll "
+printf '%s' "$fmt" | sed 's/.*nolist align=right]//' | grep -o "$mpll" | wc -l | tr -d ' '

@@ -13,3 +13,6 @@ single_status on
 connect_uses_core 1
 connect_no_divider 0
 unused_not_rendered 0
+
+left_run_mpll 1
+right_run_mpll 2

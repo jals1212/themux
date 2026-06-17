@@ -59,9 +59,12 @@ full_pill() { # $1 module -> its own pill, caps included (inlined for tmux-cpu)
   fi
 }
 
-# Connect a run of adjacent modules ($@) powerline-style: a left cap, each
-# module's bare core, a connector between neighbours (the left module's right
-# colour tapering into the right module's left background), then a right cap.
+# Connect a run of adjacent modules ($@, $1 = zone alignment) powerline-style: a
+# left cap, each module's bare core, a connector between neighbours, then a right
+# cap. The flow follows the zone: left/centre runs taper left-to-right (the left
+# module curves into the right); a right-aligned rounded run mirrors it so the
+# seam bulges the other way (the right module curves into the left). Only the
+# inner connector changes — the outer caps are a pill in either direction.
 #
 # A conditional module (@themux_<name>_when, e.g. gitmux/zoom) only joins while
 # its condition holds, at ANY position: the head cap reflows to whichever module
@@ -69,15 +72,24 @@ full_pill() { # $1 module -> its own pill, caps included (inlined for tmux-cpu)
 # module, and a run whose every module is hidden collapses to nothing (no stray
 # cap left on the bar).
 powerline_run() {
-  local m cond lcol lbg rcol core head conn seg
-  local out2="" prc=""          # prc: right colour of the last visible module
+  local dir="$1"; shift
+  local mirror=0
+  [ "$mshape" = rounded ] && [ "$dir" = right ] && mirror=1
+
+  local m cond lcol lbg rcol rbg core head conn seg
+  local out2="" prc="" prb=""   # prev visible module's right colour / right bg
   local shown="0" shown_fixed=1 # shown: anything visible yet? (fixed while constant)
   for m in "$@"; do
     cond=$(tmux show -gqv "@themux_${m}_when")
-    lcol=$(mod_field "$m" lcol); lbg=$(mod_field "$m" lbg); rcol=$(mod_field "$m" rcol)
+    lcol=$(mod_field "$m" lcol); lbg=$(mod_field "$m" lbg)
+    rcol=$(mod_field "$m" rcol); rbg=$(mod_field "$m" rbg)
     core=$(mod_core "$m")
     head="#[fg=${lcol},bg=default]${mpll}${core}"
-    conn="#[fg=${prc},bg=${lbg}]${mprr}${core}"
+    if [ "$mirror" = 1 ]; then
+      conn="#[fg=${lcol},bg=${prb}]${mpll}${core}"
+    else
+      conn="#[fg=${prc},bg=${lbg}]${mprr}${core}"
+    fi
 
     # Head cap for the first visible module, connector once something precedes
     # it. While "shown" is still constant the choice is static; once a
@@ -95,6 +107,7 @@ powerline_run() {
       tmux set -g "@_tmx_pl_${m}" "$seg"
       out2+="#{?${cond},#{E:@_tmx_pl_${m}},}"
       prc="#{?${cond},${rcol},${prc}}"
+      prb="#{?${cond},${rbg},${prb}}"
       if [ "$shown_fixed" = 1 ] && [ "$shown" = 1 ]; then
         :                               # an earlier module is always visible
       elif [ "$shown_fixed" = 1 ]; then
@@ -104,11 +117,11 @@ powerline_run() {
       fi
     else
       out2+="$seg"
-      prc="$rcol"; shown="1"; shown_fixed=1
+      prc="$rcol"; prb="$rbg"; shown="1"; shown_fixed=1
     fi
   done
 
-  # Right cap, only when the run has a visible module.
+  # Right cap, only when the run has a visible module (a pill close either way).
   if [ "$shown_fixed" = 1 ]; then
     [ "$shown" = 1 ] && out2+="#[fg=${prc},bg=default]${mprr}"
   else
@@ -131,7 +144,7 @@ expand_zone() {
     case ${#run[@]} in
       0) ;;
       1) out+="$(full_pill "${run[0]}")" ;;
-      *) out+="$(powerline_run "${run[@]}")" ;;
+      *) out+="$(powerline_run "$align" "${run[@]}")" ;;
     esac
     run=()
   }
