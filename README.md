@@ -141,12 +141,16 @@ list becomes a single ribbon with the active window raised over its neighbours.
 
 ### Pane status
 Off by default. `@themux_pane_status` is the master switch for the styled label
-on each pane border — set it to `top` or `bottom` to enable (the variant only
-picks the shape, never turns it on). With `off`, themux leaves pane borders at
-tmux's defaults.
+on each pane border — set it to `top` or `bottom` to enable (setting
+`@themux_pane_shape` only picks the look, never turns it on). With `off` themux
+draws no pane label, but its reset still clears `pane-border-style` /
+`pane-active-border-style` to tmux's defaults on every load — so set your own
+pane border styles *after* `themux.tmux` if you want them (the
+`@themux_pane_border_style` options only apply while the label is enabled).
 
 ```sh
 set -g @themux_pane_status "top"                                  # off | top | bottom
+set -g @themux_pane_shape "rounded"                              # squared | rounded | slanted | unstyled
 set -g @themux_pane_indicator_highlight_color "#{@thm_green}"     # active number accent
 set -g @themux_pane_text_highlight_color "#{@thm_green}"          # active label accent
 set -g @themux_pane_indicator_highlight "both"                    # off | bg | fg | both
@@ -205,9 +209,9 @@ is zoomed, in both pill and naked styles.
 
 ### Clean reloads
 themux resets its own derived state automatically when it loads: on a running
-server `themux.tmux` clears the palette, internals, the variant-set separators
+server `themux.tmux` clears the palette, internals, the derived separators
 and the status/window/pane formats *before* rebuilding — but never your
-`@themux_*` config. So switching theme, variant or style is just a config
+`@themux_*` config. So switching theme or style is just a config
 reload; no `tmux kill-server`, no reset file to source.
 
 ```sh
