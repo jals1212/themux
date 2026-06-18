@@ -62,16 +62,16 @@ set -g @themux_date_time_icon ""
 
 ### Notes for TPM users
 
-Make sure you load the catppuccin theme prior to setting the status-left and/or
-status-* options. This ensures the catppuccin options (such as colors and
+Make sure you load themux prior to setting the status-left and/or
+status-* options. This ensures the themux options (such as colors and
 status modules) are defined so they can then be used.
 
 After status-left and/or status-right have been set, make sure to run TPM to load
 the modules. This runs any plugins that may replace text in the status line.
 
 ```bash
-# load catppuccin theme ...
-run '~/.config/tmux/plugins/tmux/themux.tmux' # or where this file is located on your machine
+# load themux ...
+run '~/.config/tmux/plugins/themux/themux.tmux' # or where this file is located on your machine
 
 # ... and then set status-left & status-right ...
 set -g status-left "#{E:@themux_module_session}"
@@ -94,7 +94,7 @@ run '~/.tmux/plugins/tpm/tpm'
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
+run ~/.config/tmux/plugins/themux/themux.tmux
 
 set -agF status-right "#{E:@themux_module_battery}"
 
@@ -111,7 +111,7 @@ run '~/.tmux/plugins/tpm/tpm'
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
+run ~/.config/tmux/plugins/themux/themux.tmux
 
 set -agF status-right "#{E:@themux_module_cpu}"
 
@@ -128,7 +128,7 @@ run '~/.tmux/plugins/tpm/tpm'
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
+run ~/.config/tmux/plugins/themux/themux.tmux
 
 set -agF status-right "#{E:@themux_module_ram}"
 
@@ -147,7 +147,7 @@ run '~/.tmux/plugins/tpm/tpm'
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
+run ~/.config/tmux/plugins/themux/themux.tmux
 
 set -agF status-right "#{E:@themux_module_weather}"
 
@@ -164,7 +164,7 @@ run '~/.tmux/plugins/tpm/tpm'
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
+run ~/.config/tmux/plugins/themux/themux.tmux
 
 set -agF status-right "#{E:@themux_module_clima}"
 
@@ -177,7 +177,7 @@ run '~/.tmux/plugins/tpm/tpm'
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
+run ~/.config/tmux/plugins/themux/themux.tmux
 
 set -agF status-right "#{E:@themux_module_load}"
 ```
@@ -193,7 +193,7 @@ set -agF status-right "#{E:@themux_module_load}"
 Add the gitmux module to the status modules list.
 
 ```sh
-run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
+run ~/.config/tmux/plugins/themux/themux.tmux
 
 set -agF status-right "#{@themux_module_gitmux}"
 ```
@@ -202,7 +202,7 @@ Follow the instructions in the [gitmux documentation](https://github.com/arl/git
 to create a gitmux config file. The gitmux plugin expects a file to be present
 at `~/.gitmux.conf`.
 
-Add the following to your `~/.gitmux.conf` so that it uses catppuccin colors:
+Add the following to your `~/.gitmux.conf` so that it uses the theme's colors:
 
 ```yaml
 tmux:
@@ -231,7 +231,7 @@ tmux:
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
+run ~/.config/tmux/plugins/themux/themux.tmux
 
 set -agF status-right "#{E:@themux_module_pomodoro_plus}"
 
@@ -251,7 +251,7 @@ run '~/.tmux/plugins/tpm/tpm'
 set -g @themux_kube_context_color "#{@thm_red}"
 set -g @themux_kube_namespace_color "#{@thm_sky}"
 
-run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
+run ~/.config/tmux/plugins/themux/themux.tmux
 
 set -agF status-right "#{E:@themux_module_kube}"
 

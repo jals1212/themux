@@ -1,15 +1,11 @@
 <!-- markdownlint-disable -->
-<h3 align="center">
- <img src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/logos/exports/1544x1544_circle.png" width="100" alt="Logo"/><br/>
- <img src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/misc/transparent.png" height="30" width="0px"/>
- Catppuccin for <a href="https://github.com/tmux/tmux">Tmux</a>
- <img src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/misc/transparent.png" height="30" width="0px"/>
-</h3>
+<h1 align="center">themux</h1>
+<p align="center">A themed, multi-theme status line for <a href="https://github.com/tmux/tmux">tmux</a>.</p>
 
 <p align="center">
-    <a href="https://github.com/catppuccin/tmux/stargazers"><img src="https://img.shields.io/github/stars/catppuccin/tmux?colorA=363a4f&colorB=b7bdf8&style=for-the-badge"></a>
-    <a href="https://github.com/catppuccin/tmux/issues"><img src="https://img.shields.io/github/issues/catppuccin/tmux?colorA=363a4f&colorB=f5a97f&style=for-the-badge"></a>
-    <a href="https://github.com/catppuccin/tmux/contributors"><img src="https://img.shields.io/github/contributors/catppuccin/tmux?colorA=363a4f&colorB=a6da95&style=for-the-badge"></a>
+    <a href="https://github.com/jals1212/themux/stargazers"><img src="https://img.shields.io/github/stars/jals1212/themux?colorA=363a4f&colorB=b7bdf8&style=for-the-badge"></a>
+    <a href="https://github.com/jals1212/themux/issues"><img src="https://img.shields.io/github/issues/jals1212/themux?colorA=363a4f&colorB=f5a97f&style=for-the-badge"></a>
+    <a href="https://github.com/jals1212/themux/contributors"><img src="https://img.shields.io/github/contributors/jals1212/themux?colorA=363a4f&colorB=a6da95&style=for-the-badge"></a>
 </p>
 
 <p align="center">
@@ -18,6 +14,10 @@
 <!-- markdownlint-enable -->
 
 ## Themes
+
+themux ships the catppuccin, kanagawa and kanso palettes and adds its own
+component-based styling — see [multi-theme selection](#multi-theme-selection-themux)
+for the full list. Catppuccin flavor previews:
 
 <details>
 <summary>🌻 Latte</summary>
@@ -239,15 +239,15 @@ This method is recommended as TPM has some issues with name conflicts.
 <!-- x-release-please-start-version -->
 
 1. Clone this repository to your desired location (e.g.
-   `~/.config/tmux/plugins/catppuccin`).
+   `~/.config/tmux/plugins/themux`).
 
    ```bash
-   mkdir -p ~/.config/tmux/plugins/catppuccin
-   git clone -b v2.3.0 https://github.com/catppuccin/tmux.git ~/.config/tmux/plugins/catppuccin/tmux
+   mkdir -p ~/.config/tmux/plugins
+   git clone https://github.com/jals1212/themux.git ~/.config/tmux/plugins/themux
    ```
 
 1. Add the following line to your `tmux.conf` file:
-   `run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux`.
+   `run ~/.config/tmux/plugins/themux/themux.tmux`.
 1. Reload Tmux by either restarting or reloading with `tmux source ~/.tmux.conf`.
 <!-- x-release-please-end -->
 
@@ -258,10 +258,10 @@ Check out what to do next in the "[Getting Started Guide](./docs/tutorials/01-ge
 <!-- x-release-please-start-version -->
 
 1.  Install [TPM](https://github.com/tmux-plugins/tpm)
-1.  Add the Catppuccin plugin:
+1.  Add the themux plugin:
 
     ```bash
-    set -g @plugin 'catppuccin/tmux#v2.3.0' # See https://github.com/catppuccin/tmux/tags for additional tags
+    set -g @plugin 'jals1212/themux'
     # ...alongside
     set -g @plugin 'tmux-plugins/tpm'
     ```
@@ -314,17 +314,17 @@ hooks in your tmux configuration file like so:
 ```conf
 set-hook -g client-dark-theme {
   set -g @themux_theme "catppuccin_frappe"
-  run ~/code/github.com/catppuccin/tmux/themux.tmux
+  run ~/.config/tmux/plugins/themux/themux.tmux
 }
 set-hook -g client-light-theme {
   set -g @themux_theme "catppuccin_latte"
-  run ~/code/github.com/catppuccin/tmux/themux.tmux
+  run ~/.config/tmux/plugins/themux/themux.tmux
 }
 ```
 
 The above is only possible with versions of tmux 3.6+. To replicate this
 functionality with versions prior to 3.6, you can will need to set variables and
-run the `cappuccin.tmux` file and trigger it yourself. If you'd like some
+run the `themux.tmux` file and trigger it yourself. If you'd like some
 inspiration for how to do this, read through [the Bash code found in this Nix
 function here][reload-example] which reloads Catppuccin on-demand without
 relying on tmux hooks.
@@ -357,13 +357,13 @@ This is what is used for the previews above.
 set -g mouse on
 set -g default-terminal "tmux-256color"
 
-# Configure the catppuccin plugin
+# Configure the themux plugin
 set -g @themux_theme "catppuccin_mocha"
 set -g @themux_window_shape "rounded"
 
-# Load catppuccin
-run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
-# For TPM, instead use `run ~/.tmux/plugins/tmux/themux.tmux`
+# Load themux
+run ~/.config/tmux/plugins/themux/themux.tmux
+# For TPM, instead use `run ~/.tmux/plugins/themux/themux.tmux`
 
 # Make the status line pretty and add some modules
 set -g status-right-length 100
@@ -401,12 +401,15 @@ themux is a multi-theme fork of [catppuccin/tmux] — the module system,
 status-line architecture, and the catppuccin palettes are their work
 (MIT, Copyright © Catppuccin Org).
 
-The naked style is inspired by [@89iuv]'s configuration shared in the
-catppuccin/tmux [configuration showcase][89iuv-config].
+The bundled palettes are derived from their upstream colour schemes: the
+catppuccin flavors (MIT, © Catppuccin), the kanagawa themes from
+[rebelot/kanagawa.nvim] (MIT, © rebelot), and the kanso themes from
+[webhooked/kanso.nvim] (MIT, © 2025 Webhooked).
 
 [catppuccin/tmux]: https://github.com/catppuccin/tmux
-[@89iuv]: https://github.com/89iuv
-[89iuv-config]: https://github.com/catppuccin/tmux/discussions/317#discussioncomment-11064512
+[rebelot/kanagawa.nvim]: https://github.com/rebelot/kanagawa.nvim
+[webhooked/kanso.nvim]: https://github.com/webhooked/kanso.nvim
+[89iuv-config]: https://github.com/catppuccin/tmux/discussions/317#discussioncomment-11064512 (inspired naked style)
 
 Thanks to the original catppuccin/tmux contributors:
 
@@ -418,8 +421,5 @@ Thanks to the original catppuccin/tmux contributors:
 &nbsp;
 
 <!-- markdownlint-disable -->
-<p align="center">
-<img src="https://raw.githubusercontent.com/catppuccin/catppuccin/main/assets/footers/gray0_ctp_on_line.svg?sanitize=true" /></p>
-<p align="center">Copyright &copy; 2021-present <a href="https://github.com/catppuccin" target="_blank">Catppuccin Org</a>
-<p align="center"><a href="https://github.com/catppuccin/catppuccin/blob/main/LICENSE"><img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=MIT&logoColor=d9e0ee&colorA=363a4f&colorB=b7bdf8"/></a></p>
+<p align="center"><a href="./LICENSE"><img src="https://img.shields.io/static/v1.svg?style=for-the-badge&label=License&message=MIT&logoColor=d9e0ee&colorA=363a4f&colorB=b7bdf8"/></a></p>
 <!-- markdownlint-enable -->

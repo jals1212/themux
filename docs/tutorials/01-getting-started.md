@@ -1,11 +1,11 @@
-Want to install the color scheme and make tmux pastel? Great! Here's how.
+Want to theme your tmux status line? Great! Here's how.
 
 ## Step 1: Clone this repository
 
 <!-- x-release-please-start-version -->
 ```bash
-mkdir -p ~/.config/tmux/plugins/catppuccin
-git clone -b v2.3.0 https://github.com/catppuccin/tmux.git ~/.config/tmux/plugins/catppuccin/tmux
+mkdir -p ~/.config/tmux/plugins
+git clone https://github.com/jals1212/themux.git ~/.config/tmux/plugins/themux
 ```
 <!-- x-release-please-end -->
 
@@ -18,10 +18,10 @@ It should look like this:
 ```bash
 set -g @themux_theme 'catppuccin_mocha'
 
-run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
+run ~/.config/tmux/plugins/themux/themux.tmux
 ```
 
-This will load the catppuccin plugin and apply the defaults.
+This will load the themux plugin and apply the defaults.
 To apply the changes to your configuration file, exit tmux completely
 and start it again. You can also run `tmux source ~/.tmux.conf`, but this may
 not work as well when changing options.
@@ -35,7 +35,7 @@ be a bit more colorful. Edit your tmux config again so it looks like this.
 # Pick a softer palette.
 set -g @themux_theme 'catppuccin_frappe'
 
-run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux
+run ~/.config/tmux/plugins/themux/themux.tmux
 
 # Make the status line more pleasant.
 set -g status-left ""
@@ -61,7 +61,7 @@ and right of the status line.
 The `#[]` syntax is an embedded style, similar to inline css.
 `fg=#{@thm_crust}` says "make the text the crust color". `@thm_crust` is a
 user option set by the plugin. It is created by the line
-`run ~/.config/tmux/plugins/catppuccin/tmux/themux.tmux`, so if you try
+`run ~/.config/tmux/plugins/themux/themux.tmux`, so if you try
 and use colors before that line, it won't work. The `#S` is a special sequence
 that tmux replaces with the current session name. There are a long, long
 "[list of special sequences](https://man7.org/linux/man-pages/man1/tmux.1.html#FORMATS)"

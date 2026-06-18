@@ -1,6 +1,6 @@
 # User Defined Status Line Modules
 
-To create your own status line module that uses the catppuccin theme,
+To create your own status line module that uses the active theme,
 all you need to do is add it to the `status-left` or `status-right` options.
 
 You can add arbitrary things to the status line like so:
@@ -24,10 +24,10 @@ set -ag status-right "#[fg=#{@thm_fg},bg=#{@thm_mantle}] #(memory_pressure | awk
 
 ![Example of the custom ram module](../../assets/ram-example.webp)
 
-To use the status module formatting that catppuccin uses, do the following:
+To use the status module formatting that themux uses, do the following:
 
 ```sh
-# In ~/.tmux.conf, before the catppuccin plugin has been loaded.
+# In ~/.tmux.conf, before the themux plugin has been loaded.
 
 %hidden MODULE_NAME="my_custom_module"
 
