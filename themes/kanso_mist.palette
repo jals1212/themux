@@ -1,0 +1,36 @@
+# --> Kanso (Mist)
+# Palette source: webhooked/kanso.nvim (mist), mapped to catppuccin's @thm_*
+# from kanso's ghostty ANSI port (extras/ghostty/kanso-mist). Same accents as
+# zen. Mist is the hazy lighter-dark variant: its bg sits high, so the light
+# end of the grey ramp is compressed (subtext_0=overlay_2, subtext_1=fg) and
+# flamingo=pink — both inherent to the muted palette.
+bg         #393b44
+fg         #f2f1ef
+
+# Colors
+rosewater  #c5c9c7
+flamingo   #a292a3
+pink       #a292a3
+mauve      #938aa9
+red        #e46876
+maroon     #c4746e
+peach      #dca561
+yellow     #e6c384
+green      #87a987
+teal       #7aa89f
+sky        #8ea4a2
+sapphire   #8ba4b0
+blue       #7fb4ca
+lavender   #949fb5
+
+# Surfaces and overlays
+subtext_1  #f2f1ef
+subtext_0  #c5c9c7
+overlay_2  #c5c9c7
+overlay_1  #a4a7a4
+overlay_0  #909398
+surface_2  #75797f
+surface_1  #717c7c
+surface_0  #5c6066
+mantle     #2a2c35
+crust      #22262d

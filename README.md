@@ -55,13 +55,17 @@ themes can be selected with `@themux_theme`, which loads
 # Kanagawa (wave, dragon or lotus)
 set -g @themux_theme 'kanagawa_dragon'
 
+# Kanso (zen, ink, mist or pearl)
+set -g @themux_theme 'kanso_zen'
+
 # Catppuccin (latte, frappe, macchiato or mocha)
 set -g @themux_theme 'catppuccin_frappe'
 ```
 
 Available themes: `catppuccin_latte`, `catppuccin_frappe`,
 `catppuccin_macchiato`, `catppuccin_mocha`, `kanagawa_wave`,
-`kanagawa_dragon`, `kanagawa_lotus`.
+`kanagawa_dragon`, `kanagawa_lotus`, `kanso_zen`, `kanso_ink`,
+`kanso_mist`, `kanso_pearl`.
 
 ### Style variants (themux)
 

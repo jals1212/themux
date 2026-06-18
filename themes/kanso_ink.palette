@@ -1,0 +1,35 @@
+# --> Kanso (Ink)
+# Palette source: webhooked/kanso.nvim (ink), mapped to catppuccin's @thm_*
+# from kanso's ghostty ANSI port (extras/ghostty/kanso-ink). Same accents as
+# zen; ink's bg ramp has an extra step (inkBg4) so the greys stay distinct.
+# Only inherent share: flamingo=pink (kanso has one pink).
+bg         #22262d
+fg         #f2f1ef
+
+# Colors
+rosewater  #c5c9c7
+flamingo   #a292a3
+pink       #a292a3
+mauve      #938aa9
+red        #e46876
+maroon     #c4746e
+peach      #dca561
+yellow     #e6c384
+green      #87a987
+teal       #7aa89f
+sky        #8ea4a2
+sapphire   #8ba4b0
+blue       #7fb4ca
+lavender   #949fb5
+
+# Surfaces and overlays
+subtext_1  #c5c9c7
+subtext_0  #a4a7a4
+overlay_2  #909398
+overlay_1  #75797f
+overlay_0  #717c7c
+surface_2  #5c6066
+surface_1  #4b4e57
+surface_0  #393b44
+mantle     #1f1f26
+crust      #14171d

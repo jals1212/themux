@@ -1,0 +1,36 @@
+# --> Kanso (Pearl) — light theme
+# Palette source: webhooked/kanso.nvim (pearl), mapped to catppuccin's @thm_*
+# from kanso's ghostty ANSI port (extras/ghostty/kanso-pearl). Light theme:
+# main accents take the deeper ANSI normal (red/green/blue) for contrast on the
+# pale bg, with maroon as the lighter red. Only inherent share: rosewater=
+# flamingo (kanso pearl has one salmon).
+bg         #f2f1ef
+fg         #22262d
+
+# Colors
+rosewater  #d9a594
+flamingo   #d9a594
+pink       #b35b79
+mauve      #624c83
+red        #c84053
+maroon     #d7474b
+peach      #cc6d00
+yellow     #de9800
+green      #6f894e
+teal       #5e857a
+sky        #4e8ca2
+sapphire   #6693bf
+blue       #4d699b
+lavender   #766b90
+
+# Surfaces and overlays
+subtext_1  #545464
+subtext_0  #5c6068
+overlay_2  #6d6d69
+overlay_1  #9f9f99
+overlay_0  #a09cac
+surface_2  #b5cbd2
+surface_1  #cacac7
+surface_0  #c9cbd1
+mantle     #e2e1df
+crust      #dddddb
