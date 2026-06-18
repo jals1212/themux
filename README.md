@@ -272,33 +272,14 @@ Check out what to do next in the "[Getting Started Guide](./docs/tutorials/01-ge
 > if upgrading from an earlier version
 > (especially from `v0.3.0`).
 
-### For TMUX versions prior to 3.2
+### Requirements
 
-This plugin uses features that were only introduced into tmux in version 3.2.
-If you are using a version earlier than this, you can still have lovely
-catppuccin colors, the installation method just looks a little different.
+themux needs **tmux ≥ 3.3** — its core rendering relies on format features
+added in 3.3 (`#{e|...}` arithmetic and `#{l:...}` literals). A few extras
+degrade gracefully on older builds: the styled menu and popups need **3.4+**,
+and the automatic dark/light theme switching below needs **3.6+**.
 
-```sh
-# In your ~/.tmux.conf
-
-# Add the colors from the pallete. Check the themes/ directory for all options.
-
-# Some basic mocha colors.
-set -g @ctp_bg "#24273a"
-set -g @ctp_surface_1 "#494d64"
-set -g @ctp_fg "#cad3f5"
-set -g @ctp_mauve "#c6a0f6"
-set -g @ctp_crust "#181926"
-
-# status line
-set -gF status-style "bg=#{@ctp_bg},fg=#{@ctp_fg}"
-
-# windows
-set -gF window-status-format "#[bg=#{@ctp_surface_1},fg=#{@ctp_fg}] ##I ##T "
-set -gF window-status-current-format "#[bg=#{@ctp_mauve},fg=#{@ctp_crust}] ##I ##T "
-```
-
-### For TMUX versions prior to 3.6
+### Automatic dark/light theme switching
 
 This plugin can be used in conjunction with the support for tmux to
 automatically report dark or light themes using hooks. You can leverage these
@@ -316,7 +297,7 @@ set-hook -g client-light-theme {
 ```
 
 The above is only possible with versions of tmux 3.6+. To replicate this
-functionality with versions prior to 3.6, you can will need to set variables and
+functionality with versions prior to 3.6, you will need to set variables and
 run the `themux.tmux` file and trigger it yourself. If you'd like some
 inspiration for how to do this, read through [the Bash code found in this Nix
 function here][reload-example] which reloads Catppuccin on-demand without
