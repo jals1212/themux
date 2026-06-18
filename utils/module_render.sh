@@ -3,11 +3,14 @@
 # mirroring utils/pane_render.sh: the indicator (icon) and text blocks are styled
 # independently through the shared resolver. $1 is the module name.
 #
-# Colours are read raw and embedded as-is, and the option is stored with `tmux
-# set` (no -F): theme hex stays literal, while the draw-time refs — the module
-# text and the alert modules' #{l:...} threshold overrides — resolve per draw.
-# This is in shell (not module_block.conf's %if branches) because tmux's %if is
-# a parse-time test that does NOT see options set earlier in the same file.
+# The accent (@themux_<name>_color, a #{@thm_*} token) is expanded to the current
+# theme's concrete colour here, so the segment stays literal and is re-baked on
+# every reload — a theme switch tracks (like utils/window_render.sh). A live
+# #{l:...} threshold ref (the cpu/ram alert modules) is left raw so it keeps
+# resolving per draw, as are the module text and the icon/text overrides. The
+# option itself is stored with `tmux set` (no -F). This is in shell (not
+# module_block.conf's %if branches) because tmux's %if is a parse-time test that
+# does NOT see options set earlier in the same file.
 #
 # Every option is read in ONE tmux round-trip and every result written in one
 # more (chained `set`), so a used module costs ~3 forks instead of ~20 — this is
@@ -21,13 +24,23 @@ name="$1"
 
 US=$(printf '\037')
 IFS="$US" read -ra V < <(tmux display -p \
-"#{@themux_module_shape}${US}#{@themux_module_indicator}${US}#{@themux_module_text}${US}#{@themux_module_notch}${US}#{@themux_module_connect_separator}${US}#{@themux_${name}_color}${US}#{@thm_surface_0}${US}#{@thm_crust}${US}#{@thm_fg}${US}#{@themux_${name}_icon}${US}#{@themux_${name}_icon_bg}${US}#{@themux_${name}_icon_fg}${US}#{@themux_${name}_text_bg}${US}#{@themux_${name}_text_fg}${US}#{@themux_${name}_self_styled}${US}#{@themux_module_middle_separator}${US}#{@themux_${name}_when}${US}#{@themux_module_indicator_highlight}${US}#{@themux_module_text_highlight}${US}#{@themux_module_indicator_position}${US}END")
+"#{@themux_module_shape}${US}#{@themux_module_indicator}${US}#{@themux_module_text}${US}#{@themux_module_notch}${US}#{@themux_module_connect_separator}${US}#{@themux_${name}_color}${US}#{@thm_surface_0}${US}#{@thm_crust}${US}#{@thm_fg}${US}#{@themux_${name}_icon}${US}#{@themux_${name}_icon_bg}${US}#{@themux_${name}_icon_fg}${US}#{@themux_${name}_text_bg}${US}#{@themux_${name}_text_fg}${US}#{@themux_${name}_self_styled}${US}#{@themux_module_middle_separator}${US}#{@themux_${name}_when}${US}#{@themux_module_indicator_highlight}${US}#{@themux_module_text_highlight}${US}#{@themux_module_indicator_position}${US}#{E:@themux_${name}_color}${US}END")
 shape=${V[0]} indicator=${V[1]} text_style=${V[2]} notch=${V[3]} connect=${V[4]}
 accent=${V[5]} surface=${V[6]} crust=${V[7]} fg=${V[8]} icon=${V[9]}
 ibg_ov=${V[10]} ifg_ov=${V[11]} tbg_ov=${V[12]} tfg_ov=${V[13]} self_styled=${V[14]}
 midsep=${V[15]} when=${V[16]} ind_hl=${V[17]} text_hl=${V[18]} position=${V[19]}
+accent_exp=${V[20]}
 [ -n "$ind_hl" ] || ind_hl=both
 [ -n "$text_hl" ] || text_hl=both
+
+# A static theme-ref accent (#{@thm_*}) is baked to the current theme's concrete
+# colour, so the segment stays literal and is re-baked on every reload (theme
+# switch tracks, mirroring utils/window_render.sh). A live #{l:...} threshold ref
+# (the cpu/ram metric modules) is left raw so it keeps resolving per draw.
+case "$accent" in
+  *'l:'*) ;;
+  *'#{'*) accent="$accent_exp" ;;
+esac
 
 [ "$shape" = unstyled ] && exit 0
 
