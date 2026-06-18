@@ -1,16 +1,19 @@
-
 # --> Kanagawa (Wave)
-# Semantic mapping from catppuccin's palette interface.
-# Palette source: rebelot/kanagawa.nvim (wave). First pass — pending semantic review.
+# Palette source: rebelot/kanagawa.nvim (wave). Accents anchored on the
+# canonical ghostty ANSI port: main accents take ANSI bright (red=samurai_red,
+# green=spring_green, yellow=carp_yellow, teal=wave_aqua_2, mauve via magenta),
+# companions take ANSI normal (maroon=autumn_red, blue=crystal_blue). Extras
+# (sky/peach/rosewater/lavender) come from kanagawa's named palette. Inherent
+# shares: flamingo=pink (one pink), subtext_1=lavender (one light violet).
 bg         #1f1f28
 fg         #dcd7ba
 
 # Colors
-rosewater  #c8c093
+rosewater  #b8b4d0
 flamingo   #d27e99
 pink       #d27e99
 mauve      #957fb8
-red        #e46876
+red        #e82424
 maroon     #c34043
 peach      #ffa066
 yellow     #e6c384
@@ -22,11 +25,11 @@ blue       #7e9cd8
 lavender   #9cabca
 
 # Surfaces and overlays
-subtext_1  #938aa9
+subtext_1  #9cabca
 subtext_0  #c8c093
-overlay_2  #717c7c
-overlay_1  #727169
-overlay_0  #54546d
+overlay_2  #938aa9
+overlay_1  #717c7c
+overlay_0  #727169
 surface_2  #54546d
 surface_1  #363646
 surface_0  #2a2a37

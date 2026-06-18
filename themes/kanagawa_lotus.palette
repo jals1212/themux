@@ -1,9 +1,11 @@
-
 # --> Kanagawa (Lotus) — light theme
-# Semantic mapping from catppuccin's palette interface.
-# Palette source: rebelot/kanagawa.nvim (lotus). First pass — pending semantic review.
+# Palette source: rebelot/kanagawa.nvim (lotus). Accents anchored on the
+# canonical ghostty ANSI port. Light theme: main accents take the deeper ANSI
+# normal (red=lotus_red, green, blue) for contrast on the pale bg, with maroon
+# as the lighter red and mauve=lotus_violet. Inherent share: rosewater=flamingo
+# (lotus has one salmon).
 bg         #f2ecbc
-fg         #545464
+fg         #43436c
 
 # Colors
 rosewater  #d9a594
@@ -15,15 +17,15 @@ maroon     #d7474b
 peach      #cc6d00
 yellow     #de9800
 green      #6f894e
-teal       #597b75
+teal       #5e857a
 sky        #4e8ca2
 sapphire   #6693bf
 blue       #4d699b
 lavender   #766b90
 
 # Surfaces and overlays
-subtext_1  #716e61
-subtext_0  #43436c
+subtext_1  #545464
+subtext_0  #716e61
 overlay_2  #8a8980
 overlay_1  #a09cac
 overlay_0  #c9cbd1
