@@ -16,7 +16,7 @@
 ## Themes
 
 themux ships the catppuccin, kanagawa and kanso palettes and adds its own
-component-based styling — see [multi-theme selection](#multi-theme-selection-themux)
+component-based styling — see [multi-theme selection](#multi-theme-selection)
 for the full list. Catppuccin flavor previews:
 
 <details>
@@ -44,8 +44,7 @@ for the full list. Catppuccin flavor previews:
 
 </details>
 
-### Multi-theme selection (themux)
-
+### Multi-theme selection
 This fork is a multi-theme manager: besides the catppuccin flavors, other
 themes can be selected with `@themux_theme`, which loads
 `themes/<theme>.palette` (a plain `name hex` palette — a legacy
@@ -67,8 +66,7 @@ Available themes: `catppuccin_latte`, `catppuccin_frappe`,
 `kanagawa_dragon`, `kanagawa_lotus`, `kanso_zen`, `kanso_ink`,
 `kanso_mist`, `kanso_pearl`.
 
-### Style variants (themux)
-
+### Style variants
 Every item of the UI — status modules, the window list, panes — is a
 *component* with independent props, so any combination is valid:
 
@@ -94,8 +92,7 @@ On windows the text-block prop is `@themux_window_name` (the window name content
 already owns `@themux_window_text`). Replaces the old
 `@themux_<item>_variant` / `_fill` options.
 
-### Composition (themux)
-
+### Composition
 The status line is built from up to five rows (`@themux_status_line_1` … `_5`).
 Each row is split into zones by `/` — none gives one left column, one gives
 **left + right**, two gives left / center / right. A zone is a list of component
@@ -142,8 +139,7 @@ list becomes a single ribbon with the active window raised over its neighbours.
 > so killing a middle window never leaves a gap. Without it, the seam and left
 > cap next to a gap render incorrectly until you renumber.
 
-### Pane status (themux)
-
+### Pane status
 Off by default. `@themux_pane_status` is the master switch for the styled label
 on each pane border — set it to `top` or `bottom` to enable (the variant only
 picks the shape, never turns it on). With `off`, themux leaves pane borders at
@@ -158,8 +154,7 @@ set -g @themux_pane_default_text "#{b:pane_current_path}"         # label text
 set -g @themux_pane_indicator_position "left"                     # left | right
 ```
 
-### Window names (themux)
-
+### Window names
 `@themux_window_text_mode` controls when a window shows its name:
 
 ```sh
@@ -171,8 +166,7 @@ set -g @themux_window_text_mode "always"  # always | never | manual
 - `manual` — the name shows only on windows you renamed by hand (tmux's
   `automatic-rename` off); auto-named windows show just the number.
 
-### Naked style (themux)
-
+### Naked style
 By default status modules render as "pills" — icon and text blocks with their
 own backgrounds — even when `@themux_status_background` is `"none"` (that option
 only clears the bar itself). For a fully transparent status line, set the
@@ -209,8 +203,7 @@ This fork also adds a `zoom` status module
 (`#{E:@themux_module_zoom}`) that renders only while the active pane
 is zoomed, in both pill and naked styles.
 
-### Clean reloads (themux)
-
+### Clean reloads
 themux resets its own derived state automatically when it loads: on a running
 server `themux.tmux` clears the palette, internals, the variant-set separators
 and the status/window/pane formats *before* rebuilding — but never your
