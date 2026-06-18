@@ -186,7 +186,7 @@ active window.
 
 The window caps follow the shape (`@themux_window_shape`); they are drawn from
 the block colors, so there are no separate cap-glyph options. Each part has its
-own accent with a base and a highlight (active) variant: the number block uses
+own accent with a base and a highlight (active) colour: the number block uses
 `@themux_window_indicator_color` / `@themux_window_indicator_highlight_color`,
 the name block `@themux_window_text_color` / `@themux_window_text_highlight_color`.
 `soft`/`subtle` blocks fill from the shared `@themux_window_background_color`
@@ -250,6 +250,6 @@ Shared status options:
 ### Clean reloads
 
 themux resets its own derived state automatically when it loads: on a running
-server `themux.tmux` clears the palette, internals, the variant-set caps and the
+server `themux.tmux` clears the palette, internals, the derived caps and the
 status/window/pane formats *before* rebuilding — but never your `@themux_*`
-config. So switching theme, variant or style is just a config reload.
+config. So switching theme or style is just a config reload.

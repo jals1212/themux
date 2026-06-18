@@ -1,7 +1,7 @@
 # Switching theme or style at runtime
 
 themux resets its own derived state automatically every time it loads, so to
-change the theme, a variant, or any styling option you just update the option
+change the theme or any styling option you just update the option
 and reload your config — no `tmux kill-server`, no reset option to set.
 
 ```sh
@@ -13,9 +13,9 @@ set -g @themux_theme "catppuccin_latte"
 ## How it works
 
 When `themux.tmux` runs, it first clears what themux *derives* — the palette
-(`@thm_*`), internal state (`@_tmx_*`), the variant-set separators/borders and
+(`@thm_*`), internal state (`@_tmx_*`), the derived separators/borders and
 the status/window/pane formats — and then rebuilds everything from your current
-options. It never clears your `@themux_*` configuration, so your variants,
+options. It never clears your `@themux_*` configuration, so your styles,
 module lists and overrides survive the reload. The reset is skipped on a fresh
 server, where there is nothing to clear yet.
 

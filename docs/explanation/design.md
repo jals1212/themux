@@ -41,7 +41,7 @@ renderer resolves the two block styles, so a new shape is a few cap glyphs, not
 a flag that interacts with every other flag.
 
 `unstyled` is the escape hatch: it makes the law of orthogonality hold even at
-the edges. Anything themux's variants do not cover, you build yourself with the
+the edges. Anything themux's props do not cover, you build yourself with the
 exposed palette, and themux stays out of the way.
 
 ### Build for composition
