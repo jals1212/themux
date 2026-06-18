@@ -114,7 +114,7 @@ independent.
 
 | Option | Default | Effect |
 | --- | --- | --- |
-| `@themux_module_divider` | `" │ "` | Text the `|` inserts between modules (includes its own padding). |
+| `@themux_module_divider` | `" "` | Text the `|` inserts between modules (includes its own padding). |
 | `@themux_module_divider_color` | `#{@thm_overlay_0}` | Its color. |
 | `@themux_window_divider` | `" "` | `window-status-separator` between windows. |
 | `@themux_window_divider_color` | `#{@thm_overlay_0}` | Its color. |
