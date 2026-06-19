@@ -238,6 +238,10 @@ for i in 1 2 3 4 5; do
   [ -n "$(tmux show -gqv "@themux_status_line_${i}")" ] && last=$i
 done
 
+# Window-list edge flush: 1 when the "windows" token is the first item of a
+# flushing left zone or the last of a flushing right zone (any row). Read by
+# window_render.sh to drop the ribbon's opening/closing cap at that edge.
+win_fl=0; win_fr=0
 for i in 1 2 3 4 5; do
   [ "$i" -gt "$last" ] && break
   line=$(tmux show -gqv "@themux_status_line_${i}")
@@ -254,6 +258,13 @@ for i in 1 2 3 4 5; do
     *) IFS='/' read -r left center right <<<"$line" ;;
   esac
 
+  # The window list flushes only when it is the first token of the (flushing)
+  # left zone or the last token of the (flushing) right zone.
+  read -r _lfirst _ <<<"$left"
+  _rlast=""; for _t in $right; do _rlast="$_t"; done
+  [ "$left_edge" = left ]   && [ "$_lfirst" = windows ] && win_fl=1
+  [ "$right_edge" = right ] && [ "$_rlast" = windows ]  && win_fr=1
+
   # "nolist" leaves the window-list region the "windows" token turns on, so a
   # zone after it still pins to its own edge (otherwise the right zone stays
   # glued to the window list instead of the right edge).
@@ -263,6 +274,9 @@ for i in 1 2 3 4 5; do
 
   tmux set -g "status-format[$((i - 1))]" "$fmt"
 done
+
+tmux set -g @_tmx_win_flush_left "$win_fl"
+tmux set -g @_tmx_win_flush_right "$win_fr"
 
 tmux set -gu @_tmx_layout_tmp
 # `status` takes off / on (1 row) / 2..5; a literal "1" is rejected.

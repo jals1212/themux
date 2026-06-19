@@ -143,7 +143,15 @@ set -g @themux_status_flush_edges "both"   # off | left | right | both
 ```
 
 `left` flushes the left zone's first group, `right` the right zone's last group.
-Capped shapes only (`squared`/`unstyled` already fill the edge).
+The edge item can be a module group **or the connected window list** (a ribbon —
+`@themux_window_seam` other than `|`): when `windows` is the first/last token of a
+flushing zone, the ribbon's opening/closing cap drops too. Capped shapes only
+(`squared`/`unstyled` already fill the edge).
+
+> [!NOTE]
+> The window list shares one global format, so flushing assumes it sits at the
+> same edge on every row. Separate window pills (`@themux_window_seam "|"`) are not
+> flushed — use a ribbon (`<>`/`>`/`<`/`=`) for an edge-to-edge window bar.
 
 Rows render up to the last non-empty line, so a blank (`""`) line in between
 becomes an empty row — handy for spacing. The window list aligns to its zone:

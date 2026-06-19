@@ -37,3 +37,7 @@ flush_both_mprr 2
 
 flush_off_mpll 1
 flush_off_mprr 2
+
+win_flush_left_edge 1
+win_flush_left_inner 0
+win_flush_right_edge 1

@@ -135,9 +135,11 @@ render_side() {
     nameblock="#{?${text},${seam}#[fg=$tfg]#[bg=$tbg]${text} ,}"
     if [ "$connected" = 1 ]; then
       # Inner seams come from the separator. The first window opens the ribbon
-      # with a left cap and the last closes it with a tail cap, both over the bar.
-      lcap="#{?#{==:#{window_index},${base}},#[fg=${icap}]#[bg=default]${lglyph},}"
-      rcap="#{?loop_last_flag,#[fg=#{?${text},${tcap},${icap}}]#[bg=default]${rglyph},}"
+      # with a left cap and the last closes it with a tail cap, both over the bar
+      # — each dropped when layout.sh flags the list as flushing that terminal
+      # edge (@_tmx_win_flush_left/right), so the ribbon fills the border.
+      lcap="#{?#{==:#{window_index},${base}},#{?@_tmx_win_flush_left,,#[fg=${icap}]#[bg=default]${lglyph}},}"
+      rcap="#{?loop_last_flag,#{?@_tmx_win_flush_right,,#[fg=#{?${text},${tcap},${icap}}]#[bg=default]${rglyph}},}"
       out="${lcap}${nblock}${nameblock}${flags}${rcap}"
     else
       lcap=$(cap "$lglyph" "$icap" "$ibg")
