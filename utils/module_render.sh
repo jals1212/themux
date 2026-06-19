@@ -82,7 +82,10 @@ cap() { # $1 glyph, $2 block bg
   fi
 }
 
-iblock="#[fg=$ifg,bg=$ibg] $icon "
+# One leading space; the trailing one comes from the icon value (every icon is
+# "<glyph> "), so the icon block is padded 1+1 like the window number block " #I "
+# rather than 1+2 — a tighter, matching footprint.
+iblock="#[fg=$ifg,bg=$ibg] $icon"
 # The text value carries its own leading space; add a trailing one so the block
 # is padded both sides (the icon block is) and the right cap — squared █, rounded
 # bulge, or the inward slant — has a cell to sit against. Re-assert the block bg

@@ -1,5 +1,5 @@
 
-@themux_module_application #[fg=#eba0ac,bg=default]   #[fg=#eba0ac,bg=default]#{E:@themux_application_text}#[bg=default] 
+@themux_module_application #[fg=#eba0ac,bg=default]  #[fg=#eba0ac,bg=default]#{E:@themux_application_text}#[bg=default] 
 
 @themux_module_session #{?client_prefix,#{E:@themux_session_prefix_style},#{E:@themux_session_style}}#{E:@themux_session_icon}#{E:@themux_session_text} 
 
