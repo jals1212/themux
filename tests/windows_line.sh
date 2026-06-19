@@ -149,14 +149,14 @@ printf "flush_off_mprr "; glyphs "$mprr"       # 2
 # flushing right zone; window_render then drops that edge's ribbon cap.
 tmux set -g @themux_window_shape "rounded"
 tmux set -g @themux_window_seam "<>"
-tmux set -g @themux_status_flush_edges "left"
+tmux set -g @themux_window_flush_edges "left"
 tmux set -g @themux_status_line_1 "windows / / host"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
 printf "\nwin_flush_left_edge "; tmux show -gqv @_tmx_win_flush_left    # 1
 
-# "windows" not first -> not flagged (the leading module group flushes instead).
+# "windows" not first -> not flagged (window flush only targets a leading windows).
 tmux set -g @themux_status_line_1 "host windows / / "
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
@@ -164,7 +164,7 @@ run_layout
 printf "win_flush_left_inner "; tmux show -gqv @_tmx_win_flush_left    # 0
 
 # Right edge: "windows" as the last token of a flushing right zone.
-tmux set -g @themux_status_flush_edges "right"
+tmux set -g @themux_window_flush_edges "right"
 tmux set -g @themux_status_line_1 "host / / windows"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"

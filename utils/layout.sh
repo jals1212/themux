@@ -33,14 +33,24 @@ esac
 mdiv=$(tmux show -gqv @themux_module_divider)
 
 # Flush the bar's outer caps to the terminal edge (nvim-style): off|left|right|
-# both. The left zone's first group flushes left, the right zone's last group
-# flushes right; the centre zone never touches an edge.
-flush_edges=$(tmux show -gqv @themux_status_flush_edges); [ -n "$flush_edges" ] || flush_edges=off
-left_edge=none; right_edge=none
-case "$flush_edges" in
-  left)  left_edge=left ;;
-  right) right_edge=right ;;
-  both)  left_edge=left; right_edge=right ;;
+# both. Two independent controls — @themux_status_flush_edges flushes the edge
+# *module group*, @themux_window_flush_edges flushes the edge *window ribbon* —
+# so the module bar and the window list flush separately. The left zone's first
+# item flushes left, the right zone's last item flushes right; centre never
+# touches an edge.
+status_flush=$(tmux show -gqv @themux_status_flush_edges); [ -n "$status_flush" ] || status_flush=off
+win_flush=$(tmux show -gqv @themux_window_flush_edges); [ -n "$win_flush" ] || win_flush=off
+s_left=none; s_right=none
+case "$status_flush" in
+  left)  s_left=left ;;
+  right) s_right=right ;;
+  both)  s_left=left; s_right=right ;;
+esac
+w_left=none; w_right=none
+case "$win_flush" in
+  left)  w_left=left ;;
+  right) w_right=right ;;
+  both)  w_left=left; w_right=right ;;
 esac
 
 # tmux-cpu modules (cpu/ram) carry #{cpu_*}/#{ram_*} literals that only resolve
@@ -262,15 +272,15 @@ for i in 1 2 3 4 5; do
   # left zone or the last token of the (flushing) right zone.
   read -r _lfirst _ <<<"$left"
   _rlast=""; for _t in $right; do _rlast="$_t"; done
-  [ "$left_edge" = left ]   && [ "$_lfirst" = windows ] && win_fl=1
-  [ "$right_edge" = right ] && [ "$_rlast" = windows ]  && win_fr=1
+  [ "$w_left" = left ]   && [ "$_lfirst" = windows ] && win_fl=1
+  [ "$w_right" = right ] && [ "$_rlast" = windows ]  && win_fr=1
 
   # "nolist" leaves the window-list region the "windows" token turns on, so a
   # zone after it still pins to its own edge (otherwise the right zone stays
   # glued to the window list instead of the right edge).
-  fmt="#[nolist align=left]$(expand_zone "$left" left "$left_edge")"
+  fmt="#[nolist align=left]$(expand_zone "$left" left "$s_left")"
   fmt+="#[nolist align=centre]$(expand_zone "$center" centre none)"
-  fmt+="#[nolist align=right]$(expand_zone "$right" right "$right_edge")"
+  fmt+="#[nolist align=right]$(expand_zone "$right" right "$s_right")"
 
   tmux set -g "status-format[$((i - 1))]" "$fmt"
 done

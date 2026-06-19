@@ -138,20 +138,21 @@ neighbours), `a<b>c` makes it the valley.
 
 #### Flushing to the terminal edge
 
-For the lualine/nvim look — flat outer edges with powerline seams inside — set
-`@themux_status_flush_edges`. It drops the bar's outermost edge cap so that block
-fills solid to the terminal border instead of tapering:
+For the lualine/nvim look — flat outer edges with powerline seams inside — drop
+the bar's outermost edge cap so that block fills solid to the terminal border
+instead of tapering. Two **independent** controls:
 
 ```sh
 set -g @themux_module_shape "powerline"
-set -g @themux_status_flush_edges "both"   # off | left | right | both
+set -g @themux_status_flush_edges "both"   # flush the edge MODULE group
+set -g @themux_window_flush_edges "both"   # flush the edge WINDOW ribbon
 ```
 
-`left` flushes the left zone's first group, `right` the right zone's last group.
-The edge item can be a module group **or the connected window list** (a ribbon —
-`@themux_window_seam` other than `|`): when `windows` is the first/last token of a
-flushing zone, the ribbon's opening/closing cap drops too. Capped shapes only
-(`squared`/`unstyled` already fill the edge).
+Each is `off | left | right | both`: `left` flushes the left zone's first item,
+`right` the right zone's last. `@themux_status_flush_edges` acts on a module group
+at the edge; `@themux_window_flush_edges` acts on the window list there (a ribbon —
+`@themux_window_seam` other than `|`). So the module bar and the window list can
+flush separately. Capped shapes only (`squared`/`unstyled` already fill the edge).
 
 > [!NOTE]
 > The window list shares one global format, so flushing assumes it sits at the
