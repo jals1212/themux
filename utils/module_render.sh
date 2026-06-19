@@ -109,13 +109,18 @@ else
   first="$iblock" fbg="$ibg" second="$tblock" sbg="$tbg"
 fi
 
-# Notch seam: the first block's right cap into the second block's bg, only when
-# the blocks differ (matching bg would be an invisible phantom cell); else the
-# plain separator.
-if [ "$notch" = on ] && [ "$fbg" != "$sbg" ]; then
+# Seam between the two blocks, drawn only when they differ (matching bg would be
+# an invisible phantom cell; else the plain separator). notch=on takes the shape's
+# right cap; notch=off takes a flat block (█) so icon and text get a clean divider
+# instead of abutting.
+if [ "$fbg" != "$sbg" ]; then
   seamcol="$fbg"
   [ "$fbg" = default ] && seamcol="$accent"
-  seam="#[fg=$seamcol,bg=$sbg]$rglyph"
+  if [ "$notch" = on ]; then
+    seam="#[fg=$seamcol,bg=$sbg]$rglyph"
+  else
+    seam="#[fg=$seamcol,bg=$sbg]$(printf '\342\226\210')"
+  fi
 else
   seam="$midsep"
 fi
