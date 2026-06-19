@@ -42,9 +42,15 @@ set -g @themux_module_notch     "off"
 | `@themux_<item>_indicator_highlight` | `off` · `bg` · `fg` · `both` | `both` |
 | `@themux_<item>_text_highlight` | `off` · `bg` · `fg` · `both` | `both` |
 
-`<item>` is `module`, `window`, or `pane`. † On windows the text-block prop is
-`@themux_window_name`, because the name content already owns
-`@themux_window_text`.
+`<item>` is `module`, `window`, or `pane`. † The text-block **style** prop is
+`@themux_<item>_text` for all three; on windows the name *content* lives in
+`@themux_window_name` / `@themux_window_current_name`.
+
+These per-item props default from a shared `@themux_all_<prop>`: set
+`@themux_all_shape "rounded"` to shape every item at once; a per-item value
+(e.g. `@themux_window_shape`) overrides it for that item. Precedence: per-item >
+`@themux_all_*` > built-in. Cascadable props: `shape`, `indicator`, `text`,
+`notch`, `indicator_position`, `indicator_highlight`, `text_highlight`.
 
 `*_indicator_highlight` / `*_text_highlight` choose which channels take the
 item's *highlight* color — for windows/panes that is the active item, for
@@ -152,9 +158,9 @@ set -g @themux_status_line_1 "session dot application / windows / date_time"
 
 | Option | Default | Effect |
 | --- | --- | --- |
-| `@themux_window_text` | `" #W"` | Inactive window name (any tmux format). |
+| `@themux_window_name` | `" #W"` | Inactive window name content (any tmux format). |
 | `@themux_window_number` | `#I` | Inactive window index. |
-| `@themux_window_current_text` | `" #W"` | Active window name. |
+| `@themux_window_current_name` | `" #W"` | Active window name content. |
 | `@themux_window_current_number` | `#I` | Active window index. |
 | `@themux_window_indicator_color` | `#{@thm_overlay_2}` | Base (inactive) number accent. |
 | `@themux_window_indicator_highlight_color` | `#{@thm_mauve}` | Active number accent. |
@@ -169,14 +175,14 @@ set -g @themux_status_line_1 "session dot application / windows / date_time"
 
 | Option | Default | Values |
 | --- | --- | --- |
-| `@themux_window_text_mode` | `always` | `always` \| `never` \| `manual` |
+| `@themux_window_name_mode` | `always` | `always` \| `never` \| `manual` |
 
 - `always` — the name is always shown.
 - `never` — only the number block (the name container is dropped).
 - `manual` — the name shows only on windows you renamed by hand (tmux's
   `automatic-rename` is `off`); auto-named windows show just the number.
 
-Setting `@themux_window_text ""` / `@themux_window_current_text ""` also drops
+Setting `@themux_window_name ""` / `@themux_window_current_name ""` also drops
 the container — handy for, e.g., number-only inactive windows with a named
 active window.
 

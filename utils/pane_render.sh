@@ -17,16 +17,16 @@ expand() {
   tmux show -gv @_tmx_render_tmp
 }
 
-position=$(tmux show -gqv @themux_pane_indicator_position)
-indicator=$(tmux show -gqv @themux_pane_indicator)
-text_style=$(tmux show -gqv @themux_pane_text)
-notch=$(tmux show -gqv @themux_pane_notch)
-shape=$(tmux show -gqv @themux_pane_shape)
+position=$(themux_prop pane indicator_position)
+indicator=$(themux_prop pane indicator)
+text_style=$(themux_prop pane text)
+notch=$(themux_prop pane notch)
+shape=$(themux_prop pane shape)
 # Active highlight per part/channel (off|bg|fg|both, default both): which of the
 # active pane's colours actually switch; the rest stay frozen at the inactive
 # colour. Applied by resolving each block twice (active accent vs frozen) below.
-ind_hl=$(tmux show -gqv @themux_pane_indicator_highlight); [ -n "$ind_hl" ] || ind_hl=both
-txt_hl=$(tmux show -gqv @themux_pane_text_highlight); [ -n "$txt_hl" ] || txt_hl=both
+ind_hl=$(themux_prop pane indicator_highlight); [ -n "$ind_hl" ] || ind_hl=both
+txt_hl=$(themux_prop pane text_highlight); [ -n "$txt_hl" ] || txt_hl=both
 
 # Shape glyphs (octal UTF-8). squared has none — the block padding is its edge.
 case "$shape" in

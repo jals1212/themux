@@ -9,8 +9,8 @@ as does [fish](https://fishshell.com/docs/current/cmds/fish_title.html).
 The format string used can be changed by setting the following options:
 
 ```bash
-set -g @themux_window_text "#W"
-set -g @themux_window_current_text "#W"
+set -g @themux_window_name "#W"
+set -g @themux_window_current_name "#W"
 ```
 
 The window title is `#W`, the current path is `#{b:pane_current_path}`. A huge

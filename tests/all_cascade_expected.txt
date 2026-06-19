@@ -1,0 +1,9 @@
+
+all_rounded_window 1
+all_rounded_module 1
+
+default_window 0
+default_module 0
+
+override_window 0
+override_module 1

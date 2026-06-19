@@ -20,7 +20,7 @@ windows_block=$(tmux show -gqv @_tmx_fmt_windows)
 
 # Powerline cap glyphs for the module shape. Empty for squared/unstyled (no caps,
 # so the =/>/< connectors are inert and every module stays its own full pill).
-mshape=$(tmux show -gqv @themux_module_shape)
+mshape=$(tmux display -p "#{?#{@themux_module_shape},#{@themux_module_shape},#{@themux_all_shape}}")
 case "$mshape" in
   rounded)   mpll=$(printf '\356\202\266'); mprr=$(printf '\356\202\264') ;;
   slanted)   mpll=$(printf '\356\202\272'); mprr=$(printf '\356\202\274') ;;

@@ -15,16 +15,16 @@ expand() {
   tmux show -gv @_tmx_render_tmp
 }
 
-position=$(tmux show -gqv @themux_window_indicator_position)
-indicator=$(tmux show -gqv @themux_window_indicator)
-name_style=$(tmux show -gqv @themux_window_name)
-notch=$(tmux show -gqv @themux_window_notch)
-shape=$(tmux show -gqv @themux_window_shape)
+position=$(themux_prop window indicator_position)
+indicator=$(themux_prop window indicator)
+name_style=$(themux_prop window text)
+notch=$(themux_prop window notch)
+shape=$(themux_prop window shape)
 # Active highlight per part/channel (off|bg|fg|both, default both): which of the
 # active window's colours actually switch; the rest stay frozen at the inactive
 # colour. Applied only to the active side (cw), mixing active vs inactive below.
-ind_hl=$(tmux show -gqv @themux_window_indicator_highlight); [ -n "$ind_hl" ] || ind_hl=both
-txt_hl=$(tmux show -gqv @themux_window_text_highlight); [ -n "$txt_hl" ] || txt_hl=both
+ind_hl=$(themux_prop window indicator_highlight); [ -n "$ind_hl" ] || ind_hl=both
+txt_hl=$(themux_prop window text_highlight); [ -n "$txt_hl" ] || txt_hl=both
 crust=$(expand "#{@thm_crust}")
 fg=$(expand "#{@thm_fg}")
 flags=$(expand "#{@_tmx_w_flags}")

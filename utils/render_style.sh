@@ -21,3 +21,10 @@ resolve_style() {
     *)      RS_BG="$3"; RS_FG="$5" ;; # soft (the default)
   esac
 }
+
+# Resolve a shared prop with the item cascade: @themux_<item>_<prop> if set, else
+# the shared @themux_all_<prop>. One round-trip (display -p evaluates the #{?}).
+#   Usage: shape=$(themux_prop window shape)
+themux_prop() { # $1 item, $2 prop
+  tmux display -p "#{?#{@themux_$1_$2},#{@themux_$1_$2},#{@themux_all_$2}}"
+}

@@ -5,7 +5,7 @@
 function reset() {
   tmux set -gu @themux_window_shape
   tmux set -gu @themux_window_indicator
-  tmux set -gu @themux_window_name
+  tmux set -gu @themux_window_text
   tmux set -gu @themux_window_notch
   tmux set -gu @themux_window_divider
   tmux set -gu @themux_window_seam
@@ -44,8 +44,8 @@ print_option window-status-current-format
 # Empty window text drops the text container: only the number block shows.
 reset
 tmux set -g @themux_window_indicator_position "left"
-tmux set -g @themux_window_text ""
-tmux set -g @themux_window_current_text ""
+tmux set -g @themux_window_name ""
+tmux set -g @themux_window_current_name ""
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 

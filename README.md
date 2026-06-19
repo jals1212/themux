@@ -89,9 +89,14 @@ set -g @themux_module_notch     "off"
 - **notch** — `on` makes the indicator↔text seam inherit the shape's cap instead
   of a flat edge.
 
-On windows the text-block prop is `@themux_window_name` (the window name content
-already owns `@themux_window_text`). Replaces the old
-`@themux_<item>_variant` / `_fill` options.
+The text-block **style** prop is `@themux_<item>_text` for all three items; on
+windows the name *content* lives in `@themux_window_name`.
+
+Each of these per-item props defaults from a shared `@themux_all_<prop>`: `set -g
+@themux_all_shape "rounded"` shapes **every** item at once, and a per-item value
+(e.g. `@themux_window_shape "powerline"`) overrides it for that item. Cascadable
+props: `shape`, `indicator`, `text`, `notch`, `indicator_position`,
+`indicator_highlight`, `text_highlight`.
 
 ### Composition
 The status line is built from up to five rows (`@themux_status_line_1` … `_5`).
@@ -219,10 +224,10 @@ set -g @themux_pane_indicator_position "left"                     # left | right
 ```
 
 ### Window names
-`@themux_window_text_mode` controls when a window shows its name:
+`@themux_window_name_mode` controls when a window shows its name:
 
 ```sh
-set -g @themux_window_text_mode "always"  # always | never | manual
+set -g @themux_window_name_mode "always"  # always | never | manual
 ```
 
 - `always` — the name is always shown.
@@ -241,7 +246,7 @@ only clears the bar itself). For a fully transparent status line, set the
 set -g @themux_module_indicator "naked"
 set -g @themux_module_text      "naked"  # transparent modules
 set -g @themux_window_indicator "naked"
-set -g @themux_window_name      "naked"  # naked window list to match
+set -g @themux_window_text      "naked"  # naked window list to match
 set -g @themux_status_background "none"
 ```
 
