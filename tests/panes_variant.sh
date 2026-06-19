@@ -37,6 +37,18 @@ tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 print_option pane-border-format
 
+# Powerline panes: arrow caps (E0B2 left, E0B0 right) frame the pill, and with
+# notch on the indicator->text seam mirrors the right cap (E0B0). indicator solid
+# + text soft so the seam's two backgrounds differ and it shows.
+tmux set -g @themux_pane_shape "powerline"
+tmux set -g @themux_pane_indicator "solid"
+tmux set -g @themux_pane_text "soft"
+tmux set -g @themux_pane_notch "on"
+tmux set -g @themux_pane_status "top"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+print_option pane-border-format
+
 # Notch: the indicator block's right cap seams into the text block (number on the
 # left). With indicator solid + text soft the backgrounds differ, so the seam
 # shows; if they matched it would collapse to nothing (no phantom cell).

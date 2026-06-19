@@ -11,5 +11,7 @@ pane-border-format #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default]#[fg=#{?pa
 
 pane-border-format #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default]#[fg=#11111b,bg=#{?pane_active,#a6e3a1,#6c7086}] #{pane_index} #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default] #{b:pane_current_path} #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default]
 
+pane-border-format #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=default]#[fg=#11111b,bg=#{?pane_active,#a6e3a1,#6c7086}] #{pane_index} #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=#313244]#[fg=#cdd6f4,bg=#313244] #{b:pane_current_path} #[fg=#313244,bg=default]
+
 pane-border-format #[fg=#11111b,bg=#{?pane_active,#a6e3a1,#6c7086}] #{pane_index} #[fg=#{?pane_active,#a6e3a1,#6c7086},bg=#313244]█#[fg=#cdd6f4,bg=#313244] #{b:pane_current_path} 
 pane_border_style_unstyled fg=#6c7086

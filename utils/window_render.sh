@@ -31,9 +31,10 @@ flags=$(expand "#{@_tmx_w_flags}")
 
 # Shape glyphs (octal UTF-8). squared has none — the block padding is its edge.
 case "$shape" in
-  rounded) lglyph=$(printf '\356\202\266'); rglyph=$(printf '\356\202\264') ;;
-  slanted) lglyph=$(printf '\356\202\272'); rglyph=$(printf '\356\202\274') ;;
-  *)       lglyph=""; rglyph="" ;;
+  rounded)   lglyph=$(printf '\356\202\266'); rglyph=$(printf '\356\202\264') ;;
+  slanted)   lglyph=$(printf '\356\202\272'); rglyph=$(printf '\356\202\274') ;;
+  powerline) lglyph=$(printf '\356\202\262'); rglyph=$(printf '\356\202\260') ;;
+  *)         lglyph=""; rglyph="" ;;
 esac
 
 # Connected (powerline) ribbon: when the inter-window divider is emptied and the
@@ -52,9 +53,10 @@ base=$(tmux show -gwv base-index 2>/dev/null); [ -n "$base" ] || base=0
 # The notch seam mirrors the shape's right cap; left layout only (like panes).
 seam_glyph=""
 [ "$notch" = on ] && case "$shape" in
-  slanted) seam_glyph=$(printf '\356\202\274') ;;
-  rounded) seam_glyph=$(printf '\356\202\264') ;;
-  squared) seam_glyph=$(printf '\342\226\210') ;;
+  slanted)   seam_glyph=$(printf '\356\202\274') ;;
+  rounded)   seam_glyph=$(printf '\356\202\264') ;;
+  powerline) seam_glyph=$(printf '\356\202\260') ;;
+  squared)   seam_glyph=$(printf '\342\226\210') ;;
 esac
 
 # A cap. With a glyph (rounded/slanted) it is the shape glyph over the bare bar

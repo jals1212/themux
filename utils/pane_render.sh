@@ -30,9 +30,10 @@ txt_hl=$(tmux show -gqv @themux_pane_text_highlight); [ -n "$txt_hl" ] || txt_hl
 
 # Shape glyphs (octal UTF-8). squared has none — the block padding is its edge.
 case "$shape" in
-  rounded) left_glyph=$(printf '\356\202\266'); right_glyph=$(printf '\356\202\264') ;;
-  slanted) left_glyph=$(printf '\356\202\272'); right_glyph=$(printf '\356\202\274') ;;
-  *)       left_glyph=""; right_glyph="" ;;
+  rounded)   left_glyph=$(printf '\356\202\266'); right_glyph=$(printf '\356\202\264') ;;
+  slanted)   left_glyph=$(printf '\356\202\272'); right_glyph=$(printf '\356\202\274') ;;
+  powerline) left_glyph=$(printf '\356\202\262'); right_glyph=$(printf '\356\202\260') ;;
+  *)         left_glyph=""; right_glyph="" ;;
 esac
 
 # Per-part colour roles. Each part's accent brightens for the active pane (its
@@ -77,12 +78,13 @@ case "$txt_hl" in bg|both) txt_acc=$txt_accent_hl ;; *) txt_acc=$txt_accent_fr ;
 txt_cap=$txt_bg; [ "$txt_bg" = default ] && txt_cap=$txt_acc
 
 # The notch seam glyph mirrors the shape's right cap (octal UTF-8): slanted E0BC,
-# rounded E0B4, squared █ block.
+# rounded E0B4, powerline E0B0, squared █ block.
 seam_glyph=""
 [ "$notch" = on ] && case "$shape" in
-  slanted) seam_glyph=$(printf '\356\202\274') ;;
-  rounded) seam_glyph=$(printf '\356\202\264') ;;
-  squared) seam_glyph=$(printf '\342\226\210') ;;
+  slanted)   seam_glyph=$(printf '\356\202\274') ;;
+  rounded)   seam_glyph=$(printf '\356\202\264') ;;
+  powerline) seam_glyph=$(printf '\356\202\260') ;;
+  squared)   seam_glyph=$(printf '\342\226\210') ;;
 esac
 
 # Centred blocks: " idx " on the indicator bg, " text " on the text bg.

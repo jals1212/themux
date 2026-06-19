@@ -46,11 +46,12 @@ esac
 
 text="#{E:@themux_${name}_text}"
 
-# Shape glyphs (octal UTF-8). squared is a full block; rounded/slanted taper.
+# Shape glyphs (octal UTF-8). squared is a full block; rounded/slanted/powerline taper.
 case "$shape" in
-  rounded) lglyph=$(printf '\356\202\266'); rglyph=$(printf '\356\202\264') ;;
-  slanted) lglyph=$(printf '\356\202\272'); rglyph=$(printf '\356\202\274') ;;
-  *)       lglyph=$(printf '\342\226\210'); rglyph=$(printf '\342\226\210') ;;
+  rounded)   lglyph=$(printf '\356\202\266'); rglyph=$(printf '\356\202\264') ;;
+  slanted)   lglyph=$(printf '\356\202\272'); rglyph=$(printf '\356\202\274') ;;
+  powerline) lglyph=$(printf '\356\202\262'); rglyph=$(printf '\356\202\260') ;;
+  *)         lglyph=$(printf '\342\226\210'); rglyph=$(printf '\342\226\210') ;;
 esac
 
 # Indicator/text colours: a module-set override (alert modules inject their live

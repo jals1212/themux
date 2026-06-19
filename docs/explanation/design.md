@@ -29,7 +29,7 @@ vocabulary.
 
 | Prop | Values | Meaning |
 | --- | --- | --- |
-| **shape** | `squared` / `rounded` / `slanted` | Block with square / round / slant caps. |
+| **shape** | `squared` / `rounded` / `slanted` / `powerline` | Block with square / round / slant / arrow (powerline chevron) caps. |
 | | `unstyled` | themux leaves the item alone so you can build it by hand. |
 | **indicator** / **text** | `solid` / `soft` / `subtle` / `naked` | The icon-or-number block and the text block each pick a style: accent block / grey block / grey block with accent text / transparent. |
 | **notch** | `on` / `off` | The indicator↔text seam inherits the shape's cap. |
