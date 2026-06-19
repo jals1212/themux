@@ -165,13 +165,24 @@ set -g @themux_window_divider_color "#{@thm_overlay_0}"
 ```
 
 Modules merge into a powerline run only through the explicit `=`/`>`/`<`
-connectors above. Emptying the **window** divider connects the window list into
-a continuous ribbon with the active window raised over its neighbours.
+connectors above. The window list merges the same way, but through one option —
+it is a uniform list, so there is nothing to annotate inline — `@themux_window_seam`,
+with symbols mirroring the connectors:
+
+| `@themux_window_seam` | Window list |
+| --- | --- |
+| `\|` (default) | separate pills, with `@themux_window_divider` between |
+| `<>` | one ribbon, raised (active window over both neighbours) |
+| `>` / `<` | one ribbon, seam points right / left |
+| `=` | one ribbon, flat (squared) seams |
+
+Any value but `|` joins the list into a ribbon (needs a capped shape + left
+numbers); `@themux_window_divider` then only supplies the separator for `|`.
 
 > [!NOTE]
-> The connected window ribbon (rounded/slanted/powerline shapes) colours each seam from
-> its neighbour and caps the first window using the window index, both of which
-> assume **contiguous** window indices. Pair it with:
+> The connected window ribbon (`@themux_window_seam` `<>`/`>`/`<`/`=`) colours each
+> seam from its neighbour and caps the first window using the window index, both of
+> which assume **contiguous** window indices. Pair it with:
 >
 > ```sh
 > set -g renumber-windows on

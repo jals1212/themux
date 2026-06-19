@@ -37,16 +37,19 @@ case "$shape" in
   *)         lglyph=""; rglyph="" ;;
 esac
 
-# Connected (powerline) ribbon: when the inter-window divider is emptied and the
-# shape has caps (rounded/slanted, left numbers), windows draw blocks only and a
-# neighbour-aware separator carries the seam. tmux exposes active_window_index
-# inside #{W:}, so each window knows whether its neighbour is the active one;
-# that lets the seam be bi-coloured (gapless) and the active window's caps overlay
-# both neighbours, so it reads as raised. Index math (window_index ± 1) assumes
+# Connected (powerline) ribbon: @themux_window_seam (mirrors the module connector
+# vocabulary, symbols only) picks how adjacent windows meet — | separate pills
+# (default, like a plain space between modules), <> raised (the active window's
+# caps overlay both neighbours), > right, < left, = flat. Any value but | joins
+# the list into one ribbon (needs a capped shape + left numbers, else it falls
+# back to separate pills). When connected, windows draw blocks only and
+# window-status-separator carries the seam; tmux exposes active_window_index
+# inside #{W:}, so each window knows whether its neighbour is active — that lets
+# the raised seam be bi-coloured (gapless). Index math (window_index ± 1) assumes
 # contiguous indices — pair with `renumber-windows on` to avoid gaps.
-divider=$(tmux show -gqv @themux_window_divider)
+wseam=$(tmux show -gqv @themux_window_seam); [ -n "$wseam" ] || wseam='|'
 connected=0
-[ -z "$divider" ] && [ -n "$lglyph" ] && [ "$position" = left ] && connected=1
+[ "$wseam" != "|" ] && [ -n "$lglyph" ] && [ "$position" = left ] && connected=1
 # First window index (for the ribbon's opening left cap). With contiguous indices
 # it is base-index; baked as a literal so the draw-time test stays cheap.
 base=$(tmux show -gwv base-index 2>/dev/null); [ -n "$base" ] || base=0
@@ -169,15 +172,26 @@ render_side cw current_ window-status-current-format
 # and both states' colours are theme constants), so the seam is gapless and the
 # active window's caps overlay both neighbours (raised).
 if [ "$connected" = 1 ]; then
-  w_rcol="#{?#{E:@_tmx_w_text},${W_TCAP},${W_ICAP}}"   # this (inactive) window's right colour
+  w_rcol="#{?#{E:@_tmx_w_text},${W_TCAP},${W_ICAP}}"    # this window's right colour
   cw_rcol="#{?#{E:@_tmx_cw_text},${CW_TCAP},${CW_ICAP}}" # the active window's right colour
   nextact="#{==:#{active_window_index},#{e|+:#{window_index},1}}"
-  sep="#{?window_active,"
-  sep+="#[fg=${cw_rcol}]#[bg=${W_ICAP}]${rglyph},"
-  sep+="#{?${nextact},"
-  sep+="#[fg=${CW_ICAP}]#[bg=${w_rcol}]${lglyph},"
-  sep+="#[fg=${w_rcol}]#[bg=${W_ICAP}]${rglyph}"
-  sep+="}}"
+  this_rcol="#{?window_active,${cw_rcol},${w_rcol}}"     # right colour of THIS window
+  next_lcol="#{?${nextact},${CW_ICAP},${W_ICAP}}"        # left colour of the NEXT window
+  block=$(printf '\342\226\210')                          # █ — the squared seam glyph
+  case "$wseam" in
+    '>') sep="#[fg=${this_rcol}]#[bg=${next_lcol}]${rglyph}" ;; # this penetrates right
+    '<') sep="#[fg=${next_lcol}]#[bg=${this_rcol}]${lglyph}" ;; # next penetrates left
+    '=') sep="#[fg=${this_rcol}]${block}" ;;                    # flat: a 1-cell █ divider,
+                                                               # so windows keep their width
+    *)   # <> raised: the active window's caps overlay both neighbours
+      sep="#{?window_active,"
+      sep+="#[fg=${cw_rcol}]#[bg=${W_ICAP}]${rglyph},"
+      sep+="#{?${nextact},"
+      sep+="#[fg=${CW_ICAP}]#[bg=${w_rcol}]${lglyph},"
+      sep+="#[fg=${w_rcol}]#[bg=${W_ICAP}]${rglyph}"
+      sep+="}}"
+      ;;
+  esac
   tmux set -g window-status-separator "$sep"
 fi
 

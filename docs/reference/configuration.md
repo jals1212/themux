@@ -132,7 +132,8 @@ independent.
 | --- | --- | --- |
 | `@themux_module_divider` | `" "` | Text the `|` inserts between modules (includes its own padding). |
 | `@themux_module_divider_color` | `#{@thm_overlay_0}` | Its color. |
-| `@themux_window_divider` | `" "` | `window-status-separator` between windows. |
+| `@themux_window_seam` | `\|` | How windows meet (symbols, like the module connectors): `\|` separate pills · `<>` raised ribbon · `>` / `<` directional ribbon · `=` flat ribbon. Any but `\|` connects the list (capped shape + left numbers). |
+| `@themux_window_divider` | `" "` | Separator between windows, used in the `\|` (separate) case. |
 | `@themux_window_divider_color` | `#{@thm_overlay_0}` | Its color. |
 
 Extra named dividers can be created from `utils/divider.conf` and used as a
