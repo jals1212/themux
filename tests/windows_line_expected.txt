@@ -32,5 +32,8 @@ flush_left_mprr 2
 flush_right_mpll 1
 flush_right_mprr 1
 
+flush_both_mpll 2
+flush_both_mprr 2
+
 flush_off_mpll 1
 flush_off_mprr 2

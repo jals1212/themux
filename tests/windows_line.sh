@@ -124,6 +124,17 @@ run_layout
 printf "\nflush_right_mpll "; glyphs "$mpll"   # head kept -> 1
 printf "flush_right_mprr "; glyphs "$mprr"     # tail dropped -> 1
 
+# "both" drops the left zone's first head cap AND the right zone's last tail cap
+# in one config. For "session>host / / cpu<ram": off gives 3 mpll / 3 mprr; both
+# drops the left head (mpll) and the right tail (mprr) -> 2 / 2.
+tmux set -g @themux_status_flush_edges "both"
+tmux set -g @themux_status_line_1 "session>host / / cpu<ram"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "\nflush_both_mpll "; glyphs "$mpll"   # 2 (left head dropped)
+printf "flush_both_mprr "; glyphs "$mprr"     # 2 (right tail dropped)
+
 # "off" (default) keeps both outer caps.
 tmux set -g @themux_status_flush_edges "off"
 tmux set -g @themux_status_line_1 "session>host"

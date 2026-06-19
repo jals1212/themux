@@ -21,3 +21,11 @@ tmux set -g @themux_module_notch "on"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 print_option @themux_module_application | sed -E 's/(bash|fish|zsh)/<application>/'
+
+# Powerline shape: the module's outer caps are the powerline arrows (E0B2 left,
+# E0B0 right) instead of the rounded bulges.
+tmux set -g @themux_module_shape "powerline"
+tmux set -g @themux_module_notch "off"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+print_option @themux_module_application | sed -E 's/(bash|fish|zsh)/<application>/'
