@@ -77,8 +77,9 @@ set -g @themux_module_text      "naked"  # the text block (windows: _name)
 set -g @themux_module_notch     "off"
 ```
 
-- **shape** — `squared`, `rounded`, `slanted` (blocks with square / round /
-  slant caps) or `unstyled` to leave the item untouched and build it by hand
+- **shape** — `squared`, `rounded`, `slanted`, `powerline` (blocks with square /
+  round / slant / arrow caps — `powerline` is the classic powerline/lualine
+  chevron `  `) or `unstyled` to leave the item untouched and build it by hand
   with the `@thm_*` palette.
 - **indicator / text** — the icon-or-number block and the text block each take a
   style: `solid` (accent block), `soft` (grey block), `subtle` (grey block,
@@ -97,12 +98,52 @@ The status line is built from up to five rows (`@themux_status_line_1` … `_5`)
 Each row is split into zones by `/` — none gives one left column, one gives
 **left + right**, two gives left / center / right. A zone is a list of component
 names (a token `NAME` becomes the `@themux_module_NAME` segment) or the special
-token `windows` (the window list). Separate modules with a space; put a `|`
-between two of them to insert the modules divider:
+token `windows` (the window list).
+
+#### Connecting modules
+
+The character **between two module names** decides whether they stay separate or
+merge into one shape, and how the seam between them looks. Below, `( )` stands for
+the shape's caps (rounded half-circles, powerline arrows, …):
+
+| Connector | Meaning | Sketch |
+| --- | --- | --- |
+| space | two separate pills | `( a )( b )` |
+| `=` | merge — flat (squared) seam | `( a │ b )` |
+| `>` | merge — seam points right (`a` into `b`) | `( a > b )` |
+| `<` | merge — seam points left (`b` into `a`) | `( a < b )` |
+| `\|` | separate pills + the modules divider | `( a ) · ( b )` |
+
+`=`, `>` and `<` build a **group**: a run of modules under a *single* pair of
+outer caps, with the chosen seam between each. A space or a `|` ends the group, so
+the next module opens a fresh pill.
 
 ```sh
-set -g @themux_status_line_1 "session|application|directory / windows / gitmux|ram|date_time"
+#                             one merged pill   own pill
+set -g @themux_status_line_1 "cpu=ram=swap / windows / gitmux"
 ```
+
+Directions mix freely: `a>b<c` makes `b` the peak (it pushes into both
+neighbours), `a<b>c` makes it the valley.
+
+> [!NOTE]
+> Connectors need a shape with caps — `rounded`, `slanted` or `powerline`.
+> `squared` and `unstyled` have no caps, so every module is its own block and
+> `=`/`>`/`<` collapse to a plain space.
+
+#### Flushing to the terminal edge
+
+For the lualine/nvim look — flat outer edges with powerline seams inside — set
+`@themux_status_flush_edges`. It drops the bar's outermost edge cap so that block
+fills solid to the terminal border instead of tapering:
+
+```sh
+set -g @themux_module_shape "powerline"
+set -g @themux_status_flush_edges "both"   # off | left | right | both
+```
+
+`left` flushes the left zone's first group, `right` the right zone's last group.
+Capped shapes only (`squared`/`unstyled` already fill the edge).
 
 Rows render up to the last non-empty line, so a blank (`""`) line in between
 becomes an empty row — handy for spacing. The window list aligns to its zone:
@@ -123,12 +164,12 @@ set -g @themux_window_divider " "                     # window-status-separator
 set -g @themux_window_divider_color "#{@thm_overlay_0}"
 ```
 
-Emptying a divider connects the items into a continuous powerline ribbon:
-modules joined with `|` (or listed adjacent) merge into one run, and the window
-list becomes a single ribbon with the active window raised over its neighbours.
+Modules merge into a powerline run only through the explicit `=`/`>`/`<`
+connectors above. Emptying the **window** divider connects the window list into
+a continuous ribbon with the active window raised over its neighbours.
 
 > [!NOTE]
-> The connected window ribbon (rounded/slanted shapes) colours each seam from
+> The connected window ribbon (rounded/slanted/powerline shapes) colours each seam from
 > its neighbour and caps the first window using the window index, both of which
 > assume **contiguous** window indices. Pair it with:
 >
@@ -150,7 +191,7 @@ pane border styles *after* `themux.tmux` if you want them (the
 
 ```sh
 set -g @themux_pane_status "top"                                  # off | top | bottom
-set -g @themux_pane_shape "rounded"                              # squared | rounded | slanted | unstyled
+set -g @themux_pane_shape "rounded"                              # squared | rounded | slanted | powerline | unstyled
 set -g @themux_pane_indicator_highlight_color "#{@thm_green}"     # active number accent
 set -g @themux_pane_text_highlight_color "#{@thm_green}"          # active label accent
 set -g @themux_pane_indicator_highlight "both"                    # off | bg | fg | both

@@ -34,7 +34,7 @@ set -g @themux_module_notch     "off"
 
 | Prop | Values | Default |
 | --- | --- | --- |
-| `@themux_<item>_shape` | `squared` · `rounded` · `slanted` · `unstyled` | `squared` |
+| `@themux_<item>_shape` | `squared` · `rounded` · `slanted` · `powerline` · `unstyled` | `squared` |
 | `@themux_<item>_indicator` | `solid` · `soft` · `subtle` · `naked` | `solid` |
 | `@themux_<item>_text` † | `solid` · `soft` · `subtle` · `naked` | `soft` |
 | `@themux_<item>_notch` | `on` · `off` | `off` |
@@ -50,9 +50,10 @@ set -g @themux_module_notch     "off"
 item's *highlight* color — for windows/panes that is the active item, for
 modules the alert state (cpu/ram threshold, session prefix).
 
-**shape** — `squared` / `rounded` / `slanted` are blocks with square / round /
-slant caps; `unstyled` makes themux leave the item alone so you build it by hand
-with the `@thm_*` palette.
+**shape** — `squared` / `rounded` / `slanted` / `powerline` are blocks with
+square / round / slant / arrow (`  `, the classic powerline/lualine chevron)
+caps; `unstyled` makes themux leave the item alone so you build it by hand with
+the `@thm_*` palette.
 
 **indicator / text** — the icon-or-number block and the text block each take a
 style:
@@ -87,15 +88,30 @@ switch on the active item (windows → `@themux_window_indicator_color` /
 | Option | Default | Effect |
 | --- | --- | --- |
 | `@themux_status_background` | `default` | `default` (theme color), `none` (transparent), or any hex / `#{@thm_*}`. |
+| `@themux_status_flush_edges` | `off` | `off` · `left` · `right` · `both` — drop the bar's outer edge cap so its block fills to the terminal border (nvim-style; capped shapes only). |
 
 ---
 
 ### Status layout
 
 The bar is built from up to five rows. Each is `"<left> / <center> / <right>"`;
-a zone is a module list (token `NAME` → the `@themux_module_NAME` segment, `|`
-inserts a divider, space = adjacent) or the special token `windows`. Blank zones
-render nothing; the number of non-empty rows sets how many status lines show.
+a zone is a module list (token `NAME` → the `@themux_module_NAME` segment) or the
+special token `windows`. Blank zones render nothing; the number of non-empty rows
+sets how many status lines show.
+
+The character between two modules sets how they join:
+
+| Connector | Result |
+| --- | --- |
+| space | separate pills, each with its own caps |
+| `=` | one merged pill, flat (squared) seam |
+| `>` | merged, seam points right (left module into right) |
+| `<` | merged, seam points left (right module into left) |
+| `\|` | separate pills + the modules divider |
+
+`=`/`>`/`<` build one capped **group** (a space or `|` breaks it) and need a
+capped shape — `rounded`, `slanted` or `powerline`. With `squared`/`unstyled`
+they collapse to a plain space.
 
 | Option | Default | Effect |
 | --- | --- | --- |
@@ -103,7 +119,7 @@ render nothing; the number of non-empty rows sets how many status lines show.
 | `@themux_status_line_2` … `_5` | `""` | Extra rows (blank = unused). |
 
 ```sh
-set -g @themux_status_line_1 "session|application|directory / windows / gitmux|ram|date_time"
+set -g @themux_status_line_1 "session>application / windows / gitmux<cpu<ram"
 set -g @themux_status_line_2 " / windows / "   # windows on their own row
 ```
 

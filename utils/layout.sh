@@ -3,9 +3,10 @@
 #
 # Each line is split into zones by "/": none -> one left column, one ->
 # left + right, two -> left / center / right. A zone is a module list (token
-# NAMEs, "|" inserts the divider, space = adjacent) or the special token
-# "windows". Rows render up to the last non-empty line, so a blank ("") line in
-# between becomes an empty row (status off when every line is empty).
+# NAMEs; "|" inserts the divider, a space leaves each module its own pill, and
+# =/>/< merge modules into one capped group) or the special token "windows".
+# Rows render up to the last non-empty line, so a blank ("") line in between
+# becomes an empty row (status off when every line is empty).
 
 # tmux-cpu only interpolates its literals (#{ram_percentage}, ...) into
 # status-left/right, so surface them into their #(script) form here — that lets
@@ -17,19 +18,30 @@ type do_interpolation >/dev/null 2>&1 || do_interpolation() { printf '%s' "$1"; 
 
 windows_block=$(tmux show -gqv @_tmx_fmt_windows)
 
-# Powerline cap glyphs for the module shape. Empty for squared/unstyled, where
-# modules abut as their own full pills; rounded/slanted connect adjacent modules.
+# Powerline cap glyphs for the module shape. Empty for squared/unstyled (no caps,
+# so the =/>/< connectors are inert and every module stays its own full pill).
 mshape=$(tmux show -gqv @themux_module_shape)
 case "$mshape" in
-  rounded) mpll=$(printf '\356\202\266'); mprr=$(printf '\356\202\264') ;;
-  slanted) mpll=$(printf '\356\202\272'); mprr=$(printf '\356\202\274') ;;
-  *)       mpll=""; mprr="" ;;
+  rounded)   mpll=$(printf '\356\202\266'); mprr=$(printf '\356\202\264') ;;
+  slanted)   mpll=$(printf '\356\202\272'); mprr=$(printf '\356\202\274') ;;
+  powerline) mpll=$(printf '\356\202\262'); mprr=$(printf '\356\202\260') ;;
+  *)         mpll=""; mprr="" ;;
 esac
 
-# Emptying the divider ("") connects across "|" too: the divider token becomes
-# transparent so modules on either side join the same run, mirroring how an
-# empty window divider connects the window list.
+# The divider "|" inserts between modules; emptying it ("") just drops the
+# segment (modules stay separate pills — merging is done with =/>/< instead).
 mdiv=$(tmux show -gqv @themux_module_divider)
+
+# Flush the bar's outer caps to the terminal edge (nvim-style): off|left|right|
+# both. The left zone's first group flushes left, the right zone's last group
+# flushes right; the centre zone never touches an edge.
+flush_edges=$(tmux show -gqv @themux_status_flush_edges); [ -n "$flush_edges" ] || flush_edges=off
+left_edge=none; right_edge=none
+case "$flush_edges" in
+  left)  left_edge=left ;;
+  right) right_edge=right ;;
+  both)  left_edge=left; right_edge=right ;;
+esac
 
 # tmux-cpu modules (cpu/ram) carry #{cpu_*}/#{ram_*} literals that only resolve
 # in status-left/right, so do_interpolation rewrites them to #(...) form. These
@@ -59,37 +71,44 @@ full_pill() { # $1 module -> its own pill, caps included (inlined for tmux-cpu)
   fi
 }
 
-# Connect a run of adjacent modules ($@, $1 = zone alignment) powerline-style: a
-# left cap, each module's bare core, a connector between neighbours, then a right
-# cap. The flow follows the zone: left/centre runs taper left-to-right (the left
-# module curves into the right); a right-aligned rounded run mirrors it so the
-# seam bulges the other way (the right module curves into the left). Only the
-# inner connector changes — the outer caps are a pill in either direction.
+# Connect a GROUP of modules (joined in the layout string by =, > or <) into one
+# powerline strip: a left cap, each module's bare core, a per-seam connector, a
+# right cap. $1 is the space-joined module list, $2 the parallel connector list
+# (one token per module; the first is "head"). Each seam follows the right
+# module's incoming connector: > = the left module's colour penetrates right
+# (mprr glyph); < = this module penetrates left (mpll glyph); = = flat, the bare
+# cores abut as a squared seam (no glyph). The outer caps are always the shape's
+# caps, regardless of the inner seams; $3/$4 (0/1) flush the left/right outer cap
+# — dropping it so the edge block fills to the terminal border (nvim-style).
 #
 # A conditional module (@themux_<name>_when, e.g. gitmux/zoom) only joins while
 # its condition holds, at ANY position: the head cap reflows to whichever module
 # is first visible, the connector colour falls back to the previous visible
-# module, and a run whose every module is hidden collapses to nothing (no stray
+# module, and a group whose every module is hidden collapses to nothing (no stray
 # cap left on the bar).
 powerline_run() {
-  local dir="$1"; shift
-  local mirror=0
-  [ "$mshape" = rounded ] && [ "$dir" = right ] && mirror=1
+  local -a mods conns
+  read -ra mods <<<"$1"
+  read -ra conns <<<"$2"
+  local fl="${3:-0}" fr="${4:-0}"   # flush the left/right outer cap to the edge
 
-  local m cond lcol lbg rcol rbg core head conn seg
+  local i m c cond lcol lbg rcol rbg core head conn seg
   local out2="" prc="" prb=""   # prev visible module's right colour / right bg
   local shown="0" shown_fixed=1 # shown: anything visible yet? (fixed while constant)
-  for m in "$@"; do
+  for i in "${!mods[@]}"; do
+    m="${mods[i]}"; c="${conns[i]}"
     cond=$(tmux show -gqv "@themux_${m}_when")
     lcol=$(mod_field "$m" lcol); lbg=$(mod_field "$m" lbg)
     rcol=$(mod_field "$m" rcol); rbg=$(mod_field "$m" rbg)
     core=$(mod_core "$m")
-    head="#[fg=${lcol},bg=default]${mpll}${core}"
-    if [ "$mirror" = 1 ]; then
-      conn="#[fg=${lcol},bg=${prb}]${mpll}${core}"
-    else
-      conn="#[fg=${prc},bg=${lbg}]${mprr}${core}"
-    fi
+    # flush_left drops the opening cap so the first block fills the terminal edge.
+    if [ "$fl" = 1 ]; then head="${core}"; else head="#[fg=${lcol},bg=default]${mpll}${core}"; fi
+    # The seam glyph follows this module's incoming connector token.
+    case "$c" in
+      lt) conn="#[fg=${lcol},bg=${prb}]${mpll}${core}" ;; # < penetrate left
+      eq) conn="${core}" ;;                               # = flat squared seam
+      *)  conn="#[fg=${prc},bg=${lbg}]${mprr}${core}" ;;  # > penetrate right
+    esac
 
     # Head cap for the first visible module, connector once something precedes
     # it. While "shown" is still constant the choice is static; once a
@@ -121,60 +140,95 @@ powerline_run() {
     fi
   done
 
-  # Right cap, only when the run has a visible module (a pill close either way).
-  if [ "$shown_fixed" = 1 ]; then
-    [ "$shown" = 1 ] && out2+="#[fg=${prc},bg=default]${mprr}"
-  else
-    tmux set -g "@_tmx_plt_${m}" "#[fg=${prc},bg=default]${mprr}"
-    out2+="#{?${shown},#{E:@_tmx_plt_${m}},}"
+  # Right cap, only when the group has a visible module (a pill close either way).
+  # flush_right drops it so the last block fills the terminal edge instead.
+  if [ "$fr" != 1 ]; then
+    if [ "$shown_fixed" = 1 ]; then
+      [ "$shown" = 1 ] && out2+="#[fg=${prc},bg=default]${mprr}"
+    else
+      tmux set -g "@_tmx_plt_${m}" "#[fg=${prc},bg=default]${mprr}"
+      out2+="#{?${shown},#{E:@_tmx_plt_${m}},}"
+    fi
   fi
   printf '%s' "$out2"
 }
 
-# Expand one zone ($1) into a format fragment, aligned per $2 (left|centre|right).
-# Consecutive modules connect powerline-style (rounded/slanted); a squared shape
-# keeps its own full pill. A non-empty '|' divider breaks the run and draws the
-# divider; an empty divider connects through it (see mdiv above).
+# Expand one zone ($1) into a format fragment, aligned per $2 (left|centre|right),
+# with $3 = which side touches the terminal and should flush (left|right|none).
+# Modules connect only through explicit tokens in the layout string: = (flat
+# merge, squared seam), > (left penetrates right) and < (right penetrates left)
+# join modules into one capped group; a plain space leaves each module its own
+# full pill; "|" separates and draws the divider. squared/unstyled has no caps,
+# so the connectors are inert there — every module is its own pill.
+#
+# Tokens are first collected into items (G=group, D=divider, W=windows) so the
+# first/last *group* is known: that is the one whose outer cap flushes to the
+# terminal edge when $3 asks for it (capped shapes only; a leading/trailing
+# divider or window list owns the edge instead, so no module flushes there).
 expand_zone() {
-  local zone align out token run=()
-  zone="${1//|/ divider }"
-  align="$2"
-  out=""
-  flush() {
-    case ${#run[@]} in
-      0) ;;
-      1) out+="$(full_pill "${run[0]}")" ;;
-      *) out+="$(powerline_run "$align" "${run[@]}")" ;;
-    esac
-    run=()
+  local zone align edge token pending i out fl fr fg lg last
+  local -a it_type it_mods it_conns grp_mods grp_conns m
+  align="$2"; edge="$3"
+  pending=""
+  push_group() {
+    [ ${#grp_mods[@]} -eq 0 ] && return
+    it_type+=("G"); it_mods+=("${grp_mods[*]}"); it_conns+=("${grp_conns[*]}")
+    grp_mods=(); grp_conns=()
   }
+  # Make the connectors standalone tokens so a plain space (a group break) is
+  # told apart from an explicit join. Module names never contain these glyphs.
+  zone="$1"
+  zone="${zone//|/ __div__ }"
+  zone="${zone//>/ __gt__ }"
+  zone="${zone//</ __lt__ }"
+  zone="${zone//=/ __eq__ }"
   for token in $zone; do
     case "$token" in
-      windows)
-        flush
-        out+="${windows_block//%ALIGN%/$align}"
-        ;;
-      divider)
-        # An empty divider connects through "|": stay in the run, emit nothing.
-        if [ -n "$mdiv" ]; then
-          flush
-          out+="#{E:@_tmx_module_divider}"
-        fi
+      windows) push_group; it_type+=("W"); it_mods+=(""); it_conns+=(""); pending="" ;;
+      __div__) push_group; it_type+=("D"); it_mods+=(""); it_conns+=(""); pending="" ;;
+      __gt__|__lt__|__eq__)
+        # Joins the next module to the open group; nothing on its left = no-op.
+        [ ${#grp_mods[@]} -ge 1 ] && pending="${token//_/}"
         ;;
       *)
-        # squared/unstyled has no connector glyph, so each module is its own
-        # pill; rounded/slanted accumulate into a connected run (conditional
-        # modules connect through draw-time gating inside powerline_run).
+        # squared/unstyled has no caps, so connectors are inert: each module is
+        # its own one-module group. Otherwise a pending connector extends the
+        # open group; a plain space starts a fresh one (its "head").
         if [ -z "$mpll" ]; then
-          flush
-          out+="$(full_pill "$token")"
+          push_group; it_type+=("G"); it_mods+=("$token"); it_conns+=("head"); pending=""
+        elif [ -n "$pending" ]; then
+          grp_mods+=("$token"); grp_conns+=("$pending"); pending=""
         else
-          run+=("$token")
+          push_group; grp_mods+=("$token"); grp_conns+=("head")
         fi
         ;;
     esac
   done
-  flush
+  push_group
+
+  # Flushable groups are the literal first/last item, and only if a group.
+  fg=-1; lg=-1; last=$(( ${#it_type[@]} - 1 ))
+  [ "$last" -ge 0 ] && [ "${it_type[0]}" = G ] && fg=0
+  [ "$last" -ge 0 ] && [ "${it_type[last]}" = G ] && lg=$last
+
+  out=""
+  for i in "${!it_type[@]}"; do
+    case "${it_type[i]}" in
+      W) out+="${windows_block//%ALIGN%/$align}" ;;
+      D) [ -n "$mdiv" ] && out+="#{E:@_tmx_module_divider}" ;;
+      G)
+        fl=0; fr=0
+        [ -n "$mpll" ] && [ "$edge" = left ]  && [ "$i" = "$fg" ] && fl=1
+        [ -n "$mpll" ] && [ "$edge" = right ] && [ "$i" = "$lg" ] && fr=1
+        read -ra m <<<"${it_mods[i]}"
+        if [ ${#m[@]} -eq 1 ] && [ "$fl" = 0 ] && [ "$fr" = 0 ]; then
+          out+="$(full_pill "${m[0]}")"
+        else
+          out+="$(powerline_run "${it_mods[i]}" "${it_conns[i]}" "$fl" "$fr")"
+        fi
+        ;;
+    esac
+  done
   printf '%s' "$out"
 }
 
@@ -203,9 +257,9 @@ for i in 1 2 3 4 5; do
   # "nolist" leaves the window-list region the "windows" token turns on, so a
   # zone after it still pins to its own edge (otherwise the right zone stays
   # glued to the window list instead of the right edge).
-  fmt="#[nolist align=left]$(expand_zone "$left" left)"
-  fmt+="#[nolist align=centre]$(expand_zone "$center" centre)"
-  fmt+="#[nolist align=right]$(expand_zone "$right" right)"
+  fmt="#[nolist align=left]$(expand_zone "$left" left "$left_edge")"
+  fmt+="#[nolist align=centre]$(expand_zone "$center" centre none)"
+  fmt+="#[nolist align=right]$(expand_zone "$right" right "$right_edge")"
 
   tmux set -g "status-format[$((i - 1))]" "$fmt"
 done

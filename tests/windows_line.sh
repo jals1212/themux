@@ -44,34 +44,91 @@ run_layout
 printf "\nsingle_status "
 tmux show -gv status
 
-# An empty module divider connects across "|" (rounded): the run joins into one
-# powerline run — bare cores, no divider segment between the modules.
-tmux set -g @themux_status_line_1 "session|application"
+# "=" merges two modules into one capped group built from their bare cores — a
+# flat (squared) seam, no divider between them even with a non-empty divider set.
+tmux set -g @themux_status_line_1 "session=application"
 tmux set -g @themux_module_shape "rounded"
-tmux set -g @themux_module_divider ""
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
-printf "\nconnect_uses_core "
+printf "\nmerge_uses_core "
 tmux show -gv 'status-format[0]' | grep -c '@_tmx_module_session_core' || true
-printf "connect_no_divider "
+printf "merge_no_divider "
 tmux show -gv 'status-format[0]' | grep -c '@_tmx_module_divider' || true
 
 # Lazy render: a module never referenced in any status line is not rendered.
 printf "unused_not_rendered "
 tmux show -gqv @themux_module_weather | grep -c . || true
 
-# Powerline direction follows the zone: a left run taper L->R (one mpll glyph,
-# the head cap), a right rounded run mirrors so the inner seam also bulges left
-# (two mpll glyphs: head + seam).
-tmux set -g @themux_status_line_1 "session host / / user uptime"
+# Per-seam connectors (rounded): ">" draws a right-cap seam (mprr), "<" a left-cap
+# seam (mpll), "=" no seam glyph (flat). Outer caps are always the shape's caps.
+# Counting inline glyphs over status-format[0] counts caps+seams only — module
+# cores are references, so their glyphs are not inlined.
+mpll=$(printf '\356\202\266')   # rounded left cap  (E0B6)
+mprr=$(printf '\356\202\264')   # rounded right cap (E0B4)
+# `|| true` so a zero count (grep exit 1) does not trip the harness ERR trap.
+glyphs() { tmux show -gv 'status-format[0]' | { grep -o "$1" || true; } | wc -l | tr -d ' '; }
 tmux set -g @themux_module_shape "rounded"
+
+# ">" : head (mpll) + right-penetrate seam (mprr) + tail (mprr) = 1 mpll, 2 mprr
+tmux set -g @themux_status_line_1 "session>host"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
-mpll=$(printf '\356\202\266')
-fmt=$(tmux show -gv 'status-format[0]')
-printf "\nleft_run_mpll "
-printf '%s' "$fmt" | sed -E 's/.*nolist align=left\]//; s/#\[nolist align=centre.*//' | grep -o "$mpll" | wc -l | tr -d ' '
-printf "right_run_mpll "
-printf '%s' "$fmt" | sed 's/.*nolist align=right]//' | grep -o "$mpll" | wc -l | tr -d ' '
+printf "\ngt_mpll "; glyphs "$mpll"
+printf "gt_mprr "; glyphs "$mprr"
+
+# "<" : head (mpll) + left-penetrate seam (mpll) + tail (mprr) = 2 mpll, 1 mprr
+tmux set -g @themux_status_line_1 "session<host"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "\nlt_mpll "; glyphs "$mpll"
+printf "lt_mprr "; glyphs "$mprr"
+
+# "=" : head (mpll) + flat seam (none) + tail (mprr) = 1 mpll, 1 mprr
+tmux set -g @themux_status_line_1 "session=host"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "\neq_mpll "; glyphs "$mpll"
+printf "eq_mprr "; glyphs "$mprr"
+
+# A plain space breaks the group: each module is its own full pill (a reference),
+# so no run core is emitted.
+tmux set -g @themux_status_line_1 "session host"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "\nspace_session_pill "
+tmux show -gv 'status-format[0]' | grep -c 'E:@themux_module_session}' || true
+printf "space_no_run_core "
+tmux show -gv 'status-format[0]' | grep -c '@_tmx_module_session_core' || true
+
+# Flush edges (nvim-style): the edge group's outer cap is dropped so its block
+# fills to the terminal border. "left" drops the left zone's first head cap
+# (one fewer mpll); "right" drops the right zone's last tail cap (one fewer mprr).
+tmux set -g @themux_status_flush_edges "left"
+tmux set -g @themux_status_line_1 "session>host"   # left zone
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "\nflush_left_mpll "; glyphs "$mpll"   # head dropped -> 0
+printf "flush_left_mprr "; glyphs "$mprr"     # seam + tail kept -> 2
+
+tmux set -g @themux_status_flush_edges "right"
+tmux set -g @themux_status_line_1 " / session>host"   # right zone
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "\nflush_right_mpll "; glyphs "$mpll"   # head kept -> 1
+printf "flush_right_mprr "; glyphs "$mprr"     # tail dropped -> 1
+
+# "off" (default) keeps both outer caps.
+tmux set -g @themux_status_flush_edges "off"
+tmux set -g @themux_status_line_1 "session>host"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "\nflush_off_mpll "; glyphs "$mpll"     # 1
+printf "flush_off_mprr "; glyphs "$mprr"       # 2

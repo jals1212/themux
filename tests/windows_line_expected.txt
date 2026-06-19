@@ -10,9 +10,27 @@ two_line2_windows_right 1
 
 single_status on
 
-connect_uses_core 1
-connect_no_divider 0
+merge_uses_core 1
+merge_no_divider 0
 unused_not_rendered 0
 
-left_run_mpll 1
-right_run_mpll 2
+gt_mpll 1
+gt_mprr 2
+
+lt_mpll 2
+lt_mprr 1
+
+eq_mpll 1
+eq_mprr 1
+
+space_session_pill 1
+space_no_run_core 0
+
+flush_left_mpll 0
+flush_left_mprr 2
+
+flush_right_mpll 1
+flush_right_mprr 1
+
+flush_off_mpll 1
+flush_off_mprr 2
