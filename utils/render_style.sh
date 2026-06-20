@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Shared style resolver for the variant grammar (v3). Each styleable sub-part of
-# an item — the indicator (icon/number) and the text — picks a named style; this
+# an item — the leading (icon/number) and the text — picks a named style; this
 # maps that name plus the item's colour roles to a (background, foreground) pair.
 # One source of truth, sourced by utils/window_render.sh and utils/pane_render.sh.
 #

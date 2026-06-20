@@ -5,9 +5,9 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 source "${script_dir}/helpers.sh"
 
 # Tests the naked status module and window status style
-tmux set -g @themux_module_indicator "naked"
+tmux set -g @themux_module_leading "naked"
 tmux set -g @themux_module_text "naked"
-tmux set -g @themux_window_indicator "naked"
+tmux set -g @themux_window_leading "naked"
 tmux set -g @themux_window_text "naked"
 # A module renders only when referenced in a status line (lazy render).
 tmux set -g @themux_status_line_1 "application session zoom"

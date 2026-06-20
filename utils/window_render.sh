@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Assemble window-status-format and window-status-current-format from the v3
-# props @themux_window_{shape,indicator,name,notch}, mirroring pane_render.sh:
-# the indicator (number) and name blocks are styled independently through the
+# props @themux_window_{shape,leading,name,notch}, mirroring pane_render.sh:
+# the leading (number) and name blocks are styled independently through the
 # shared resolver. The two sides differ only by their accent/surface brightness
 # (inactive: number_color/text_color; active: current_number_color/
 # current_text_color). Load-time colours are resolved now; draw-time refs (the
@@ -15,15 +15,15 @@ expand() {
   tmux show -gv @_tmx_render_tmp
 }
 
-position=$(themux_prop window indicator_position)
-indicator=$(themux_prop window indicator)
+position=$(themux_prop window leading_position)
+leading=$(themux_prop window leading)
 name_style=$(themux_prop window text)
 notch=$(themux_prop window notch)
 shape=$(themux_prop window shape)
 # Active highlight per part/channel (off|bg|fg|both, default both): which of the
 # active window's colours actually switch; the rest stay frozen at the inactive
 # colour. Applied only to the active side (cw), mixing active vs inactive below.
-ind_hl=$(themux_prop window indicator_highlight); [ -n "$ind_hl" ] || ind_hl=both
+lead_hl=$(themux_prop window leading_highlight); [ -n "$lead_hl" ] || lead_hl=both
 txt_hl=$(themux_prop window text_highlight); [ -n "$txt_hl" ] || txt_hl=both
 crust=$(expand "#{@thm_crust}")
 fg=$(expand "#{@thm_fg}")
@@ -85,16 +85,16 @@ render_side() {
   # name each resolve from their own accent; the inactive side uses the base
   # colours, the active side the _highlight_color variants (the toggles below
   # then freeze the channels they exclude).
-  local ind_acc txt_acc
+  local lead_acc txt_acc
   if [ "$p" = w ]; then
-    ind_acc=$(expand "#{E:@themux_window_indicator_color}")
+    lead_acc=$(expand "#{E:@themux_window_leading_color}")
     txt_acc=$(expand "#{E:@themux_window_text_color}")
   else
-    ind_acc=$(expand "#{E:@themux_window_indicator_highlight_color}")
+    lead_acc=$(expand "#{E:@themux_window_leading_highlight_color}")
     txt_acc=$(expand "#{E:@themux_window_text_highlight_color}")
   fi
   surface=$(expand "#{E:@themux_window_background_color}")
-  resolve_style "$indicator" "$ind_acc" "$surface" "$crust" "$fg"
+  resolve_style "$leading" "$lead_acc" "$surface" "$crust" "$fg"
   ibg="$RS_BG" ifg="$RS_FG"
   resolve_style "$name_style" "$txt_acc" "$surface" "$crust" "$fg"
   tbg="$RS_BG" tfg="$RS_FG"
@@ -109,7 +109,7 @@ render_side() {
   if [ "$p" = w ]; then
     W_IBG="$ibg" W_IFG="$ifg" W_TBG="$tbg" W_TFG="$tfg" W_ICAP="$icap" W_TCAP="$tcap"
   else
-    case "$ind_hl" in
+    case "$lead_hl" in
       bg)  ifg="$W_IFG" ;;
       fg)  ibg="$W_IBG" icap="$W_ICAP" ;;
       off) ibg="$W_IBG" ifg="$W_IFG" icap="$W_ICAP" ;;

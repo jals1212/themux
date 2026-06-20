@@ -72,7 +72,7 @@ Every item of the UI — status modules, the window list, panes — is a
 
 ```sh
 set -g @themux_module_shape     "rounded"
-set -g @themux_module_indicator "solid"  # the icon/number block
+set -g @themux_module_leading "solid"  # the icon/number block
 set -g @themux_module_text      "naked"  # the text block (windows: _name)
 set -g @themux_module_notch     "off"
 ```
@@ -81,12 +81,12 @@ set -g @themux_module_notch     "off"
   round / slant / arrow caps — `powerline` is the classic powerline/lualine
   chevron `  `) or `unstyled` to leave the item untouched and build it by hand
   with the `@thm_*` palette.
-- **indicator / text** — the icon-or-number block and the text block each take a
+- **leading / text** — the icon-or-number block and the text block each take a
   style: `solid` (accent block), `soft` (grey block), `subtle` (grey block,
   accent text) or `naked` (transparent, accent text — pair with
   `@themux_status_background "none"`). A naked block keeps the shape's caps as an
-  outline, so `rounded` indicator + `naked` text reads as a capsule.
-- **notch** — `on` makes the indicator↔text seam inherit the shape's cap instead
+  outline, so `rounded` leading + `naked` text reads as a capsule.
+- **notch** — `on` makes the leading↔text seam inherit the shape's cap instead
   of a flat edge.
 
 The text-block **style** prop is `@themux_<item>_text` for all three items; on
@@ -95,8 +95,8 @@ windows the name *content* lives in `@themux_window_name`.
 Each of these per-item props defaults from a shared `@themux_all_<prop>`: `set -g
 @themux_all_shape "rounded"` shapes **every** item at once, and a per-item value
 (e.g. `@themux_window_shape "powerline"`) overrides it for that item. Cascadable
-props: `shape`, `indicator`, `text`, `notch`, `indicator_position`,
-`indicator_highlight`, `text_highlight`.
+props: `shape`, `leading`, `text`, `notch`, `leading_position`,
+`leading_highlight`, `text_highlight`.
 
 ### Composition
 The status line is built from up to five rows (`@themux_status_line_1` … `_5`).
@@ -234,11 +234,11 @@ pane border styles *after* `themux.tmux` if you want them (the
 ```sh
 set -g @themux_pane_status "top"                                  # off | top | bottom
 set -g @themux_pane_shape "rounded"                              # squared | rounded | slanted | powerline | unstyled
-set -g @themux_pane_indicator_highlight_color "#{@thm_green}"     # active number accent
+set -g @themux_pane_leading_highlight_color "#{@thm_green}"     # active number accent
 set -g @themux_pane_text_highlight_color "#{@thm_green}"          # active label accent
-set -g @themux_pane_indicator_highlight "both"                    # off | bg | fg | both
+set -g @themux_pane_leading_highlight "both"                    # off | bg | fg | both
 set -g @themux_pane_default_text "#{b:pane_current_path}"         # label text
-set -g @themux_pane_indicator_position "left"                     # left | right
+set -g @themux_pane_leading_position "left"                     # left | right
 ```
 
 ### Window names
@@ -261,16 +261,16 @@ only clears the bar itself). For a fully transparent status line, set the
 
 ```sh
 # Before loading the plugin
-set -g @themux_module_indicator "naked"
+set -g @themux_module_leading "naked"
 set -g @themux_module_text      "naked"  # transparent modules
-set -g @themux_window_indicator "naked"
+set -g @themux_window_leading "naked"
 set -g @themux_window_text      "naked"  # naked window list to match
 set -g @themux_status_background "none"
 ```
 
 `naked` is per part, so it pairs with any shape and with the other styles: a
 `rounded` shape keeps the bare bar but outlines each item with the rounded caps,
-and a `solid` indicator + `naked` text gives a colored chip with a transparent
+and a `solid` leading + `naked` text gives a colored chip with a transparent
 label. Each module's icon and text take the module color
 (`@themux_<module>_color`), so all the existing modules and per-module options
 keep working — only the rendering changes.

@@ -4,12 +4,12 @@
 # subsequent test runs.
 function reset() {
   tmux set -gu @themux_window_shape
-  tmux set -gu @themux_window_indicator
+  tmux set -gu @themux_window_leading
   tmux set -gu @themux_window_text
   tmux set -gu @themux_window_notch
   tmux set -gu @themux_window_divider
   tmux set -gu @themux_window_seam
-  tmux set -gu @themux_window_indicator_highlight
+  tmux set -gu @themux_window_leading_highlight
   tmux set -gu @themux_window_text_highlight
 }
 
@@ -34,7 +34,7 @@ print_option window-status-current-format
 
 # Test the basic style with the number on the right
 reset
-tmux set -g @themux_window_indicator_position "right"
+tmux set -g @themux_window_leading_position "right"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 
@@ -43,7 +43,7 @@ print_option window-status-current-format
 
 # Empty window text drops the text container: only the number block shows.
 reset
-tmux set -g @themux_window_indicator_position "left"
+tmux set -g @themux_window_leading_position "left"
 tmux set -g @themux_window_name ""
 tmux set -g @themux_window_current_name ""
 tmux source "${script_dir}/../themux_options.conf"
@@ -57,7 +57,7 @@ print_option window-status-current-format
 # a left cap, the last closes with a tail cap, and the raised separator is
 # neighbour-aware so the active window's caps overlay both sides.
 reset
-tmux set -g @themux_window_indicator_position "left"
+tmux set -g @themux_window_leading_position "left"
 tmux set -g @themux_window_shape "rounded"
 tmux set -g @themux_window_seam "<>"
 tmux source "${script_dir}/../themux_options.conf"
@@ -70,7 +70,7 @@ print_option window-status-separator
 # Seam styles (rounded): > a uniform right-cap seam, < a uniform left-cap seam,
 # = a flat seam (empty separator); each still connects the list.
 reset
-tmux set -g @themux_window_indicator_position "left"
+tmux set -g @themux_window_leading_position "left"
 tmux set -g @themux_window_shape "rounded"
 tmux set -g @themux_window_seam ">"
 tmux source "${script_dir}/../themux_options.conf"
@@ -78,7 +78,7 @@ tmux source "${script_dir}/../themux.conf"
 print_option window-status-separator
 
 reset
-tmux set -g @themux_window_indicator_position "left"
+tmux set -g @themux_window_leading_position "left"
 tmux set -g @themux_window_shape "rounded"
 tmux set -g @themux_window_seam "<"
 tmux source "${script_dir}/../themux_options.conf"
@@ -86,18 +86,18 @@ tmux source "${script_dir}/../themux.conf"
 print_option window-status-separator
 
 reset
-tmux set -g @themux_window_indicator_position "left"
+tmux set -g @themux_window_leading_position "left"
 tmux set -g @themux_window_shape "rounded"
 tmux set -g @themux_window_seam "="
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 print_option window-status-separator
 
-# Active highlight: indicator_highlight=off freezes the active number block at
+# Active highlight: leading_highlight=off freezes the active number block at
 # the inactive (base) colour; the name block still takes its highlight colour.
 reset
 tmux set -g @themux_window_shape "rounded"
-tmux set -g @themux_window_indicator_highlight "off"
+tmux set -g @themux_window_leading_highlight "off"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 

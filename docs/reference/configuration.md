@@ -8,8 +8,8 @@ loads** unless noted. Colors accept a hex code (`#ff0000`) or a palette token
 load, so changing an option and reloading is enough — no `kill-server`.
 
 The three UI items — **status modules**, **windows**, **panes** — are each a
-*component* styled through a few independent props: a **shape**, an
-**indicator** style, a **text** style, and a **notch** flag.
+*component* styled through a few independent props: a **shape**, a
+**leading** style, a **text** style, and a **notch** flag.
 
 ---
 
@@ -22,12 +22,12 @@ The three UI items — **status modules**, **windows**, **panes** — are each a
 ### Component props — per item
 
 Each item is styled by independent props, so any combination is valid: the
-shape draws the border/caps, the indicator (icon/number) and text blocks each
+shape draws the border/caps, the leading (icon/number) and text blocks each
 pick a style on their own, and notch shapes the seam between them.
 
 ```sh
 set -g @themux_module_shape     "rounded"
-set -g @themux_module_indicator "solid"
+set -g @themux_module_leading "solid"
 set -g @themux_module_text      "naked"  # colored icon chip, transparent label
 set -g @themux_module_notch     "off"
 ```
@@ -35,11 +35,11 @@ set -g @themux_module_notch     "off"
 | Prop | Values | Default |
 | --- | --- | --- |
 | `@themux_<item>_shape` | `squared` · `rounded` · `slanted` · `powerline` · `unstyled` | `squared` |
-| `@themux_<item>_indicator` | `solid` · `soft` · `subtle` · `naked` | `solid` |
+| `@themux_<item>_leading` | `solid` · `soft` · `subtle` · `naked` | `solid` |
 | `@themux_<item>_text` † | `solid` · `soft` · `subtle` · `naked` | `soft` |
 | `@themux_<item>_notch` | `on` · `off` | `off` |
-| `@themux_<item>_indicator_position` | `left` · `right` | `left` |
-| `@themux_<item>_indicator_highlight` | `off` · `bg` · `fg` · `both` | `both` |
+| `@themux_<item>_leading_position` | `left` · `right` | `left` |
+| `@themux_<item>_leading_highlight` | `off` · `bg` · `fg` · `both` | `both` |
 | `@themux_<item>_text_highlight` | `off` · `bg` · `fg` · `both` | `both` |
 
 `<item>` is `module`, `window`, or `pane`. † The text-block **style** prop is
@@ -49,10 +49,10 @@ set -g @themux_module_notch     "off"
 These per-item props default from a shared `@themux_all_<prop>`: set
 `@themux_all_shape "rounded"` to shape every item at once; a per-item value
 (e.g. `@themux_window_shape`) overrides it for that item. Precedence: per-item >
-`@themux_all_*` > built-in. Cascadable props: `shape`, `indicator`, `text`,
-`notch`, `indicator_position`, `indicator_highlight`, `text_highlight`.
+`@themux_all_*` > built-in. Cascadable props: `shape`, `leading`, `text`,
+`notch`, `leading_position`, `leading_highlight`, `text_highlight`.
 
-`*_indicator_highlight` / `*_text_highlight` choose which channels take the
+`*_leading_highlight` / `*_text_highlight` choose which channels take the
 item's *highlight* color — for windows/panes that is the active item, for
 modules the alert state (cpu/ram threshold, session prefix).
 
@@ -61,7 +61,7 @@ square / round / slant / arrow (`  `, the classic powerline/lualine chevron)
 caps; `unstyled` makes themux leave the item alone so you build it by hand with
 the `@thm_*` palette.
 
-**indicator / text** — the icon-or-number block and the text block each take a
+**leading / text** — the icon-or-number block and the text block each take a
 style:
 
 | Style | Background | Text |
@@ -71,22 +71,22 @@ style:
 | `subtle` | surface (grey) | accent |
 | `naked` | transparent | accent — no block |
 
-A `naked` block keeps the shape's caps as an outline, so a `rounded` indicator +
+A `naked` block keeps the shape's caps as an outline, so a `rounded` leading +
 `naked` text reads as a capsule. Pair naked styles with
 `@themux_status_background "none"` for a fully bare bar.
 
-**notch** — `on` makes the indicator↔text seam inherit the shape's cap (the
-indicator color tapering into the text background) instead of a flat boundary;
+**notch** — `on` makes the leading↔text seam inherit the shape's cap (the
+leading color tapering into the text background) instead of a flat boundary;
 it collapses to nothing when the two blocks share a background.
 
 For windows and panes, each part has a base and a highlight (active) color, and
 `@themux_<item>_<part>_highlight` (`off`\|`bg`\|`fg`\|`both`) picks which channels
-switch on the active item (windows → `@themux_window_indicator_color` /
-`@themux_window_indicator_highlight_color`, panes → `@themux_pane_indicator_color`
-/ `@themux_pane_indicator_highlight_color`, and the matching `_text_` pair).
+switch on the active item (windows → `@themux_window_leading_color` /
+`@themux_window_leading_highlight_color`, panes → `@themux_pane_leading_color`
+/ `@themux_pane_leading_highlight_color`, and the matching `_text_` pair).
 
 > **Migration** from the old `@themux_<item>_variant` / `_fill` options (both
-> removed): map the old fill to the new pair — `icon` → indicator `solid` + text
+> removed): map the old fill to the new pair — `icon` → leading `solid` + text
 > `soft`, `fill` → both `solid`, `none` → both `soft`, `naked` → both `naked`.
 
 ### Status line background
@@ -164,14 +164,14 @@ set -g @themux_status_line_1 "session dot application / windows / date_time"
 | `@themux_window_number` | `#I` | Inactive window index. |
 | `@themux_window_current_name` | `" #W"` | Active window name content. |
 | `@themux_window_current_number` | `#I` | Active window index. |
-| `@themux_window_indicator_color` | `#{@thm_overlay_2}` | Base (inactive) number accent. |
-| `@themux_window_indicator_highlight_color` | `#{@thm_mauve}` | Active number accent. |
+| `@themux_window_leading_color` | `#{@thm_overlay_2}` | Base (inactive) number accent. |
+| `@themux_window_leading_highlight_color` | `#{@thm_mauve}` | Active number accent. |
 | `@themux_window_text_color` | `#{@thm_overlay_2}` | Base (inactive) name accent. |
 | `@themux_window_text_highlight_color` | `#{@thm_mauve}` | Active name accent. |
 | `@themux_window_background_color` | `#{@thm_surface_0}` | Shared neutral fill for `soft`/`subtle` blocks. |
-| `@themux_window_indicator_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — which channels of the number block switch to the active color. |
+| `@themux_window_leading_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — which channels of the number block switch to the active color. |
 | `@themux_window_text_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — same, for the name block. |
-| `@themux_window_indicator_position` | `left` | `left` \| `right` — number before or after the name. |
+| `@themux_window_leading_position` | `left` | `left` \| `right` — number before or after the name. |
 
 #### Window name visibility
 
@@ -212,10 +212,10 @@ active window.
 The window caps follow the shape (`@themux_window_shape`); they are drawn from
 the block colors, so there are no separate cap-glyph options. Each part has its
 own accent with a base and a highlight (active) colour: the number block uses
-`@themux_window_indicator_color` / `@themux_window_indicator_highlight_color`,
+`@themux_window_leading_color` / `@themux_window_leading_highlight_color`,
 the name block `@themux_window_text_color` / `@themux_window_text_highlight_color`.
 `soft`/`subtle` blocks fill from the shared `@themux_window_background_color`
-instead of the accent. `@themux_window_indicator_highlight` and
+instead of the accent. `@themux_window_leading_highlight` and
 `@themux_window_text_highlight` (`off` \| `bg` \| `fg` \| `both`) pick which
 channels actually switch to the active color. This mirrors panes exactly.
 
@@ -226,15 +226,15 @@ channels actually switch to the active color. This mirrors panes exactly.
 | Option | Default | Effect |
 | --- | --- | --- |
 | `@themux_pane_status` | `off` | `off` \| `top` \| `bottom` — shows a styled label on each pane border. |
-| `@themux_pane_indicator_color` | `#{@thm_overlay_0}` | Inactive pane number/accent color. |
-| `@themux_pane_indicator_highlight_color` | `#{@thm_green}` | Active pane number/accent color. |
+| `@themux_pane_leading_color` | `#{@thm_overlay_0}` | Inactive pane number/accent color. |
+| `@themux_pane_leading_highlight_color` | `#{@thm_green}` | Active pane number/accent color. |
 | `@themux_pane_text_color` | `#{@thm_overlay_0}` | Inactive pane label accent. |
 | `@themux_pane_text_highlight_color` | `#{@thm_green}` | Active pane label accent. |
-| `@themux_pane_indicator_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — which channels of the number block switch on the active pane. |
+| `@themux_pane_leading_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — which channels of the number block switch on the active pane. |
 | `@themux_pane_text_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — same, for the label block. |
 | `@themux_pane_background_color` | `#{@thm_surface_0}` | Pane label neutral background. |
 | `@themux_pane_default_text` | `#{b:pane_current_path}` | Label text (any tmux format). |
-| `@themux_pane_indicator_position` | `left` | `left` \| `right`. |
+| `@themux_pane_leading_position` | `left` | `left` \| `right`. |
 | `@themux_pane_border_style` | `fg=#{@thm_overlay_0}` | Inactive pane border style. |
 | `@themux_pane_active_border_style` | lavender (mauve when synced) | Active pane border style. |
 

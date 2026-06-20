@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Assemble pane-border-format from the v3 props: @themux_pane_{shape,indicator,
-# text,notch}. The indicator (pane number) and text blocks are styled
+# Assemble pane-border-format from the v3 props: @themux_pane_{shape,leading,
+# text,notch}. The leading (pane number) and text blocks are styled
 # independently through the shared resolver; the shape draws the caps; notch
-# shapes the indicator<->text seam.
+# shapes the leading<->text seam.
 #
 # A pane has ONE format whose accent brightens for the active pane at draw time
 # via #{?pane_active,...}. As in window_render.sh, load-time colours are resolved
@@ -17,15 +17,15 @@ expand() {
   tmux show -gv @_tmx_render_tmp
 }
 
-position=$(themux_prop pane indicator_position)
-indicator=$(themux_prop pane indicator)
+position=$(themux_prop pane leading_position)
+leading=$(themux_prop pane leading)
 text_style=$(themux_prop pane text)
 notch=$(themux_prop pane notch)
 shape=$(themux_prop pane shape)
 # Active highlight per part/channel (off|bg|fg|both, default both): which of the
 # active pane's colours actually switch; the rest stay frozen at the inactive
 # colour. Applied by resolving each block twice (active accent vs frozen) below.
-ind_hl=$(themux_prop pane indicator_highlight); [ -n "$ind_hl" ] || ind_hl=both
+lead_hl=$(themux_prop pane leading_highlight); [ -n "$lead_hl" ] || lead_hl=both
 txt_hl=$(themux_prop pane text_highlight); [ -n "$txt_hl" ] || txt_hl=both
 
 # Shape glyphs (octal UTF-8). squared has none — the block padding is its edge.
@@ -39,11 +39,11 @@ esac
 # Per-part colour roles. Each part's accent brightens for the active pane (its
 # highlight colour when active, base colour when not); accent_fr is the frozen
 # base for the channels the highlight toggles exclude. surface/crust/fg static.
-ind_base=$(expand "#{E:@themux_pane_indicator_color}")
-ind_hi=$(expand "#{E:@themux_pane_indicator_highlight_color}")
+lead_base=$(expand "#{E:@themux_pane_leading_color}")
+lead_hi=$(expand "#{E:@themux_pane_leading_highlight_color}")
 txt_base=$(expand "#{E:@themux_pane_text_color}")
 txt_hi=$(expand "#{E:@themux_pane_text_highlight_color}")
-ind_accent_hl="#{?pane_active,${ind_hi},${ind_base}}"; ind_accent_fr="$ind_base"
+lead_accent_hl="#{?pane_active,${lead_hi},${lead_base}}"; lead_accent_fr="$lead_base"
 txt_accent_hl="#{?pane_active,${txt_hi},${txt_base}}"; txt_accent_fr="$txt_base"
 surface=$(expand "#{E:@themux_pane_background_color}")
 crust=$(expand "#{@thm_crust}")
@@ -55,16 +55,16 @@ text=$(expand "#{E:@themux_pane_default_text}")
 # Resolve each block with its highlighting accent and its frozen accent, then
 # pick per channel per toggle. The cap colour follows the bg channel (it is the
 # block bg, or the accent that bg uses when the block is transparent/naked).
-resolve_style "$indicator" "$ind_accent_hl" "$surface" "$crust" "$fg"; ibg_hl=$RS_BG ifg_hl=$RS_FG
-resolve_style "$indicator" "$ind_accent_fr" "$surface" "$crust" "$fg"; ibg_fr=$RS_BG ifg_fr=$RS_FG
-case "$ind_hl" in
-  bg)  ind_bg=$ibg_hl ind_fg=$ifg_fr ;;
-  fg)  ind_bg=$ibg_fr ind_fg=$ifg_hl ;;
-  off) ind_bg=$ibg_fr ind_fg=$ifg_fr ;;
-  *)   ind_bg=$ibg_hl ind_fg=$ifg_hl ;;
+resolve_style "$leading" "$lead_accent_hl" "$surface" "$crust" "$fg"; ibg_hl=$RS_BG ifg_hl=$RS_FG
+resolve_style "$leading" "$lead_accent_fr" "$surface" "$crust" "$fg"; ibg_fr=$RS_BG ifg_fr=$RS_FG
+case "$lead_hl" in
+  bg)  lead_bg=$ibg_hl lead_fg=$ifg_fr ;;
+  fg)  lead_bg=$ibg_fr lead_fg=$ifg_hl ;;
+  off) lead_bg=$ibg_fr lead_fg=$ifg_fr ;;
+  *)   lead_bg=$ibg_hl lead_fg=$ifg_hl ;;
 esac
-case "$ind_hl" in bg|both) ind_acc=$ind_accent_hl ;; *) ind_acc=$ind_accent_fr ;; esac
-ind_cap=$ind_bg; [ "$ind_bg" = default ] && ind_cap=$ind_acc
+case "$lead_hl" in bg|both) lead_acc=$lead_accent_hl ;; *) lead_acc=$lead_accent_fr ;; esac
+lead_cap=$lead_bg; [ "$lead_bg" = default ] && lead_cap=$lead_acc
 
 resolve_style "$text_style" "$txt_accent_hl" "$surface" "$crust" "$fg"; tbg_hl=$RS_BG tfg_hl=$RS_FG
 resolve_style "$text_style" "$txt_accent_fr" "$surface" "$crust" "$fg"; tbg_fr=$RS_BG tfg_fr=$RS_FG
@@ -87,26 +87,26 @@ seam_glyph=""
   squared)   seam_glyph=$(printf '\342\226\210') ;;
 esac
 
-# Centred blocks: " idx " on the indicator bg, " text " on the text bg.
-ind_block="#[fg=$ind_fg,bg=$ind_bg] $index "
+# Centred blocks: " idx " on the leading bg, " text " on the text bg.
+lead_block="#[fg=$lead_fg,bg=$lead_bg] $index "
 txt_block="#[fg=$txt_fg,bg=$txt_bg] $text "
 
 # A cap is the shape glyph over the bare border, coloured by the block it tapers
 # (its cap colour). Empty glyph (squared) -> no cap, the block fills its own edge.
 cap() { [ -n "$1" ] && printf '#[fg=%s,bg=default]%s' "$2" "$1"; }
 
-# Notch seam: the indicator's right cap tapering into the text bg, only on the
+# Notch seam: the leading's right cap tapering into the text bg, only on the
 # number-on-the-left layout (matching windows) and only when the two blocks
 # differ — same bg would render an invisible phantom cell.
 seam() {
-  [ -n "$seam_glyph" ] && [ "$ind_bg" != "$txt_bg" ] &&
-    printf '#[fg=%s,bg=%s]%s' "$ind_bg" "$txt_bg" "$seam_glyph"
+  [ -n "$seam_glyph" ] && [ "$lead_bg" != "$txt_bg" ] &&
+    printf '#[fg=%s,bg=%s]%s' "$lead_bg" "$txt_bg" "$seam_glyph"
 }
 
 if [ "$position" = right ]; then
-  fmt="$(cap "$left_glyph" "$txt_cap")$txt_block$ind_block$(cap "$right_glyph" "$ind_cap")"
+  fmt="$(cap "$left_glyph" "$txt_cap")$txt_block$lead_block$(cap "$right_glyph" "$lead_cap")"
 else
-  fmt="$(cap "$left_glyph" "$ind_cap")$ind_block$(seam)$txt_block$(cap "$right_glyph" "$txt_cap")"
+  fmt="$(cap "$left_glyph" "$lead_cap")$lead_block$(seam)$txt_block$(cap "$right_glyph" "$txt_cap")"
 fi
 
 tmux set -wg pane-border-format "$fmt"
