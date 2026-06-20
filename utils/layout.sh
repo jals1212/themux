@@ -33,15 +33,15 @@ esac
 mdiv=$(tmux show -gqv @themux_module_divider)
 
 # Flush the bar's outer caps to the terminal edge (nvim-style): off|left|right|
-# both. Two independent controls — @themux_status_flush_edges flushes the edge
+# both. Two independent controls — @themux_module_flush_edges flushes the edge
 # *module group*, @themux_window_flush_edges flushes the edge *window ribbon* —
 # so the module bar and the window list flush separately. The left zone's first
 # item flushes left, the right zone's last item flushes right; centre never
 # touches an edge.
-status_flush=$(tmux show -gqv @themux_status_flush_edges); [ -n "$status_flush" ] || status_flush=off
+module_flush=$(tmux show -gqv @themux_module_flush_edges); [ -n "$module_flush" ] || module_flush=off
 win_flush=$(tmux show -gqv @themux_window_flush_edges); [ -n "$win_flush" ] || win_flush=off
 s_left=none; s_right=none
-case "$status_flush" in
+case "$module_flush" in
   left)  s_left=left ;;
   right) s_right=right ;;
   both)  s_left=left; s_right=right ;;

@@ -108,7 +108,7 @@ tmux show -gv 'status-format[0]' | grep -c '@_tmx_module_session_core' || true
 # Flush edges (nvim-style): the edge group's outer cap is dropped so its block
 # fills to the terminal border. "left" drops the left zone's first head cap
 # (one fewer mpll); "right" drops the right zone's last tail cap (one fewer mprr).
-tmux set -g @themux_status_flush_edges "left"
+tmux set -g @themux_module_flush_edges "left"
 tmux set -g @themux_status_line_1 "session>host"   # left zone
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
@@ -116,7 +116,7 @@ run_layout
 printf "\nflush_left_mpll "; glyphs "$mpll"   # head dropped -> 0
 printf "flush_left_mprr "; glyphs "$mprr"     # seam + tail kept -> 2
 
-tmux set -g @themux_status_flush_edges "right"
+tmux set -g @themux_module_flush_edges "right"
 tmux set -g @themux_status_line_1 " / session>host"   # right zone
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
@@ -127,7 +127,7 @@ printf "flush_right_mprr "; glyphs "$mprr"     # tail dropped -> 1
 # "both" drops the left zone's first head cap AND the right zone's last tail cap
 # in one config. For "session>host / / cpu<ram": off gives 3 mpll / 3 mprr; both
 # drops the left head (mpll) and the right tail (mprr) -> 2 / 2.
-tmux set -g @themux_status_flush_edges "both"
+tmux set -g @themux_module_flush_edges "both"
 tmux set -g @themux_status_line_1 "session>host / / cpu<ram"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
@@ -136,7 +136,7 @@ printf "\nflush_both_mpll "; glyphs "$mpll"   # 2 (left head dropped)
 printf "flush_both_mprr "; glyphs "$mprr"     # 2 (right tail dropped)
 
 # "off" (default) keeps both outer caps.
-tmux set -g @themux_status_flush_edges "off"
+tmux set -g @themux_module_flush_edges "off"
 tmux set -g @themux_status_line_1 "session>host"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"

@@ -144,12 +144,12 @@ instead of tapering. Two **independent** controls:
 
 ```sh
 set -g @themux_module_shape "powerline"
-set -g @themux_status_flush_edges "both"   # flush the edge MODULE group
+set -g @themux_module_flush_edges "both"   # flush the edge MODULE group
 set -g @themux_window_flush_edges "both"   # flush the edge WINDOW ribbon
 ```
 
 Each is `off | left | right | both`: `left` flushes the left zone's first item,
-`right` the right zone's last. `@themux_status_flush_edges` acts on a module group
+`right` the right zone's last. `@themux_module_flush_edges` acts on a module group
 at the edge; `@themux_window_flush_edges` acts on the window list there (a ribbon —
 `@themux_window_seam` other than `|`). So the module bar and the window list can
 flush separately. Capped shapes only (`squared`/`unstyled` already fill the edge).

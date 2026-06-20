@@ -94,8 +94,8 @@ switch on the active item (windows → `@themux_window_indicator_color` /
 | Option | Default | Effect |
 | --- | --- | --- |
 | `@themux_status_background` | `default` | `default` (theme color), `none` (transparent), or any hex / `#{@thm_*}`. |
-| `@themux_status_flush_edges` | `off` | `off` · `left` · `right` · `both` — flush the edge **module group** (drop its outer cap so the block fills to the terminal border). Capped shapes only. |
-| `@themux_window_flush_edges` | `off` | `off` · `left` · `right` · `both` — same, for the edge **window ribbon** (independent of the status flush). Needs a connected ribbon (`@themux_window_seam` ≠ `\|`). |
+| `@themux_module_flush_edges` | `off` | `off` · `left` · `right` · `both` — flush the edge **module group** (drop its outer cap so the block fills to the terminal border). Capped shapes only. |
+| `@themux_window_flush_edges` | `off` | `off` · `left` · `right` · `both` — same, for the edge **window ribbon** (independent of the module flush). Needs a connected ribbon (`@themux_window_seam` ≠ `\|`). |
 
 ---
 
