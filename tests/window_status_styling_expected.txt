@@ -25,7 +25,7 @@ window-status-separator #[fg=#{?window_active,#{?#{E:@_tmx_cw_text},#313244,#cba
 
 window-status-separator #[fg=#{?#{==:#{active_window_index},#{e|+:#{window_index},1}},#cba6f7,#9399b2}]#[bg=#{?window_active,#{?#{E:@_tmx_cw_text},#313244,#cba6f7},#{?#{E:@_tmx_w_text},#313244,#9399b2}}]
 
-window-status-separator #[fg=#{?window_active,#{?#{E:@_tmx_cw_text},#313244,#cba6f7},#{?#{E:@_tmx_w_text},#313244,#9399b2}}]█
+window-status-separator #[fg=#{?window_active,#{?#{E:@_tmx_cw_text},#313244,#cba6f7},#{?#{E:@_tmx_w_text},#313244,#9399b2}}]#[bg=#{?#{==:#{active_window_index},#{e|+:#{window_index},1}},#cba6f7,#9399b2}]▌
 
 window-status-current-format #[fg=#9399b2,bg=default]#[fg=#11111b,bg=#9399b2] #I #{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_cw_text} ,}#[fg=#{?#{E:@_tmx_cw_text},#313244,#9399b2},bg=default]
 

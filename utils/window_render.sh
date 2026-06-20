@@ -179,12 +179,13 @@ if [ "$connected" = 1 ]; then
   nextact="#{==:#{active_window_index},#{e|+:#{window_index},1}}"
   this_rcol="#{?window_active,${cw_rcol},${w_rcol}}"     # right colour of THIS window
   next_lcol="#{?${nextact},${CW_ICAP},${W_ICAP}}"        # left colour of the NEXT window
-  block=$(printf '\342\226\210')                          # █ — the squared seam glyph
+  half=$(printf '\342\226\214')                          # ▌ — left half block
   case "$wseam" in
     '>') sep="#[fg=${this_rcol}]#[bg=${next_lcol}]${rglyph}" ;; # this penetrates right
     '<') sep="#[fg=${next_lcol}]#[bg=${this_rcol}]${lglyph}" ;; # next penetrates left
-    '=') sep="#[fg=${this_rcol}]${block}" ;;                    # flat: a 1-cell █ divider,
-                                                               # so windows keep their width
+    '=') sep="#[fg=${this_rcol}]#[bg=${next_lcol}]${half}" ;;   # flat: a 1-cell boundary,
+                                                               # left half this / right half next,
+                                                               # so each number box stays centred
     *)   # <> raised: the active window's caps overlay both neighbours
       sep="#{?window_active,"
       sep+="#[fg=${cw_rcol}]#[bg=${W_ICAP}]${rglyph},"
