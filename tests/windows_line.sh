@@ -170,3 +170,20 @@ tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
 printf "win_flush_right_edge "; tmux show -gqv @_tmx_win_flush_right    # 1
+
+# Per-line prepend/append: arbitrary content pinned to a row's left/right edge. A
+# prepend cancels that line's left module flush, an append the right flush (the
+# edge group is no longer against the border), so both head and tail caps return.
+tmux set -gu @themux_window_flush_edges
+tmux set -g @themux_module_shape "rounded"
+tmux set -g @themux_module_flush_edges "both"
+tmux set -g @themux_status_line_1_prepend "PRE "
+tmux set -g @themux_status_line_1_append " END"
+tmux set -g @themux_status_line_1 "session>host"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "\nprepend_pinned "; tmux show -gv 'status-format[0]' | grep -c 'align=left\]PRE ' || true
+printf "append_pinned "; tmux show -gv 'status-format[0]' | grep -c ' END' || true
+printf "prepend_cancels_left_flush_mpll "; glyphs "$mpll"   # head cap back -> 1
+printf "append_cancels_right_flush_mprr "; glyphs "$mprr"   # tail cap back -> 2 (seam + tail)

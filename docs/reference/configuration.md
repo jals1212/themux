@@ -124,6 +124,7 @@ they collapse to a plain space.
 | --- | --- | --- |
 | `@themux_status_line_1` | `" / windows / "` | First row. |
 | `@themux_status_line_2` … `_5` | `""` | Extra rows (blank = unused). |
+| `@themux_status_line_<N>_prepend` / `_append` | _(unset)_ | Arbitrary content (text, emoji, `#{...}`, `#[styles]`) pinned to row N's far left / far right — e.g. padding. A prepend cancels that row's left `*_flush_edges`; an append cancels the right. |
 
 ```sh
 set -g @themux_status_line_1 "session>application / windows / gitmux<cpu<ram"

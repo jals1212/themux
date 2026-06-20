@@ -40,11 +40,11 @@ mdiv=$(tmux show -gqv @themux_module_divider)
 # touches an edge.
 module_flush=$(tmux show -gqv @themux_module_flush_edges); [ -n "$module_flush" ] || module_flush=off
 win_flush=$(tmux show -gqv @themux_window_flush_edges); [ -n "$win_flush" ] || win_flush=off
-s_left=none; s_right=none
+m_left=none; m_right=none
 case "$module_flush" in
-  left)  s_left=left ;;
-  right) s_right=right ;;
-  both)  s_left=left; s_right=right ;;
+  left)  m_left=left ;;
+  right) m_right=right ;;
+  both)  m_left=left; m_right=right ;;
 esac
 w_left=none; w_right=none
 case "$win_flush" in
@@ -268,19 +268,31 @@ for i in 1 2 3 4 5; do
     *) IFS='/' read -r left center right <<<"$line" ;;
   esac
 
-  # The window list flushes only when it is the first token of the (flushing)
-  # left zone or the last token of the (flushing) right zone.
+  # Per-line prepend/append: arbitrary content (text, emoji, #{...}, #[styles])
+  # pinned to the very left/right of the row. A prepend pushes the left edge off
+  # the terminal border, so it cancels this line's left flush; an append cancels
+  # the right flush.
+  prepend=$(tmux show -gqv "@themux_status_line_${i}_prepend")
+  append=$(tmux show -gqv "@themux_status_line_${i}_append")
+
+  # The window list flushes only when it is the first token of the (flushing) left
+  # zone with no prepend, or the last token of the (flushing) right zone with no
+  # append.
   read -r _lfirst _ <<<"$left"
   _rlast=""; for _t in $right; do _rlast="$_t"; done
-  [ "$w_left" = left ]   && [ "$_lfirst" = windows ] && win_fl=1
-  [ "$w_right" = right ] && [ "$_rlast" = windows ]  && win_fr=1
+  [ "$w_left" = left ]   && [ "$_lfirst" = windows ] && [ -z "$prepend" ] && win_fl=1
+  [ "$w_right" = right ] && [ "$_rlast" = windows ]  && [ -z "$append" ]  && win_fr=1
 
   # "nolist" leaves the window-list region the "windows" token turns on, so a
   # zone after it still pins to its own edge (otherwise the right zone stays
   # glued to the window list instead of the right edge).
-  fmt="#[nolist align=left]$(expand_zone "$left" left "$s_left")"
+  # A prepend/append also cancels the module flush on its edge (the edge group is
+  # no longer against the terminal border).
+  l_edge="$m_left"; [ -n "$prepend" ] && l_edge=none
+  r_edge="$m_right"; [ -n "$append" ] && r_edge=none
+  fmt="#[nolist align=left]${prepend}$(expand_zone "$left" left "$l_edge")"
   fmt+="#[nolist align=centre]$(expand_zone "$center" centre none)"
-  fmt+="#[nolist align=right]$(expand_zone "$right" right "$s_right")"
+  fmt+="#[nolist align=right]$(expand_zone "$right" right "$r_edge")${append}"
 
   tmux set -g "status-format[$((i - 1))]" "$fmt"
 done

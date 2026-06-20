@@ -168,6 +168,23 @@ set -g @themux_status_line_2 ""                             # blank row
 set -g @themux_status_line_3 "windows"                      # windows, own row
 ```
 
+#### Prepend / append
+
+`@themux_status_line_<N>_prepend` and `_append` pin arbitrary content to a row's
+far left / far right — any tmux format (text, an emoji, `#{...}`, `#[styles]`),
+useful for padding:
+
+```sh
+set -g @themux_status_line_2_prepend "  "    # 2-space left pad on row 2
+set -g @themux_status_line_2_append  " 🚀"
+```
+
+> [!NOTE]
+> A prepend/append occupies the row edge, so the edge item no longer touches the
+> terminal border: a **prepend cancels that line's left** `*_flush_edges`, an
+> **append cancels the right**. Drop the prepend/append (or the flush) if you need
+> the edge-to-edge look on that row.
+
 The divider between status modules and the divider between windows are
 configured independently:
 
