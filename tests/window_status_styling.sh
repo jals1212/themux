@@ -4,13 +4,13 @@
 # subsequent test runs.
 function reset() {
   tmux set -gu @themux_window_shape
-  tmux set -gu @themux_window_leading
-  tmux set -gu @themux_window_text
+  tmux set -gu @themux_window_leading_variant
+  tmux set -gu @themux_window_text_variant
   tmux set -gu @themux_window_notch
   tmux set -gu @themux_window_divider
   tmux set -gu @themux_window_seam
-  tmux set -gu @themux_window_leading_highlight
-  tmux set -gu @themux_window_text_highlight
+  tmux set -gu @themux_window_leading_active_variant
+  tmux set -gu @themux_window_text_active_variant
 }
 
 script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
@@ -93,11 +93,12 @@ tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 print_option window-status-separator
 
-# Active highlight: leading_highlight=off freezes the active number block at
-# the inactive (base) colour; the name block still takes its highlight colour.
+# Active variant: the current window can take a DIFFERENT variant from the
+# inactive side. leading_active_variant=subtle re-renders the active number block
+# as a neutral block with accent text instead of the default solid accent block.
 reset
 tmux set -g @themux_window_shape "rounded"
-tmux set -g @themux_window_leading_highlight "off"
+tmux set -g @themux_window_leading_active_variant "subtle"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 

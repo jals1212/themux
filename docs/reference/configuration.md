@@ -26,35 +26,45 @@ shape draws the border/caps, the leading (icon/number) and text blocks each
 pick a style on their own, and notch shapes the seam between them.
 
 ```sh
-set -g @themux_module_shape     "rounded"
-set -g @themux_module_leading "solid"
-set -g @themux_module_text      "naked"  # colored icon chip, transparent label
-set -g @themux_module_notch     "off"
+set -g @themux_module_shape           "rounded"
+set -g @themux_module_leading_variant "solid"
+set -g @themux_module_text_variant    "naked"  # colored icon chip, transparent label
+set -g @themux_module_notch           "off"
 ```
 
 | Prop | Values | Default |
 | --- | --- | --- |
 | `@themux_<item>_shape` | `squared` · `rounded` · `slanted` · `powerline` · `unstyled` | `squared` |
-| `@themux_<item>_leading` | `solid` · `soft` · `subtle` · `naked` | `solid` |
-| `@themux_<item>_text` † | `solid` · `soft` · `subtle` · `naked` | `soft` |
+| `@themux_<item>_leading_variant` | `solid` · `soft` · `subtle` · `naked` | `solid` |
+| `@themux_<item>_text_variant` † | `solid` · `soft` · `subtle` · `naked` | `soft` |
 | `@themux_<item>_notch` | `on` · `off` | `off` |
 | `@themux_<item>_leading_position` | `left` · `right` | `left` |
-| `@themux_<item>_leading_highlight` | `off` · `bg` · `fg` · `both` | `both` |
-| `@themux_<item>_text_highlight` | `off` · `bg` · `fg` · `both` | `both` |
+| `@themux_<item>_leading_active_variant` | `solid` · `soft` · `subtle` · `naked` | resting variant |
+| `@themux_<item>_text_active_variant` | `solid` · `soft` · `subtle` · `naked` | resting variant |
 
-`<item>` is `module`, `window`, or `pane`. † The text-block **style** prop is
-`@themux_<item>_text` for all three; on windows the name *content* lives in
-`@themux_window_name` / `@themux_window_current_name`.
+`<item>` is `module`, `window`, or `pane`. † The text-block **variant** prop is
+`@themux_<item>_text_variant` for all three; on windows the name *content* lives
+in `@themux_window_name` / `@themux_window_current_name` (the bare
+`@themux_<name>_text` is a module's text *content*, never its variant — which is
+why the variant prop carries the explicit `_variant` suffix).
 
 These per-item props default from a shared `@themux_all_<prop>`: set
 `@themux_all_shape "rounded"` to shape every item at once; a per-item value
-(e.g. `@themux_window_shape`) overrides it for that item. Precedence: per-item >
-`@themux_all_*` > built-in. Cascadable props: `shape`, `leading`, `text`,
-`notch`, `leading_position`, `leading_highlight`, `text_highlight`.
+(e.g. `@themux_window_shape`) overrides it for that item. Modules add a finer
+tier — `@themux_<name>_<prop>` (e.g. `@themux_cpu_text_variant`) overrides
+`@themux_module_<prop>` for one module. Precedence: `<name>` > per-item >
+`@themux_all_*` > built-in. Cascadable props: `shape`, `leading_variant`,
+`text_variant`, `notch`, `leading_position`, `leading_active_variant`,
+`text_active_variant`.
 
-`*_leading_highlight` / `*_text_highlight` choose which channels take the
-item's *highlight* color — for windows/panes that is the active item, for
-modules the alert state (cpu/ram threshold, session prefix).
+**Active appearance** — the selected window/pane (or a module's alert state:
+cpu/ram threshold, session prefix) is rendered with a *second* variant + accent
+(`*_leading_active_variant` / `*_text_active_variant` and the `*_active_color`
+accents below). Each `_active_variant` defaults to the resting variant, so by
+default the active state keeps the same shape and only its colour swaps; set one
+to also change the shape (e.g. resting `subtle` → active `solid`). There is no
+per-channel toggle — a variant owns both the background and the foreground, so
+the active state can never collapse to a single blank colour.
 
 **shape** — `squared` / `rounded` / `slanted` / `powerline` are blocks with
 square / round / slant / arrow (`  `, the classic powerline/lualine chevron)
@@ -79,15 +89,20 @@ A `naked` block keeps the shape's caps as an outline, so a `rounded` leading +
 leading color tapering into the text background) instead of a flat boundary;
 it collapses to nothing when the two blocks share a background.
 
-For windows and panes, each part has a base and a highlight (active) color, and
-`@themux_<item>_<part>_highlight` (`off`\|`bg`\|`fg`\|`both`) picks which channels
-switch on the active item (windows → `@themux_window_leading_color` /
-`@themux_window_leading_highlight_color`, panes → `@themux_pane_leading_color`
-/ `@themux_pane_leading_highlight_color`, and the matching `_text_` pair).
+For windows and panes, each part has a resting and an active accent: the resting
+one (`@themux_window_leading_color`, `@themux_pane_leading_color`, and the
+matching `_text_` pair) and the active one (`@themux_window_leading_active_color`,
+`@themux_pane_leading_active_color`, …). The part resolves its resting variant
+with the resting accent and its active variant with the active accent.
 
-> **Migration** from the old `@themux_<item>_variant` / `_fill` options (both
-> removed): map the old fill to the new pair — `icon` → leading `solid` + text
-> `soft`, `fill` → both `solid`, `none` → both `soft`, `naked` → both `naked`.
+> **Migration** from the old `@themux_<item>_leading` / `_text` style props and
+> the `*_highlight` channel toggles (all removed): the style prop is now
+> `*_leading_variant` / `*_text_variant`, and `*_highlight_color` is now
+> `*_active_color`. The old `_highlight both` (the default) maps to the new
+> default — the active state reuses the resting variant with the active accent;
+> `off` maps to setting the active accent equal to the resting one. The old
+> per-channel `bg` / `fg` partial swaps have no single-variant equivalent — pick
+> the `_active_variant` whose `(background, foreground)` pair you want instead.
 
 ### Status line background
 
@@ -164,13 +179,13 @@ set -g @themux_status_line_1 "session dot application / windows / date_time"
 | `@themux_window_number` | `#I` | Inactive window index. |
 | `@themux_window_current_name` | `" #W"` | Active window name content. |
 | `@themux_window_current_number` | `#I` | Active window index. |
-| `@themux_window_leading_color` | `#{@thm_overlay_2}` | Base (inactive) number accent. |
-| `@themux_window_leading_highlight_color` | `#{@thm_mauve}` | Active number accent. |
-| `@themux_window_text_color` | `#{@thm_overlay_2}` | Base (inactive) name accent. |
-| `@themux_window_text_highlight_color` | `#{@thm_mauve}` | Active name accent. |
+| `@themux_window_leading_color` | `#{@thm_overlay_2}` | Resting (inactive) number accent. |
+| `@themux_window_leading_active_color` | `#{@thm_mauve}` | Active (current window) number accent. |
+| `@themux_window_text_color` | `#{@thm_overlay_2}` | Resting (inactive) name accent. |
+| `@themux_window_text_active_color` | `#{@thm_mauve}` | Active name accent. |
 | `@themux_window_background_color` | `#{@thm_surface_0}` | Shared neutral fill for `soft`/`subtle` blocks. |
-| `@themux_window_leading_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — which channels of the number block switch to the active color. |
-| `@themux_window_text_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — same, for the name block. |
+| `@themux_window_leading_active_variant` | resting variant | `solid` \| `soft` \| `subtle` \| `naked` — the active number block's variant. |
+| `@themux_window_text_active_variant` | resting variant | same, for the active name block. |
 | `@themux_window_leading_position` | `left` | `left` \| `right` — number before or after the name. |
 
 #### Window name visibility
@@ -211,13 +226,14 @@ active window.
 
 The window caps follow the shape (`@themux_window_shape`); they are drawn from
 the block colors, so there are no separate cap-glyph options. Each part has its
-own accent with a base and a highlight (active) colour: the number block uses
-`@themux_window_leading_color` / `@themux_window_leading_highlight_color`,
-the name block `@themux_window_text_color` / `@themux_window_text_highlight_color`.
+own accent with a resting and an active colour: the number block uses
+`@themux_window_leading_color` / `@themux_window_leading_active_color`, the name
+block `@themux_window_text_color` / `@themux_window_text_active_color`.
 `soft`/`subtle` blocks fill from the shared `@themux_window_background_color`
-instead of the accent. `@themux_window_leading_highlight` and
-`@themux_window_text_highlight` (`off` \| `bg` \| `fg` \| `both`) pick which
-channels actually switch to the active color. This mirrors panes exactly.
+instead of the accent. The active (current) window resolves
+`@themux_window_leading_active_variant` / `@themux_window_text_active_variant`
+(each defaulting to the resting variant) with those active accents. This mirrors
+panes exactly.
 
 ---
 
@@ -226,12 +242,12 @@ channels actually switch to the active color. This mirrors panes exactly.
 | Option | Default | Effect |
 | --- | --- | --- |
 | `@themux_pane_status` | `off` | `off` \| `top` \| `bottom` — shows a styled label on each pane border. |
-| `@themux_pane_leading_color` | `#{@thm_overlay_0}` | Inactive pane number/accent color. |
-| `@themux_pane_leading_highlight_color` | `#{@thm_green}` | Active pane number/accent color. |
-| `@themux_pane_text_color` | `#{@thm_overlay_0}` | Inactive pane label accent. |
-| `@themux_pane_text_highlight_color` | `#{@thm_green}` | Active pane label accent. |
-| `@themux_pane_leading_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — which channels of the number block switch on the active pane. |
-| `@themux_pane_text_highlight` | `both` | `off` \| `bg` \| `fg` \| `both` — same, for the label block. |
+| `@themux_pane_leading_color` | `#{@thm_overlay_0}` | Resting (inactive) pane number accent. |
+| `@themux_pane_leading_active_color` | `#{@thm_green}` | Active pane number accent. |
+| `@themux_pane_text_color` | `#{@thm_overlay_0}` | Resting (inactive) pane label accent. |
+| `@themux_pane_text_active_color` | `#{@thm_green}` | Active pane label accent. |
+| `@themux_pane_leading_active_variant` | resting variant | `solid` \| `soft` \| `subtle` \| `naked` — the active number block's variant. |
+| `@themux_pane_text_active_variant` | resting variant | same, for the active label block. |
 | `@themux_pane_background_color` | `#{@thm_surface_0}` | Pane label neutral background. |
 | `@themux_pane_default_text` | `#{b:pane_current_path}` | Label text (any tmux format). |
 | `@themux_pane_leading_position` | `left` | `left` \| `right`. |
@@ -250,12 +266,16 @@ in a layout zone). Built-in modules: `session`, `application`, `directory`,
 | Option | Effect |
 | --- | --- |
 | `@themux_<name>_icon` | The module's icon. |
-| `@themux_<name>_color` | The module's accent color. |
-| `@themux_<name>_text` | The module's text (any tmux format). |
+| `@themux_<name>_color` | The module's accent color (feeds both slots; per-slot `@themux_<name>_leading_color` / `_text_color` override it). |
+| `@themux_<name>_text` | The module's text *content* (any tmux format). |
 
-Per-module overrides (advanced): `@themux_<name>_icon_fg` / `_icon_bg` /
-`_text_fg` / `_text_bg` force a segment's colors (used by the `cpu`/`ram`
-threshold modules, which also read tmux-cpu's `@cpu_*` / `@ram_*` colors).
+Per-module variant overrides (advanced): any cascadable prop can be set for a
+single module — `@themux_<name>_leading_variant`, `@themux_<name>_text_variant`,
+their `_active_variant` / `_active_color` counterparts, and
+`@themux_<name>_active_when` (a tmux conditional that triggers the active
+appearance, e.g. `client_prefix` for `session`). The `cpu`/`ram` threshold
+modules set their accent to tmux-cpu's live `#{<name>_bg_color}`, so the colour
+escalates by itself and a contrasting variant decides how it shows.
 
 Shared status options:
 

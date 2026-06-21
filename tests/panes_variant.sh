@@ -5,8 +5,8 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 source "${script_dir}/helpers.sh"
 
 # Naked panes: transparent blocks (leading + text) on the default background
-tmux set -g @themux_pane_leading "naked"
-tmux set -g @themux_pane_text "naked"
+tmux set -g @themux_pane_leading_variant "naked"
+tmux set -g @themux_pane_text_variant "naked"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 print_option pane-border-style
@@ -30,8 +30,8 @@ print_option pane-border-format
 # Rounded capsule: a solid leading and a naked text framed by the rounded caps
 # (the caps outline in the accent when the block background is transparent).
 tmux set -g @themux_pane_shape "rounded"
-tmux set -g @themux_pane_leading "solid"
-tmux set -g @themux_pane_text "naked"
+tmux set -g @themux_pane_leading_variant "solid"
+tmux set -g @themux_pane_text_variant "naked"
 tmux set -g @themux_pane_status "top"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
@@ -41,8 +41,8 @@ print_option pane-border-format
 # notch on the leading->text seam mirrors the right cap (E0B0). leading solid
 # + text soft so the seam's two backgrounds differ and it shows.
 tmux set -g @themux_pane_shape "powerline"
-tmux set -g @themux_pane_leading "solid"
-tmux set -g @themux_pane_text "soft"
+tmux set -g @themux_pane_leading_variant "solid"
+tmux set -g @themux_pane_text_variant "soft"
 tmux set -g @themux_pane_notch "on"
 tmux set -g @themux_pane_status "top"
 tmux source "${script_dir}/../themux_options.conf"
@@ -53,8 +53,8 @@ print_option pane-border-format
 # left). With leading solid + text soft the backgrounds differ, so the seam
 # shows; if they matched it would collapse to nothing (no phantom cell).
 tmux set -g @themux_pane_shape "squared"
-tmux set -g @themux_pane_leading "solid"
-tmux set -g @themux_pane_text "soft"
+tmux set -g @themux_pane_leading_variant "solid"
+tmux set -g @themux_pane_text_variant "soft"
 tmux set -g @themux_pane_notch "on"
 tmux set -g @themux_pane_status "top"
 tmux source "${script_dir}/../themux_options.conf"
