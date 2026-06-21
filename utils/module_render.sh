@@ -43,12 +43,13 @@ aacc() { printf '#{?#{@themux_%s_%s_active_color},#{@themux_%s_%s_active_color},
 
 lead_acc=$(acc leading) text_acc=$(acc text)
 IFS="$US" read -ra V < <(tmux display -p \
-"$(casc shape)${US}$(casc leading_variant)${US}$(casc text_variant)${US}$(casc notch)${US}#{@themux_module_connect_separator}${US}${lead_acc}${US}${text_acc}${US}#{@thm_surface_0}${US}#{@thm_crust}${US}#{@thm_fg}${US}#{@themux_${name}_icon}${US}#{@themux_${name}_self_styled}${US}#{@themux_module_middle_separator}${US}#{@themux_${name}_when}${US}$(casc leading_position)${US}$(casc leading_active_variant)${US}$(casc text_active_variant)${US}$(aacc leading "$lead_acc")${US}$(aacc text "$text_acc")${US}#{@themux_${name}_active_when}${US}#{E:${lead_acc}}${US}#{E:${text_acc}}${US}#{E:$(aacc leading "$lead_acc")}${US}#{E:$(aacc text "$text_acc")}${US}END")
+"$(casc shape)${US}$(casc leading_variant)${US}$(casc text_variant)${US}$(casc notch)${US}#{@themux_module_connect_separator}${US}${lead_acc}${US}${text_acc}${US}#{@thm_surface_0}${US}#{@thm_crust}${US}#{@thm_fg}${US}#{@themux_${name}_icon}${US}#{@themux_${name}_self_styled}${US}#{@themux_module_middle_separator}${US}#{@themux_${name}_when}${US}$(casc leading_position)${US}$(casc leading_active_variant)${US}$(casc text_active_variant)${US}$(aacc leading "$lead_acc")${US}$(aacc text "$text_acc")${US}#{@themux_${name}_active_when}${US}#{E:${lead_acc}}${US}#{E:${text_acc}}${US}#{E:$(aacc leading "$lead_acc")}${US}#{E:$(aacc text "$text_acc")}${US}#{@themux_${name}_icon_bg}${US}#{@themux_${name}_icon_fg}${US}#{@themux_${name}_text_bg}${US}#{@themux_${name}_text_fg}${US}END")
 shape=${V[0]} leading=${V[1]} text_style=${V[2]} notch=${V[3]} connect=${V[4]}
 lead_acc=${V[5]} text_acc=${V[6]} surface=${V[7]} crust=${V[8]} fg=${V[9]} icon=${V[10]}
 self_styled=${V[11]} midsep=${V[12]} when=${V[13]} position=${V[14]}
 lead_av=${V[15]} text_av=${V[16]} lead_aacc=${V[17]} text_aacc=${V[18]} active_when=${V[19]}
 lead_acc_E=${V[20]} text_acc_E=${V[21]} lead_aacc_E=${V[22]} text_aacc_E=${V[23]}
+icon_bg_ov=${V[24]} icon_fg_ov=${V[25]} text_bg_ov=${V[26]} text_fg_ov=${V[27]}
 # The active variant defaults to the resting one — the active state keeps the same
 # shape unless _active_variant is set, so only the colour swaps.
 [ -n "$lead_av" ] || lead_av="$leading"
@@ -95,10 +96,19 @@ chan() { # $1 active value, $2 resting value -> conditional or plain
 
 resolve_style "$leading" "$lead_acc" "$surface" "$crust" "$fg"; ribg=$RS_BG rifg=$RS_FG
 resolve_style "$lead_av" "$lead_aacc" "$surface" "$crust" "$fg"; aibg=$RS_BG aifg=$RS_FG
+# Raw per-channel overrides (advanced): a module may pin a concrete colour on a
+# channel, over the variant. cpu/ram use this to carry tmux-cpu's LIVE per-level
+# fg/bg (#{<name>_fg_color}/#{<name>_bg_color}), so the block escalates colour at
+# draw time — something a variant cannot do, since the segment is baked once at
+# layout time. The two channels take different live refs, so they always contrast.
+[ -n "$icon_bg_ov" ] && { ribg="$icon_bg_ov"; aibg="$icon_bg_ov"; }
+[ -n "$icon_fg_ov" ] && { rifg="$icon_fg_ov"; aifg="$icon_fg_ov"; }
 ibg=$(chan "$aibg" "$ribg") ifg=$(chan "$aifg" "$rifg")
 
 resolve_style "$text_style" "$text_acc" "$surface" "$crust" "$fg"; rtbg=$RS_BG rtfg=$RS_FG
 resolve_style "$text_av" "$text_aacc" "$surface" "$crust" "$fg"; atbg=$RS_BG atfg=$RS_FG
+[ -n "$text_bg_ov" ] && { rtbg="$text_bg_ov"; atbg="$text_bg_ov"; }
+[ -n "$text_fg_ov" ] && { rtfg="$text_fg_ov"; atfg="$text_fg_ov"; }
 tbg=$(chan "$atbg" "$rtbg") tfg=$(chan "$atfg" "$rtfg")
 
 # The accent used by a transparent (naked) block's cap: the active accent under

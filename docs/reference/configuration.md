@@ -279,13 +279,21 @@ in a layout zone). Built-in modules: `session`, `application`, `directory`,
 | `@themux_<name>_color` | The module's accent color (feeds both slots; per-slot `@themux_<name>_leading_color` / `_text_color` override it). |
 | `@themux_<name>_text` | The module's text *content* (any tmux format). |
 
-Per-module variant overrides (advanced): any cascadable prop can be set for a
-single module — `@themux_<name>_leading_variant`, `@themux_<name>_text_variant`,
-their `_active_variant` / `_active_color` counterparts, and
-`@themux_<name>_active_when` (a tmux conditional that triggers the active
-appearance, e.g. `client_prefix` for `session`). The `cpu`/`ram` threshold
-modules set their accent to tmux-cpu's live `#{<name>_bg_color}`, so the colour
-escalates by itself and a contrasting variant decides how it shows.
+Per-module overrides (advanced): any cascadable prop can be set for a single
+module — `@themux_<name>_leading_variant`, `@themux_<name>_text_variant`, their
+`_active_variant` / `_active_color` counterparts, plus `@themux_<name>_active_when`
+(a tmux conditional that triggers the active appearance, e.g. `client_prefix` for
+`session`) and raw per-channel colour overrides
+`@themux_<name>_{icon,text}_{fg,bg}` that pin a concrete colour over the variant.
+
+The `cpu`/`ram` threshold modules use those overrides to carry tmux-cpu's live
+colour **pair** — `#{<name>_bg_color}` and `#{<name>_fg_color}` — on both
+channels, so the block escalates its colour at draw time: a calm grey block with
+green digits at low, a solid yellow/red pill when hot. A variant cannot do this
+(the segment is baked once at layout time, so a draw-time condition is lost) —
+only a live colour survives. Restyle the levels with tmux-cpu's
+`@<name>_{low,medium,high}_{bg,fg}_color` and move the boundary with
+`@<name>_{medium,high}_thresh`.
 
 Shared status options:
 

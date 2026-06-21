@@ -1,7 +1,9 @@
 
 cpu_live 1
 cpu_not_blank ok
-cpu_text_naked Y
+cpu_live_fg 1
+
+host_text_naked Y
 session_prefix 1
 
 position_swaps_edges Y

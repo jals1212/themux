@@ -19,16 +19,19 @@ printf "\ncpu_live "
 core cpu | grep -c 'cpu_bg_color' || true
 printf "cpu_not_blank "
 { core cpu | grep -qF 'fg=#{l:#{cpu_bg_color}},bg=#{l:#{cpu_bg_color}}'; } && printf "blank" || printf "ok"
+printf "\ncpu_live_fg "
+# the per-channel override carries tmux-cpu's LIVE fg, so fg and bg escalate apart
+core cpu | grep -c 'cpu_fg_color' || true
 
-# Per-single-module override beats the all-modules tier: @themux_cpu_text_variant
-# naked wins over @themux_module_text_variant solid, so cpu's text drops its block.
+# Per-single-module override beats the all-modules tier: @themux_host_text_variant
+# naked wins over @themux_module_text_variant solid, so host's text drops its block.
 tmux set -g @themux_module_text_variant "solid"
-tmux set -g @themux_cpu_text_variant "naked"
+tmux set -g @themux_host_text_variant "naked"
 src
-printf "\ncpu_text_naked "
-{ core cpu | grep -qF 'bg=default]#{E:@themux_cpu_text}'; } && printf "Y" || printf "n"
+printf "\nhost_text_naked "
+{ core host | grep -qF 'bg=default]#{E:@themux_host_text}'; } && printf "Y" || printf "n"
 tmux set -gu @themux_module_text_variant
-tmux set -gu @themux_cpu_text_variant
+tmux set -gu @themux_host_text_variant
 
 # A stateful module: session carries its prefix accent at draw time through
 # @themux_<name>_active_when, so the active reference is always in the segment.
