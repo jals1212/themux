@@ -44,5 +44,5 @@ win_flush_right_edge 1
 
 prepend_pinned 1
 append_pinned 1
-prepend_cancels_left_flush_mpll 1
-append_cancels_right_flush_mprr 2
+prepend_cancels_left_flush_mpll 3
+append_cancels_right_flush_mprr 3

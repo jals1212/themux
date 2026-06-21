@@ -144,19 +144,19 @@ neighbours), `a<b>c` makes it the valley.
 
 For the lualine/nvim look — flat outer edges with powerline seams inside — drop
 the bar's outermost edge cap so that block fills solid to the terminal border
-instead of tapering. Two **independent** controls:
+instead of tapering. It is part of the line grammar: a leading `=` on a row's
+left zone, a trailing `=` on its right zone.
 
 ```sh
 set -g @themux_module_shape "powerline"
-set -g @themux_module_flush_edges "both"   # flush the edge MODULE group
-set -g @themux_window_flush_edges "both"   # flush the edge WINDOW ribbon
+set -g @themux_status_line_1 "=session>application / windows / cpu<ram="
+#                            ^ flush left zone        flush right zone ^
 ```
 
-Each is `off | left | right | both`: `left` flushes the left zone's first item,
-`right` the right zone's last. `@themux_module_flush_edges` acts on a module group
-at the edge; `@themux_window_flush_edges` acts on the window list there (a ribbon —
-`@themux_window_seam` other than `|`). So the module bar and the window list can
-flush separately. Capped shapes only (`squared`/`unstyled` already fill the edge).
+It is the same `=` that flat-merges two modules, carried out to the bar's edge:
+one marker flushes whatever sits there — a module group or the window ribbon (a
+leading/trailing `windows` token). It is per row, so each line flushes
+independently. Capped shapes only (`squared`/`unstyled` already fill the edge).
 
 > [!NOTE]
 > The window list shares one global format, so flushing assumes it sits at the
@@ -185,9 +185,9 @@ set -g @themux_status_line_2_append  " 🚀"
 
 > [!NOTE]
 > A prepend/append occupies the row edge, so the edge item no longer touches the
-> terminal border: a **prepend cancels that line's left** `*_flush_edges`, an
-> **append cancels the right**. Drop the prepend/append (or the flush) if you need
-> the edge-to-edge look on that row.
+> terminal border: a **prepend cancels that line's left** flush (the leading `=`),
+> an **append cancels the right** (the trailing `=`). Drop the prepend/append (or
+> the flush marker) if you need the edge-to-edge look on that row.
 
 The divider between status modules and the divider between windows are
 configured independently:

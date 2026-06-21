@@ -109,8 +109,6 @@ with the resting accent and its active variant with the active accent.
 | Option | Default | Effect |
 | --- | --- | --- |
 | `@themux_status_background` | `default` | `default` (theme color), `none` (transparent), or any hex / `#{@thm_*}`. |
-| `@themux_module_flush_edges` | `off` | `off` · `left` · `right` · `both` — flush the edge **module group** (drop its outer cap so the block fills to the terminal border). Capped shapes only. |
-| `@themux_window_flush_edges` | `off` | `off` · `left` · `right` · `both` — same, for the edge **window ribbon** (independent of the module flush). Needs a connected ribbon (`@themux_window_seam` ≠ `\|`). |
 
 ---
 
@@ -135,11 +133,23 @@ The character between two modules sets how they join:
 capped shape — `rounded`, `slanted` or `powerline`. With `squared`/`unstyled`
 they collapse to a plain space.
 
+**Edge flush** — a leading `=` on a row's left zone (or a trailing `=` on its
+right zone) drops that edge's outer cap so the block fills flat to the terminal
+border (nvim-style) — the same `=` "no cap" seam carried out to the bar's edge.
+One marker flushes whatever sits there: a module group or the window ribbon (a
+leading/trailing `windows` token). Capped shapes only; a row's prepend/append
+cancels its flush. An inline `=` between two modules stays a flat-merge connector.
+
+```sh
+set -g @themux_status_line_1 "=session>application / windows / cpu<ram="
+#                             ^ left zone flush         right zone flush ^
+```
+
 | Option | Default | Effect |
 | --- | --- | --- |
 | `@themux_status_line_1` | `" / windows / "` | First row. |
 | `@themux_status_line_2` … `_5` | `""` | Extra rows (blank = unused). |
-| `@themux_status_line_<N>_prepend` / `_append` | _(unset)_ | Arbitrary content (text, emoji, `#{...}`, `#[styles]`) pinned to row N's far left / far right — e.g. padding. A prepend cancels that row's left `*_flush_edges`; an append cancels the right. |
+| `@themux_status_line_<N>_prepend` / `_append` | _(unset)_ | Arbitrary content (text, emoji, `#{...}`, `#[styles]`) pinned to row N's far left / far right — e.g. padding. A prepend cancels that row's left edge flush (leading `=`); an append cancels the right (trailing `=`). |
 
 ```sh
 set -g @themux_status_line_1 "session>application / windows / gitmux<cpu<ram"

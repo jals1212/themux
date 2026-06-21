@@ -105,38 +105,35 @@ tmux show -gv 'status-format[0]' | grep -c 'E:@themux_module_session}' || true
 printf "space_no_run_core "
 tmux show -gv 'status-format[0]' | grep -c '@_tmx_module_session_core' || true
 
-# Flush edges (nvim-style): the edge group's outer cap is dropped so its block
-# fills to the terminal border. "left" drops the left zone's first head cap
-# (one fewer mpll); "right" drops the right zone's last tail cap (one fewer mprr).
-tmux set -g @themux_module_flush_edges "left"
-tmux set -g @themux_status_line_1 "session>host"   # left zone
+# Edge flush (nvim-style) is part of the line grammar: a leading "=" on the left
+# zone drops that group's head cap (one fewer mpll); a trailing "=" on the right
+# zone drops its tail cap (one fewer mprr). The edge block then fills flat to the
+# terminal border.
+tmux set -g @themux_status_line_1 "=session>host"   # left zone, leading "="
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
 printf "\nflush_left_mpll "; glyphs "$mpll"   # head dropped -> 0
 printf "flush_left_mprr "; glyphs "$mprr"     # seam + tail kept -> 2
 
-tmux set -g @themux_module_flush_edges "right"
-tmux set -g @themux_status_line_1 " / session>host"   # right zone
+tmux set -g @themux_status_line_1 " / session>host="   # right zone, trailing "="
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
 printf "\nflush_right_mpll "; glyphs "$mpll"   # head kept -> 1
 printf "flush_right_mprr "; glyphs "$mprr"     # tail dropped -> 1
 
-# "both" drops the left zone's first head cap AND the right zone's last tail cap
-# in one config. For "session>host / / cpu<ram": off gives 3 mpll / 3 mprr; both
-# drops the left head (mpll) and the right tail (mprr) -> 2 / 2.
-tmux set -g @themux_module_flush_edges "both"
-tmux set -g @themux_status_line_1 "session>host / / cpu<ram"
+# "=" at both ends drops the left zone's head cap AND the right zone's tail cap.
+# For "=session>host / / cpu<ram=": off gives 3 mpll / 3 mprr; the markers drop
+# the left head (mpll) and the right tail (mprr) -> 2 / 2.
+tmux set -g @themux_status_line_1 "=session>host / / cpu<ram="
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
 printf "\nflush_both_mpll "; glyphs "$mpll"   # 2 (left head dropped)
 printf "flush_both_mprr "; glyphs "$mprr"     # 2 (right tail dropped)
 
-# "off" (default) keeps both outer caps.
-tmux set -g @themux_module_flush_edges "off"
+# No markers (default): both outer caps kept.
 tmux set -g @themux_status_line_1 "session>host"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
@@ -144,46 +141,44 @@ run_layout
 printf "\nflush_off_mpll "; glyphs "$mpll"     # 1
 printf "flush_off_mprr "; glyphs "$mprr"       # 2
 
-# Window ribbon flush: layout flags the window list (@_tmx_win_flush_left/right)
-# only when "windows" is the first token of a flushing left zone or the last of a
-# flushing right zone; window_render then drops that edge's ribbon cap.
+# Window ribbon flush: the same "=" flags the window list (@_tmx_win_flush_left/
+# right) when a "windows" token sits at that edge; window_render then drops the
+# ribbon's opening/closing cap.
 tmux set -g @themux_window_shape "rounded"
 tmux set -g @themux_window_seam "<>"
-tmux set -g @themux_window_flush_edges "left"
-tmux set -g @themux_status_line_1 "windows / / host"
+tmux set -g @themux_status_line_1 "=windows / / host"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
 printf "\nwin_flush_left_edge "; tmux show -gqv @_tmx_win_flush_left    # 1
 
 # "windows" not first -> not flagged (window flush only targets a leading windows).
-tmux set -g @themux_status_line_1 "host windows / / "
+tmux set -g @themux_status_line_1 "=host windows / / "
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
 printf "win_flush_left_inner "; tmux show -gqv @_tmx_win_flush_left    # 0
 
-# Right edge: "windows" as the last token of a flushing right zone.
-tmux set -g @themux_window_flush_edges "right"
-tmux set -g @themux_status_line_1 "host / / windows"
+# Right edge: "windows" as the last token of a "="-flushed right zone.
+tmux set -g @themux_status_line_1 "host / / windows="
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
 printf "win_flush_right_edge "; tmux show -gqv @_tmx_win_flush_right    # 1
 
-# Per-line prepend/append: arbitrary content pinned to a row's left/right edge. A
-# prepend cancels that line's left module flush, an append the right flush (the
-# edge group is no longer against the border), so both head and tail caps return.
-tmux set -gu @themux_window_flush_edges
+# Per-line prepend/append: a prepend cancels that row's left "=" flush, an append
+# the right "=" flush (the edge block is no longer against the border), so both
+# the head and tail caps return.
+tmux set -gu @themux_window_shape
+tmux set -gu @themux_window_seam
 tmux set -g @themux_module_shape "rounded"
-tmux set -g @themux_module_flush_edges "both"
 tmux set -g @themux_status_line_1_prepend "PRE "
 tmux set -g @themux_status_line_1_append " END"
-tmux set -g @themux_status_line_1 "session>host"
+tmux set -g @themux_status_line_1 "=session>host / / cpu<ram="
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
 printf "\nprepend_pinned "; tmux show -gv 'status-format[0]' | grep -c 'align=left\]PRE ' || true
 printf "append_pinned "; tmux show -gv 'status-format[0]' | grep -c ' END' || true
-printf "prepend_cancels_left_flush_mpll "; glyphs "$mpll"   # head cap back -> 1
-printf "append_cancels_right_flush_mprr "; glyphs "$mprr"   # tail cap back -> 2 (seam + tail)
+printf "prepend_cancels_left_flush_mpll "; glyphs "$mpll"   # left head back -> 3
+printf "append_cancels_right_flush_mprr "; glyphs "$mprr"   # right tail back -> 3

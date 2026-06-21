@@ -32,26 +32,12 @@ esac
 # segment (modules stay separate pills — merging is done with =/>/< instead).
 mdiv=$(tmux show -gqv @themux_module_divider)
 
-# Flush the bar's outer caps to the terminal edge (nvim-style): off|left|right|
-# both. Two independent controls — @themux_module_flush_edges flushes the edge
-# *module group*, @themux_window_flush_edges flushes the edge *window ribbon* —
-# so the module bar and the window list flush separately. The left zone's first
-# item flushes left, the right zone's last item flushes right; centre never
-# touches an edge.
-module_flush=$(tmux show -gqv @themux_module_flush_edges); [ -n "$module_flush" ] || module_flush=off
-win_flush=$(tmux show -gqv @themux_window_flush_edges); [ -n "$win_flush" ] || win_flush=off
-m_left=none; m_right=none
-case "$module_flush" in
-  left)  m_left=left ;;
-  right) m_right=right ;;
-  both)  m_left=left; m_right=right ;;
-esac
-w_left=none; w_right=none
-case "$win_flush" in
-  left)  w_left=left ;;
-  right) w_right=right ;;
-  both)  w_left=left; w_right=right ;;
-esac
+# Edge flush (nvim-style) is part of the status-line grammar: a leading "=" on the
+# left zone, or a trailing "=" on the right zone, drops that edge's outer cap so
+# the block fills flat to the terminal border. It mirrors the "=" connector (a
+# flat, capless seam) carried out to the bar's edge. One marker flushes whatever
+# sits there — a module group OR the window ribbon — and it is per line; the
+# centre zone never touches an edge. Parsed in the per-line loop below.
 
 # tmux-cpu modules (cpu/ram) carry #{cpu_*}/#{ram_*} literals that only resolve
 # in status-left/right, so do_interpolation rewrites them to #(...) form. These
@@ -268,6 +254,16 @@ for i in 1 2 3 4 5; do
     *) IFS='/' read -r left center right <<<"$line" ;;
   esac
 
+  # Edge flush marker: a leading "=" on the left zone flushes the left border, a
+  # trailing "=" on the right zone the right border. Strip it before the zone is
+  # parsed (an inline "=" between two modules stays a flat-merge connector). A
+  # single-zone row has no right border, so only the left marker applies there.
+  l_flush=0; r_flush=0
+  lz="${left#"${left%%[![:space:]]*}"}"     # left zone, leading whitespace trimmed
+  [ "${lz:0:1}" = "=" ] && { l_flush=1; left="${lz:1}"; }
+  rz="${right%"${right##*[![:space:]]}"}"   # right zone, trailing whitespace trimmed
+  [ -n "$rz" ] && [ "${rz: -1}" = "=" ] && { r_flush=1; right="${rz%=}"; }
+
   # Per-line prepend/append: arbitrary content (text, emoji, #{...}, #[styles])
   # pinned to the very left/right of the row. A prepend pushes the left edge off
   # the terminal border, so it cancels this line's left flush; an append cancels
@@ -275,21 +271,21 @@ for i in 1 2 3 4 5; do
   prepend=$(tmux show -gqv "@themux_status_line_${i}_prepend")
   append=$(tmux show -gqv "@themux_status_line_${i}_append")
 
-  # The window list flushes only when it is the first token of the (flushing) left
-  # zone with no prepend, or the last token of the (flushing) right zone with no
-  # append.
+  # One "=" flushes whatever sits at that edge: a leading/trailing "windows" token
+  # flags the ribbon (@_tmx_win_flush_left/right, read by window_render.sh to drop
+  # its opening/closing cap); a module group drops its outer cap via the edge arg
+  # to expand_zone below. A prepend/append cancels the flush on its edge (the
+  # block is no longer against the terminal border).
   read -r _lfirst _ <<<"$left"
   _rlast=""; for _t in $right; do _rlast="$_t"; done
-  [ "$w_left" = left ]   && [ "$_lfirst" = windows ] && [ -z "$prepend" ] && win_fl=1
-  [ "$w_right" = right ] && [ "$_rlast" = windows ]  && [ -z "$append" ]  && win_fr=1
+  [ "$l_flush" = 1 ] && [ "$_lfirst" = windows ] && [ -z "$prepend" ] && win_fl=1
+  [ "$r_flush" = 1 ] && [ "$_rlast" = windows ]  && [ -z "$append" ]  && win_fr=1
 
   # "nolist" leaves the window-list region the "windows" token turns on, so a
   # zone after it still pins to its own edge (otherwise the right zone stays
   # glued to the window list instead of the right edge).
-  # A prepend/append also cancels the module flush on its edge (the edge group is
-  # no longer against the terminal border).
-  l_edge="$m_left"; [ -n "$prepend" ] && l_edge=none
-  r_edge="$m_right"; [ -n "$append" ] && r_edge=none
+  l_edge=none; [ "$l_flush" = 1 ] && [ -z "$prepend" ] && l_edge=left
+  r_edge=none; [ "$r_flush" = 1 ] && [ -z "$append" ] && r_edge=right
   fmt="#[nolist align=left]${prepend}$(expand_zone "$left" left "$l_edge")"
   fmt+="#[nolist align=centre]$(expand_zone "$center" centre none)"
   fmt+="#[nolist align=right]$(expand_zone "$right" right "$r_edge")${append}"
