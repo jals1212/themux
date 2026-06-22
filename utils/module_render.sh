@@ -131,15 +131,17 @@ cap() { # $1 glyph, $2 block bg, $3 naked-accent for that block
   fi
 }
 
-# One leading space; the trailing one comes from the icon value (every icon is
-# "<glyph> "), so the icon block is padded 1+1 like the window number block " #I ".
+# The icon value carries its OWN padding (the shipped icons are " <glyph> " for the
+# default 1+1, matching the window number block " #I "). Keeping the pad in the
+# value lets each icon be nudged on its own: nerd-font glyphs sit off-centre in
+# their cell by different amounts, so no single rule places them all — tune the
+# leading/trailing spaces in @themux_<name>_icon per glyph.
 # A notch taper trims ~half a cell of icon colour off the seam edge that the flat
-# (notch=off) █ seam keeps, so the icon reads smaller; add one trailing space when
-# the notch draws a real taper (notch=on with a seam — icon bg differs from text
-# bg, i.e. not the single-colour metric pill) to restore the 1+1 footprint.
+# (notch=off) █ seam keeps, so add one trailing space when the notch draws a real
+# taper (notch=on with a seam — not the single-colour metric pill) to keep the footprint.
 itrail=""
 [ "$notch" = on ] && [ "$ibg" != "$tbg" ] && itrail=" "
-iblock="#[fg=$ifg,bg=$ibg] $icon$itrail"
+iblock="#[fg=$ifg,bg=$ibg]$icon$itrail"
 # The text value carries its own leading space; add a trailing one so the block
 # is padded both sides (the icon block is) and the right cap — squared █, rounded
 # bulge, or the inward slant — has a cell to sit against. Re-assert the block bg
