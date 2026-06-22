@@ -50,3 +50,16 @@ src
 rl=$(tmux show -gqv @_tmx_module_host_lbg) rr=$(tmux show -gqv @_tmx_module_host_rbg)
 printf "\nposition_swaps_edges "
 { [ "$ll" = "$rr" ] && [ "$lr" = "$rl" ] && [ "$ll" != "$lr" ]; } && printf "Y" || printf "n"
+
+# notch=on tapers the icon's seam edge (trimming the icon colour a flat notch=off
+# █ keeps), so a trailing space is added to a non-metric module's icon to keep the
+# 1+1 footprint. The single-colour metric pill has no seam, so it is not padded.
+tmux set -gu @themux_module_leading_position
+tmux set -g @themux_status_line_1 "host cpu"
+tmux set -g @themux_all_shape "rounded"
+tmux set -g @themux_all_notch "on"; src
+hon=$(core host | wc -c | tr -d ' '); con=$(core cpu | wc -c | tr -d ' ')
+tmux set -g @themux_all_notch "off"; src
+hoff=$(core host | wc -c | tr -d ' '); coff=$(core cpu | wc -c | tr -d ' ')
+printf "\nnotch_pads_host_icon "; { [ "$hon" -eq "$((hoff + 1))" ]; } && printf "Y" || printf "n"
+printf "\nnotch_keeps_metric_pill "; { [ "$con" -eq "$coff" ]; } && printf "Y" || printf "n"

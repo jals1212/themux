@@ -7,3 +7,5 @@ host_text_naked Y
 session_prefix 1
 
 position_swaps_edges Y
+notch_pads_host_icon Y
+notch_keeps_metric_pill Y
