@@ -1,11 +1,11 @@
 
 cpu_live 1
 cpu_not_blank ok
-cpu_live_fg 1
-
+cpu_icon_solid Y
+cpu_text_subtle Y
 host_text_naked Y
 session_prefix 1
 
 position_swaps_edges Y
 notch_pads_host_icon Y
-notch_keeps_metric_pill Y
+notch_pads_metric_icon Y

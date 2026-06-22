@@ -57,8 +57,9 @@ tier — `@themux_<name>_<prop>` (e.g. `@themux_cpu_text_variant`) overrides
 `text_variant`, `notch`, `leading_position`, `leading_active_variant`,
 `text_active_variant`.
 
-**Active appearance** — the selected window/pane (or a module's alert state:
-cpu/ram threshold, session prefix) is rendered with a *second* variant + accent
+**Active appearance** — the selected window/pane (or a module with
+`@themux_<name>_active_when` set, e.g. `session`'s prefix highlight) is rendered
+with a *second* variant + accent
 (`*_leading_active_variant` / `*_text_active_variant` and the `*_active_color`
 accents below). Each `_active_variant` defaults to the resting variant, so by
 default the active state keeps the same shape and only its colour swaps; set one
@@ -286,14 +287,17 @@ module — `@themux_<name>_leading_variant`, `@themux_<name>_text_variant`, thei
 `session`) and raw per-channel colour overrides
 `@themux_<name>_{icon,text}_{fg,bg}` that pin a concrete colour over the variant.
 
-The `cpu`/`ram` threshold modules use those overrides to carry tmux-cpu's live
-colour **pair** — `#{<name>_bg_color}` and `#{<name>_fg_color}` — on both
-channels, so the block escalates its colour at draw time: a calm grey block with
-green digits at low, a solid yellow/red pill when hot. A variant cannot do this
-(the segment is baked once at layout time, so a draw-time condition is lost) —
-only a live colour survives. Restyle the levels with tmux-cpu's
-`@<name>_{low,medium,high}_{bg,fg}_color` and move the boundary with
-`@<name>_{medium,high}_thresh`.
+The `cpu`/`ram` threshold modules carry tmux-cpu's live level colour
+`#{<name>_bg_color}` as their accent — green at rest, warming yellow → red as the
+value climbs. The default variants place it on both slots: the **icon** is `solid`
+(a coloured block that escalates) and the **text** is `subtle` (grey block, the
+digits take the live colour). Set `@themux_<name>_{leading,text}_variant` to restyle
+(text `naked` for bare digits, `soft` to mute), pin a fixed icon accent with
+`@themux_<name>_color`, restyle the levels with tmux-cpu's
+`@<name>_{low,medium,high}_bg_color` (themux bases low on `@thm_green`), and move the
+boundary with `@<name>_{medium,high}_thresh`. A variant *switch* on alert cannot work
+here (the segment is composed inline for tmux-cpu, so a draw-time condition is baked
+away) — the escalation rides in the colour, not a variant change.
 
 Shared status options:
 

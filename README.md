@@ -99,8 +99,9 @@ Each of these per-item props defaults from a shared `@themux_all_<prop>`: `set -
 (e.g. `@themux_cpu_text_variant "subtle"`) overrides one module. Cascadable
 props: `shape`, `leading_variant`, `text_variant`, `notch`, `leading_position`,
 `leading_active_variant`, `text_active_variant`. The selected window/pane (or a
-module alert) re-renders with each part's `_active_variant` + `_active_color` —
-by default the same variant with the active colour swapped in.
+module with `_active_when`, like `session`'s prefix) re-renders with each part's
+`_active_variant` + `_active_color` — by default the same variant with the active
+colour swapped in.
 
 ### Composition
 The status line is built from up to five rows (`@themux_status_line_1` … `_5`).
