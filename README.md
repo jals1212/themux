@@ -366,10 +366,10 @@ Check out what to do next in the "[Getting Started Guide](./docs/tutorials/01-ge
 
 ### Requirements
 
-themux needs **tmux ≥ 3.3** — its core rendering relies on format features
-added in 3.3 (`#{e|...}` arithmetic and `#{l:...}` literals). A few extras
-degrade gracefully on older builds: the styled menu and popups need **3.4+**,
-and the automatic dark/light theme switching below needs **3.6+**.
+themux needs **tmux ≥ 3.6**. Its variant rendering relies on format-resolution
+behaviour that older builds get wrong: on tmux 3.4 module styles resolve empty,
+leaving segments uncoloured. (3.6 also enables the automatic dark/light theme
+switching below.)
 
 ### Automatic dark/light theme switching
 

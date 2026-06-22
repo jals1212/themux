@@ -24,8 +24,15 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Install tmux
-        run: sudo apt update && sudo apt install -y --allow-downgrades tmux=3.4-1build1
+      - name: Build tmux 3.6b
+        # themux's variant rendering needs tmux >= 3.6 (3.4 resolves module styles
+        # empty); apt on ubuntu-24.04 only ships 3.4, so build the goldens' version.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libevent-dev libncurses-dev bison pkg-config
+          cd /tmp
+          curl -fsSL https://github.com/tmux/tmux/releases/download/3.6b/tmux-3.6b.tar.gz | tar xz
+          cd tmux-3.6b && ./configure && make && sudo make install
       - uses: actions/checkout@v6
       - name: Run Tests
         shell: bash
