@@ -4,3 +4,7 @@ shell=bash
 disable=SC2154
 
 external-sources=true
+
+# Resolve `# shellcheck source=` directives relative to each script's own dir (the
+# render scripts source a sibling render_style.sh via a dynamic $0 path).
+source-path=SCRIPTDIR

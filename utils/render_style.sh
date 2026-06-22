@@ -13,6 +13,7 @@
 #        then read the two globals it sets: RS_BG and RS_FG.
 # Globals (not a subshell) so a draw-time #{?...} accent — which carries commas —
 # survives intact instead of being word-split.
+# shellcheck disable=SC2034  # RS_BG/RS_FG are read by the sourcing render scripts
 resolve_style() {
   case "$1" in
     solid)  RS_BG="$2"; RS_FG="$4" ;;
