@@ -26,8 +26,15 @@ Every module supports the following overrides:
 ### Override the specific module icon
 
 ```sh
-set -g @themux_[module_name]_icon "icon"
+set -g @themux_[module_name]_icon " <glyph> "
 ```
+
+The icon value carries its **own** padding — the shipped icons are `" <glyph> "`
+(a leading and a trailing space) for the default footprint. Tune those spaces per
+icon to nudge a glyph: nerd-font glyphs sit off-centre in their cell by different
+amounts, so no single rule places them all (e.g. `"<glyph> "` pulls it to the
+left cap, `" <glyph>  "` gives it more room on the right). An override with no
+leading space sits flush against the left cap.
 
 ### Override the specific module color
 

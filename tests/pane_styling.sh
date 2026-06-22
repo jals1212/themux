@@ -19,13 +19,13 @@ print_option pane-border-format
 tmux set -g @themux_pane_leading_position "left" # reset
 
 # Whole label one colour: both blocks solid
-tmux set -g @themux_pane_leading "solid"
-tmux set -g @themux_pane_text "solid"
+tmux set -g @themux_pane_leading_variant "solid"
+tmux set -g @themux_pane_text_variant "solid"
 tmux source "${script_dir}/../themux.conf"
 print_option pane-border-format
 
 # Neutral, no accent: both blocks soft
-tmux set -g @themux_pane_leading "soft"
-tmux set -g @themux_pane_text "soft"
+tmux set -g @themux_pane_leading_variant "soft"
+tmux set -g @themux_pane_text_variant "soft"
 tmux source "${script_dir}/../themux.conf"
 print_option pane-border-format

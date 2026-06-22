@@ -71,10 +71,10 @@ Every item of the UI — status modules, the window list, panes — is a
 *component* with independent props, so any combination is valid:
 
 ```sh
-set -g @themux_module_shape     "rounded"
-set -g @themux_module_leading "solid"  # the icon/number block
-set -g @themux_module_text      "naked"  # the text block (windows: _name)
-set -g @themux_module_notch     "off"
+set -g @themux_module_shape           "rounded"
+set -g @themux_module_leading_variant "solid"  # the icon/number block
+set -g @themux_module_text_variant    "naked"  # the text block (windows: _name)
+set -g @themux_module_notch           "off"
 ```
 
 - **shape** — `squared`, `rounded`, `slanted`, `powerline` (blocks with square /
@@ -89,14 +89,18 @@ set -g @themux_module_notch     "off"
 - **notch** — `on` makes the leading↔text seam inherit the shape's cap instead
   of a flat edge.
 
-The text-block **style** prop is `@themux_<item>_text` for all three items; on
-windows the name *content* lives in `@themux_window_name`.
+The text-block **variant** prop is `@themux_<item>_text_variant` for all three
+items; on windows the name *content* lives in `@themux_window_name` (the bare
+`@themux_<name>_text` is a module's text content, hence the `_variant` suffix).
 
 Each of these per-item props defaults from a shared `@themux_all_<prop>`: `set -g
-@themux_all_shape "rounded"` shapes **every** item at once, and a per-item value
-(e.g. `@themux_window_shape "powerline"`) overrides it for that item. Cascadable
-props: `shape`, `leading`, `text`, `notch`, `leading_position`,
-`leading_highlight`, `text_highlight`.
+@themux_all_shape "rounded"` shapes **every** item at once, a per-item value
+(e.g. `@themux_window_shape "powerline"`) overrides it, and a per-module value
+(e.g. `@themux_cpu_text_variant "subtle"`) overrides one module. Cascadable
+props: `shape`, `leading_variant`, `text_variant`, `notch`, `leading_position`,
+`leading_active_variant`, `text_active_variant`. The selected window/pane (or a
+module alert) re-renders with each part's `_active_variant` + `_active_color` —
+by default the same variant with the active colour swapped in.
 
 ### Composition
 The status line is built from up to five rows (`@themux_status_line_1` … `_5`).
@@ -140,19 +144,19 @@ neighbours), `a<b>c` makes it the valley.
 
 For the lualine/nvim look — flat outer edges with powerline seams inside — drop
 the bar's outermost edge cap so that block fills solid to the terminal border
-instead of tapering. Two **independent** controls:
+instead of tapering. It is part of the line grammar: a leading `=` on a row's
+left zone, a trailing `=` on its right zone.
 
 ```sh
 set -g @themux_module_shape "powerline"
-set -g @themux_module_flush_edges "both"   # flush the edge MODULE group
-set -g @themux_window_flush_edges "both"   # flush the edge WINDOW ribbon
+set -g @themux_status_line_1 "=session>application / windows / cpu<ram="
+#                            ^ flush left zone        flush right zone ^
 ```
 
-Each is `off | left | right | both`: `left` flushes the left zone's first item,
-`right` the right zone's last. `@themux_module_flush_edges` acts on a module group
-at the edge; `@themux_window_flush_edges` acts on the window list there (a ribbon —
-`@themux_window_seam` other than `|`). So the module bar and the window list can
-flush separately. Capped shapes only (`squared`/`unstyled` already fill the edge).
+It is the same `=` that flat-merges two modules, carried out to the bar's edge:
+one marker flushes whatever sits there — a module group or the window ribbon (a
+leading/trailing `windows` token). It is per row, so each line flushes
+independently. Capped shapes only (`squared`/`unstyled` already fill the edge).
 
 > [!NOTE]
 > The window list shares one global format, so flushing assumes it sits at the
@@ -181,9 +185,9 @@ set -g @themux_status_line_2_append  " 🚀"
 
 > [!NOTE]
 > A prepend/append occupies the row edge, so the edge item no longer touches the
-> terminal border: a **prepend cancels that line's left** `*_flush_edges`, an
-> **append cancels the right**. Drop the prepend/append (or the flush) if you need
-> the edge-to-edge look on that row.
+> terminal border: a **prepend cancels that line's left** flush (the leading `=`),
+> an **append cancels the right** (the trailing `=`). Drop the prepend/append (or
+> the flush marker) if you need the edge-to-edge look on that row.
 
 The divider between status modules and the divider between windows are
 configured independently:
@@ -234,9 +238,9 @@ pane border styles *after* `themux.tmux` if you want them (the
 ```sh
 set -g @themux_pane_status "top"                                  # off | top | bottom
 set -g @themux_pane_shape "rounded"                              # squared | rounded | slanted | powerline | unstyled
-set -g @themux_pane_leading_highlight_color "#{@thm_green}"     # active number accent
-set -g @themux_pane_text_highlight_color "#{@thm_green}"          # active label accent
-set -g @themux_pane_leading_highlight "both"                    # off | bg | fg | both
+set -g @themux_pane_leading_active_color "#{@thm_green}"        # active number accent
+set -g @themux_pane_text_active_color "#{@thm_green}"            # active label accent
+set -g @themux_pane_leading_active_variant "solid"             # solid | soft | subtle | naked
 set -g @themux_pane_default_text "#{b:pane_current_path}"         # label text
 set -g @themux_pane_leading_position "left"                     # left | right
 ```
@@ -261,10 +265,10 @@ only clears the bar itself). For a fully transparent status line, set the
 
 ```sh
 # Before loading the plugin
-set -g @themux_module_leading "naked"
-set -g @themux_module_text      "naked"  # transparent modules
-set -g @themux_window_leading "naked"
-set -g @themux_window_text      "naked"  # naked window list to match
+set -g @themux_module_leading_variant "naked"
+set -g @themux_module_text_variant    "naked"  # transparent modules
+set -g @themux_window_leading_variant "naked"
+set -g @themux_window_text_variant    "naked"  # naked window list to match
 set -g @themux_status_background "none"
 ```
 

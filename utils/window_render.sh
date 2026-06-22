@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Assemble window-status-format and window-status-current-format from the v3
-# props @themux_window_{shape,leading,name,notch}, mirroring pane_render.sh:
-# the leading (number) and name blocks are styled independently through the
-# shared resolver. The two sides differ only by their accent/surface brightness
-# (inactive: number_color/text_color; active: current_number_color/
-# current_text_color). Load-time colours are resolved now; draw-time refs (the
-# per-window name, its visibility) stay literal #{...} for tmux to resolve.
+# Assemble window-status-format and window-status-current-format from the variant
+# grammar @themux_window_{shape,leading_variant,text_variant,notch}, mirroring
+# pane_render.sh: the leading (number) and name blocks are styled independently
+# through the shared resolver. The two sides each resolve their OWN variant +
+# accent — the inactive side from _leading_variant/_leading_color, the active
+# (current) side from _leading_active_variant/_leading_active_color — so the
+# active state is just a second appearance, with no per-channel toggles.
+# Load-time colours are resolved now; draw-time refs (the per-window name, its
+# visibility) stay literal #{...} for tmux to resolve.
 
 # shellcheck source=render_style.sh
 . "$(dirname "$0")/render_style.sh"
@@ -16,18 +18,19 @@ expand() {
 }
 
 position=$(themux_prop window leading_position)
-leading=$(themux_prop window leading)
-name_style=$(themux_prop window text)
+leading=$(themux_prop window leading_variant)
+name_style=$(themux_prop window text_variant)
+leading_active=$(themux_prop window leading_active_variant)
+name_active=$(themux_prop window text_active_variant)
+# The active variant defaults to the resting one (same shape, colour swaps only).
+[ -n "$leading_active" ] || leading_active="$leading"
+[ -n "$name_active" ] || name_active="$name_style"
 notch=$(themux_prop window notch)
 shape=$(themux_prop window shape)
-# Active highlight per part/channel (off|bg|fg|both, default both): which of the
-# active window's colours actually switch; the rest stay frozen at the inactive
-# colour. Applied only to the active side (cw), mixing active vs inactive below.
-lead_hl=$(themux_prop window leading_highlight); [ -n "$lead_hl" ] || lead_hl=both
-txt_hl=$(themux_prop window text_highlight); [ -n "$txt_hl" ] || txt_hl=both
 crust=$(expand "#{@thm_crust}")
 fg=$(expand "#{@thm_fg}")
 flags=$(expand "#{@_tmx_w_flags}")
+surface=$(expand "#{E:@themux_window_background_color}")
 
 # Shape glyphs (octal UTF-8). squared has none — the block padding is its edge.
 case "$shape" in
@@ -77,48 +80,35 @@ cap() {
 
 # Render one side into option $3. $1: var prefix (w|cw); $2: option infix
 # (""|current_). Sets the option directly (no command substitution) so the cap
-# colours it stashes survive for the connected separator built afterwards.
+# colours it stashes survive for the connected separator built afterwards. Each
+# side resolves its own variant + accent: the inactive side the resting ones, the
+# active side the _active_ ones — independent, so no channel is "frozen".
 render_side() {
   local p="$1" o="$2" opt="$3"
-  local accent surface ibg ifg tbg tfg icap tcap number text seam lcap rcap nblock nameblock out
-  # Per-part accents over a shared surface (mirrors pane_render): the number and
-  # name each resolve from their own accent; the inactive side uses the base
-  # colours, the active side the _highlight_color variants (the toggles below
-  # then freeze the channels they exclude).
-  local lead_acc txt_acc
+  local lvar tvar lead_acc txt_acc ibg ifg tbg tfg icap tcap number text seam lcap rcap nblock nameblock out
   if [ "$p" = w ]; then
+    lvar="$leading" tvar="$name_style"
     lead_acc=$(expand "#{E:@themux_window_leading_color}")
     txt_acc=$(expand "#{E:@themux_window_text_color}")
   else
-    lead_acc=$(expand "#{E:@themux_window_leading_highlight_color}")
-    txt_acc=$(expand "#{E:@themux_window_text_highlight_color}")
+    lvar="$leading_active" tvar="$name_active"
+    lead_acc=$(expand "#{E:@themux_window_leading_active_color}")
+    txt_acc=$(expand "#{E:@themux_window_text_active_color}")
   fi
-  surface=$(expand "#{E:@themux_window_background_color}")
-  resolve_style "$leading" "$lead_acc" "$surface" "$crust" "$fg"
+  resolve_style "$lvar" "$lead_acc" "$surface" "$crust" "$fg"
   ibg="$RS_BG" ifg="$RS_FG"
-  resolve_style "$name_style" "$txt_acc" "$surface" "$crust" "$fg"
+  resolve_style "$tvar" "$txt_acc" "$surface" "$crust" "$fg"
   tbg="$RS_BG" tfg="$RS_FG"
-  icap="$ibg"; [ "$ibg" = default ] && icap="$accent"
-  tcap="$tbg"; [ "$tbg" = default ] && tcap="$accent"
+  icap="$ibg"; [ "$ibg" = default ] && icap="$lead_acc"
+  tcap="$tbg"; [ "$tbg" = default ] && tcap="$txt_acc"
   number=$(expand "#{@themux_window_${o}number}")
   text="#{E:@_tmx_${p}_text}" # draw-time; "" when the name is hidden
 
-  # The inactive side is the baseline; the active side freezes the channels the
-  # highlight toggles exclude back to it (icap/tcap track the bg channel, since
-  # they are the block colour). Colours are stashed for the connected separator.
+  # Cap colours are stashed for the connected separator (the bg channel is the
+  # block colour, or the accent the block uses when transparent/naked).
   if [ "$p" = w ]; then
-    W_IBG="$ibg" W_IFG="$ifg" W_TBG="$tbg" W_TFG="$tfg" W_ICAP="$icap" W_TCAP="$tcap"
+    W_ICAP="$icap" W_TCAP="$tcap"
   else
-    case "$lead_hl" in
-      bg)  ifg="$W_IFG" ;;
-      fg)  ibg="$W_IBG" icap="$W_ICAP" ;;
-      off) ibg="$W_IBG" ifg="$W_IFG" icap="$W_ICAP" ;;
-    esac
-    case "$txt_hl" in
-      bg)  tfg="$W_TFG" ;;
-      fg)  tbg="$W_TBG" tcap="$W_TCAP" ;;
-      off) tbg="$W_TBG" tfg="$W_TFG" tcap="$W_TCAP" ;;
-    esac
     CW_ICAP="$icap" CW_TCAP="$tcap"
   fi
 
@@ -170,9 +160,9 @@ render_side cw current_ window-status-current-format
 #   - left window active  -> its right cap (active colour) bulges over the next
 #   - right window active  -> the active's left cap bulges back over this window
 #   - neither             -> a plain inactive->inactive taper
-# All four colours are known (the off side is always the opposite active state,
-# and both states' colours are theme constants), so the seam is gapless and the
-# active window's caps overlay both neighbours (raised).
+# All four colours are known (each side resolved its own cap colour, and both
+# states' colours are theme constants), so the seam is gapless and the active
+# window's caps overlay both neighbours (raised).
 if [ "$connected" = 1 ]; then
   w_rcol="#{?#{E:@_tmx_w_text},${W_TCAP},${W_ICAP}}"    # this window's right colour
   cw_rcol="#{?#{E:@_tmx_cw_text},${CW_TCAP},${CW_ICAP}}" # the active window's right colour

@@ -22,7 +22,7 @@ server, where there is nothing to clear yet.
 This means any option can be changed and reapplied with a plain reload:
 
 ```sh
-set -g @themux_module_text "naked"
+set -g @themux_module_text_variant "naked"
 set -g @themux_window_shape "rounded"
 # reload
 ```

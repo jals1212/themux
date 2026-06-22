@@ -1,0 +1,11 @@
+
+cpu_live 1
+cpu_not_blank ok
+cpu_live_fg 1
+
+host_text_naked Y
+session_prefix 1
+
+position_swaps_edges Y
+notch_pads_host_icon Y
+notch_keeps_metric_pill Y
