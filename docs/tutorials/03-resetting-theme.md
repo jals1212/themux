@@ -2,7 +2,7 @@
 
 themux resets its own derived state automatically every time it loads, so to
 change the theme or any styling option you just update the option
-and reload your config — no `tmux kill-server`, no reset option to set.
+and reload your config — no `tmux kill-server` needed.
 
 ```sh
 # In your tmux.conf (or wherever you load themux), change the value...
@@ -19,12 +19,25 @@ options. It never clears your `@themux_*` configuration, so your styles,
 module lists and overrides survive the reload. The reset is skipped on a fresh
 server, where there is nothing to clear yet.
 
-This means any option can be changed and reapplied with a plain reload:
+So *changing* an option and reloading just works:
 
 ```sh
 set -g @themux_module_text_variant "naked"
 set -g @themux_window_shape "rounded"
 # reload
+```
+
+## Resetting to defaults (clean reload)
+
+The flip side of options surviving: *removing* one from your config does **not**
+revert it — tmux keeps the last value until it is unset, so a plain reload leaves
+the old setting in place. To make a reload start from defaults, set
+`@themux_reload_key`. themux binds that key to a clean reload that unsets every
+`@themux_*` first, then re-sources your whole config — so anything you removed
+falls back to its default (and the rest of your `tmux.conf` reloads too):
+
+```conf
+set -g @themux_reload_key "r"   # prefix + r now does a clean reload
 ```
 
 ## Light/dark switching with hooks

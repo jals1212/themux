@@ -22,6 +22,11 @@ in the "[tmux man page](https://man7.org/linux/man-pages/man1/tmux.1.html#FORMAT
 Make sure you have installed a [Nerd Font](https://www.nerdfonts.com/),
 and that your terminal is set to use that font.
 
+## Modules have no colour
+
+themux needs **tmux ≥ 3.6** (check with `tmux -V`). On older builds the module
+styles resolve empty, so segments render without their colours — upgrade tmux.
+
 ## My options are not being applied
 
 Go through these steps:

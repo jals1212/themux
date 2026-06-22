@@ -310,7 +310,7 @@ Shared status options:
 
 | Option | Default | Effect |
 | --- | --- | --- |
-| `@themux_menu_selected_style` | `fg=#{@thm_fg},bold,bg=#{@thm_overlay_0}` | Selected menu entry style (tmux ≥ 3.4). |
+| `@themux_menu_selected_style` | `fg=#{@thm_fg},bold,bg=#{@thm_overlay_0}` | Selected menu entry style. |
 
 ---
 
