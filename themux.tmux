@@ -34,3 +34,13 @@ fi
 
 tmux source "${PLUGIN_DIR}/themux_options.conf"
 tmux source "${PLUGIN_DIR}/themux.conf"
+
+# Optional clean-reload key. When @themux_reload_key is set, bind it to reset.sh,
+# which unsets every @themux_* option and then re-sources your config — so a reload
+# returns options you removed from (or changed in) your config to their themux
+# defaults AND reloads the rest of your tmux.conf, exactly like a normal reload.
+# Nothing is bound unless you set the key, so themux never hijacks a key by default.
+reload_key="$(tmux show -gqv @themux_reload_key)"
+if [ -n "$reload_key" ]; then
+  tmux bind-key "$reload_key" run-shell "${PLUGIN_DIR}/utils/reset.sh"
+fi

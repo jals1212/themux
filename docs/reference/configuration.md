@@ -319,4 +319,18 @@ Shared status options:
 themux resets its own derived state automatically when it loads: on a running
 server `themux.tmux` clears the palette, internals, the derived caps and the
 status/window/pane formats *before* rebuilding — but never your `@themux_*`
-config. So switching theme or style is just a config reload.
+config, so your variants, module lists and overrides survive the reload. Switching
+theme or style is just a config reload.
+
+Because `@themux_*` options survive, an option you *remove from* (or change in)
+your config lingers at its old value until something unsets it — a plain
+`source-file` reload won't revert it. Set `@themux_reload_key` to a key and themux
+binds it to a **clean reload**: it unsets every `@themux_*` first (so removed or
+changed options fall back to their themux defaults) and then re-sources your whole
+`tmux.conf` (via `#{config_files}`) — a superset of a normal `bind <key>
+source-file`, so the rest of your config reloads too. It is off until you set the
+key, so themux never grabs a binding by default:
+
+```tmux
+set -g @themux_reload_key "r"   # prefix + r now does a clean reload
+```
