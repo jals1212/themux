@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.2.0](https://github.com/jals1212/themux/compare/v0.1.0...v0.2.0) (2026-06-23)
+
+
+### Added
+
+* **modules:** interpolate plugin-data modules in the status-line grammar ([ff838a6](https://github.com/jals1212/themux/commit/ff838a652c54398cb98525bd137271d2d43d8d4f))
+* **padding:** configurable badge padding grammar ([ece0656](https://github.com/jals1212/themux/commit/ece0656d2c486de2e8b84d9c8463820582171b8b))
+* status-line grammar — configurable padding + grammar-native modules + docs ([7205862](https://github.com/jals1212/themux/commit/720586247cfe71d0c55b9438054face05b9d0304))
+
+
+### Documentation
+
+* document the clean reload and tmux 3.6 requirement ([bff498c](https://github.com/jals1212/themux/commit/bff498c1c47ce1834b198d2e6265b3f5e2a05537))
+* migrate status-line examples to the [@themux](https://github.com/themux)_status_line grammar ([29663e1](https://github.com/jals1212/themux/commit/29663e12d1f0264ef219fe31f4e859020dedd013))
+
 ## 0.1.0 (2026-06-22)
 
 
