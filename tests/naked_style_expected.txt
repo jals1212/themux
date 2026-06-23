@@ -1,15 +1,15 @@
 
-@themux_module_application #[fg=#eba0ac,bg=default] #[fg=#eba0ac,bg=default]#{E:@themux_application_text}#[bg=default] 
+@themux_module_application #[fg=#eba0ac,bg=default]   #[fg=#eba0ac,bg=default] #{E:@themux_application_text}#[bg=default] 
 
-@themux_module_session #[fg=#{?client_prefix,#f38ba8,#a6e3a1},bg=default] #[fg=#a6e3a1,bg=default]#{E:@themux_session_text}#[bg=default] 
+@themux_module_session #[fg=#{?client_prefix,#f38ba8,#a6e3a1},bg=default]   #[fg=#a6e3a1,bg=default] #{E:@themux_session_text}#[bg=default] 
 
 @_tmx_module_divider #[fg=#{E:@themux_module_divider_color},bg=default]#{E:@themux_module_divider}
 
 @themux_module_zoom #{?window_zoomed_flag,#{E:@_tmx_module_zoom_seg},}
 
-window-status-format #[bg=default] #[fg=#9399b2,bg=default]#I#{?#{E:@_tmx_w_text},#[fg=#9399b2]#[bg=default]#{E:@_tmx_w_text} ,}#[bg=#{?#{E:@_tmx_w_text},default,default}] 
+window-status-format #[bg=default] #[fg=#9399b2,bg=default] #I #{?#{E:@_tmx_w_text},#[fg=#9399b2]#[bg=default] #{E:@_tmx_w_text} ,}#[bg=#{?#{E:@_tmx_w_text},default,default}] 
 
-window-status-current-format #[bg=default] #[fg=#cba6f7,bg=default]#I#{?#{E:@_tmx_cw_text},#[fg=#cba6f7]#[bg=default]#{E:@_tmx_cw_text} ,}#[bg=#{?#{E:@_tmx_cw_text},default,default}] 
+window-status-current-format #[bg=default] #[fg=#cba6f7,bg=default] #I #{?#{E:@_tmx_cw_text},#[fg=#cba6f7]#[bg=default] #{E:@_tmx_cw_text} ,}#[bg=#{?#{E:@_tmx_cw_text},default,default}] 
 
 window-status-style default
 

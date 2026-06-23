@@ -3,9 +3,11 @@ cpu_live 1
 cpu_not_blank ok
 cpu_icon_solid Y
 cpu_text_subtle Y
-host_text_naked Y
+host_text_naked n
 session_prefix 1
 
 position_swaps_edges Y
 notch_adds_seam_host_icon Y
 notch_adds_seam_metric_icon Y
+padding_widens_badge Y
+padding_sep_widens Y
