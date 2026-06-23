@@ -9,7 +9,7 @@ load, so changing an option and reloading is enough — no `kill-server`.
 
 The three UI items — **status modules**, **windows**, **panes** — are each a
 *component* styled through a few independent props: a **shape**, a
-**leading** style, a **text** style, and a **notch** flag.
+**leading** style, a **text** style, a **notch** flag, and **padding**.
 
 ---
 
@@ -39,6 +39,7 @@ set -g @themux_module_notch           "off"
 | `@themux_<item>_text_variant` † | `solid` · `soft` · `subtle` · `naked` | `soft` |
 | `@themux_<item>_notch` | `on` · `off` | `off` |
 | `@themux_<item>_leading_position` | `left` · `right` | `left` |
+| `@themux_<item>_padding` | `"<L> <S> <T>"` cells (see below) | `1 1 1` |
 | `@themux_<item>_leading_active_variant` | `solid` · `soft` · `subtle` · `naked` | resting variant |
 | `@themux_<item>_text_active_variant` | `solid` · `soft` · `subtle` · `naked` | resting variant |
 
@@ -54,8 +55,22 @@ These per-item props default from a shared `@themux_all_<prop>`: set
 tier — `@themux_<name>_<prop>` (e.g. `@themux_cpu_text_variant`) overrides
 `@themux_module_<prop>` for one module. Precedence: `<name>` > per-item >
 `@themux_all_*` > built-in. Cascadable props: `shape`, `leading_variant`,
-`text_variant`, `notch`, `leading_position`, `leading_active_variant`,
-`text_active_variant`.
+`text_variant`, `notch`, `leading_position`, `padding`,
+`leading_active_variant`, `text_active_variant`.
+
+**Padding** (`@themux_<item>_padding`) sets a badge's tightness as three cell
+counts `"<L> <S> <T>"`: **L** pads *both* sides of the leading (icon/number) block
+so it stays centred, **S** is the icon↔text separator, and **T** trails the text
+(the right-cap room). A single number sets all three (`"2"` = `2 2 2`); two are the
+extremes with the centre kept at its default (`"0 2"` = `0 1 2`); the default is
+`1 1 1`. An icon glyph's own per-glyph nudging still lives in `@themux_<name>_icon`,
+independent of this — padding is the badge's room, the icon value is the glyph's.
+
+```sh
+set -g @themux_all_padding    "1 1 1"   # the default
+set -g @themux_window_padding "0"       # flush windows (every pad 0)
+set -g @themux_cpu_padding    "0 3 1"   # cpu only: flush icon, wide separator
+```
 
 **Active appearance** — the selected window/pane (or a module with
 `@themux_<name>_active_when` set, e.g. `session`'s prefix highlight) is rendered

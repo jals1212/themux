@@ -8,13 +8,35 @@
 # Rows render up to the last non-empty line, so a blank ("") line in between
 # becomes an empty row (status off when every line is empty).
 
-# tmux-cpu only interpolates its literals (#{ram_percentage}, ...) into
-# status-left/right, so surface them into their #(script) form here — that lets
-# cpu/ram sit in any zone of any line, not just the left/right edges.
-cpu_tmux="${TMUX_PLUGIN_MANAGER_PATH}/tmux-cpu/cpu.tmux"
-# shellcheck disable=SC1090
-[ -r "$cpu_tmux" ] && source "$cpu_tmux" >/dev/null 2>&1
-type do_interpolation >/dev/null 2>&1 || do_interpolation() { printf '%s' "$1"; }
+# A module marked @themux_<name>_expand=yes carries a tmux plugin's #{var} literals
+# (#{cpu_percentage}, #{battery_percentage}, ...) that the plugin only resolves into
+# status-left/right. @themux_<name>_plugin names the plugin's tmux file (under
+# TMUX_PLUGIN_MANAGER_PATH); its do_interpolation rewrites those literals into the
+# #(script) form, so the module works in ANY zone of the grammar — not just the bar
+# edges. Every such plugin names the function `do_interpolation`, so they would
+# clobber one another: source each ONCE and snapshot its function under a per-plugin
+# name (the `declare -F` guard caches it). A missing plugin — or one without the
+# function — snapshots to identity, leaving the literals untouched (no regression).
+interp() { # $1 module, $2 string -> the string with the module's plugin literals resolved
+  local p fn
+  p=$(tmux show -gqv "@themux_${1}_plugin")
+  [ -z "$p" ] && { printf '%s' "$2"; return; }
+  fn="_di_${p//[^a-zA-Z0-9]/_}"
+  # Snapshot the plugin's do_interpolation under a per-plugin name on first use (the
+  # declare -F guard caches it within this shell). Inlined here — not split into a
+  # helper — so the eval'd function lives in the same scope that then calls it.
+  if ! declare -F "$fn" >/dev/null 2>&1; then
+    unset -f do_interpolation 2>/dev/null || true
+    # shellcheck disable=SC1090
+    [ -r "${TMUX_PLUGIN_MANAGER_PATH}/${p}" ] && source "${TMUX_PLUGIN_MANAGER_PATH}/${p}" >/dev/null 2>&1
+    if declare -F do_interpolation >/dev/null 2>&1; then
+      eval "${fn}() $(declare -f do_interpolation | sed '1d')"
+    else
+      eval "${fn}() { printf '%s' \"\$1\"; }"
+    fi
+  fi
+  "$fn" "$2"
+}
 
 windows_block=$(tmux show -gqv @_tmx_fmt_windows)
 
@@ -39,13 +61,13 @@ mdiv=$(tmux show -gqv @themux_module_divider)
 # sits there — a module group OR the window ribbon — and it is per line; the
 # centre zone never touches an edge. Parsed in the per-line loop below.
 
-# tmux-cpu modules (cpu/ram) carry #{cpu_*}/#{ram_*} literals that only resolve
-# in status-left/right, so do_interpolation rewrites them to #(...) form. These
-# helpers apply it for those modules and pass everything else through unchanged.
+# An _expand module (cpu/ram, battery, ...) carries its plugin's #{var} literals;
+# interp (above) rewrites them to #(...) form via that plugin's do_interpolation.
+# These helpers apply it for such modules and pass everything else through unchanged.
 mod_field() { # $1 module, $2 edge option (lcol|rcol|lbg) -> a usable colour
   if [ "$(tmux show -gqv "@themux_${1}_expand")" = "yes" ]; then
     tmux set -gF @_tmx_layout_tmp "#{E:@_tmx_module_${1}_${2}}"
-    do_interpolation "$(tmux show -gv @_tmx_layout_tmp)"
+    interp "$1" "$(tmux show -gv @_tmx_layout_tmp)"
   else
     tmux show -gqv "@_tmx_module_${1}_${2}"
   fi
@@ -53,7 +75,7 @@ mod_field() { # $1 module, $2 edge option (lcol|rcol|lbg) -> a usable colour
 mod_core() { # $1 module -> its bare core (a ref normally; inlined for tmux-cpu)
   if [ "$(tmux show -gqv "@themux_${1}_expand")" = "yes" ]; then
     tmux set -gF @_tmx_layout_tmp "#{E:@_tmx_module_${1}_core}"
-    do_interpolation "$(tmux show -gv @_tmx_layout_tmp)"
+    interp "$1" "$(tmux show -gv @_tmx_layout_tmp)"
   else
     printf '%s' "#{E:@_tmx_module_${1}_core}"
   fi
@@ -61,7 +83,7 @@ mod_core() { # $1 module -> its bare core (a ref normally; inlined for tmux-cpu)
 full_pill() { # $1 module -> its own pill, caps included (inlined for tmux-cpu)
   if [ "$(tmux show -gqv "@themux_${1}_expand")" = "yes" ]; then
     tmux set -gF @_tmx_layout_tmp "#{E:@themux_module_${1}}"
-    do_interpolation "$(tmux show -gv @_tmx_layout_tmp)"
+    interp "$1" "$(tmux show -gv @_tmx_layout_tmp)"
   else
     printf '%s' "#{E:@themux_module_${1}}"
   fi

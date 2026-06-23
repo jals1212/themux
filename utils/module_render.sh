@@ -35,7 +35,9 @@ name="$1"
 US=$(printf '\037')
 
 # A property cascade: @themux_<name>_<prop> > @themux_module_<prop> > @themux_all_<prop>.
-casc() { printf '#{?#{@themux_%s_%s},#{@themux_%s_%s},#{?#{@themux_module_%s},#{@themux_module_%s},#{@themux_all_%s}}}' "$name" "$1" "$name" "$1" "$1" "$1" "$1"; }
+# Empty-check (not truthy) so a literal "0" value (valid for padding) is honoured;
+# tmux's #{?...} would read "0" as false and skip the tier.
+casc() { printf '#{?#{==:#{@themux_%s_%s},},#{?#{==:#{@themux_module_%s},},#{@themux_all_%s},#{@themux_module_%s}},#{@themux_%s_%s}}' "$name" "$1" "$1" "$1" "$1" "$name" "$1"; }
 # A resting accent: @themux_<name>_<slot>_color > @themux_<name>_color.
 acc() { printf '#{?#{@themux_%s_%s_color},#{@themux_%s_%s_color},#{@themux_%s_color}}' "$name" "$1" "$name" "$1" "$name"; }
 # An active accent: @themux_<name>_<slot>_active_color > @themux_<name>_active_color > the resting accent ($2).
@@ -43,13 +45,15 @@ aacc() { printf '#{?#{@themux_%s_%s_active_color},#{@themux_%s_%s_active_color},
 
 lead_acc=$(acc leading) text_acc=$(acc text)
 IFS="$US" read -ra V < <(tmux display -p \
-"$(casc shape)${US}$(casc leading_variant)${US}$(casc text_variant)${US}$(casc notch)${US}#{@themux_module_connect_separator}${US}${lead_acc}${US}${text_acc}${US}#{@thm_surface_0}${US}#{@thm_crust}${US}#{@thm_fg}${US}#{@themux_${name}_icon}${US}#{@themux_${name}_self_styled}${US}#{@themux_module_middle_separator}${US}#{@themux_${name}_when}${US}$(casc leading_position)${US}$(casc leading_active_variant)${US}$(casc text_active_variant)${US}$(aacc leading "$lead_acc")${US}$(aacc text "$text_acc")${US}#{@themux_${name}_active_when}${US}#{E:${lead_acc}}${US}#{E:${text_acc}}${US}#{E:$(aacc leading "$lead_acc")}${US}#{E:$(aacc text "$text_acc")}${US}#{@themux_${name}_icon_bg}${US}#{@themux_${name}_icon_fg}${US}#{@themux_${name}_text_bg}${US}#{@themux_${name}_text_fg}${US}END")
+"$(casc shape)${US}$(casc leading_variant)${US}$(casc text_variant)${US}$(casc notch)${US}#{@themux_module_connect_separator}${US}${lead_acc}${US}${text_acc}${US}#{@thm_surface_0}${US}#{@thm_crust}${US}#{@thm_fg}${US}#{@themux_${name}_icon}${US}#{@themux_${name}_self_styled}${US}#{@themux_module_middle_separator}${US}#{@themux_${name}_when}${US}$(casc leading_position)${US}$(casc leading_active_variant)${US}$(casc text_active_variant)${US}$(aacc leading "$lead_acc")${US}$(aacc text "$text_acc")${US}#{@themux_${name}_active_when}${US}#{E:${lead_acc}}${US}#{E:${text_acc}}${US}#{E:$(aacc leading "$lead_acc")}${US}#{E:$(aacc text "$text_acc")}${US}#{@themux_${name}_icon_bg}${US}#{@themux_${name}_icon_fg}${US}#{@themux_${name}_text_bg}${US}#{@themux_${name}_text_fg}${US}$(casc padding)${US}END")
 shape=${V[0]} leading=${V[1]} text_style=${V[2]} notch=${V[3]} connect=${V[4]}
 lead_acc=${V[5]} text_acc=${V[6]} surface=${V[7]} crust=${V[8]} fg=${V[9]} icon=${V[10]}
 self_styled=${V[11]} midsep=${V[12]} when=${V[13]} position=${V[14]}
 lead_av=${V[15]} text_av=${V[16]} lead_aacc=${V[17]} text_aacc=${V[18]} active_when=${V[19]}
 lead_acc_E=${V[20]} text_acc_E=${V[21]} lead_aacc_E=${V[22]} text_aacc_E=${V[23]}
 icon_bg_ov=${V[24]} icon_fg_ov=${V[25]} text_bg_ov=${V[26]} text_fg_ov=${V[27]}
+padding=${V[28]}
+read -r plead psep ptrail <<<"$(pad_parse "$padding")"
 # The active variant defaults to the resting one — the active state keeps the same
 # shape unless _active_variant is set, so only the colour swaps.
 [ -n "$lead_av" ] || lead_av="$leading"
@@ -131,21 +135,19 @@ cap() { # $1 glyph, $2 block bg, $3 naked-accent for that block
   fi
 }
 
-# The icon value carries its OWN padding (the shipped icons are " <glyph> " for the
-# default 1+1, matching the window number block " #I "). Keeping the pad in the
-# value lets each icon be nudged on its own: nerd-font glyphs sit off-centre in
-# their cell by different amounts, so no single rule places them all — tune the
-# leading/trailing spaces in @themux_<name>_icon per glyph.
-# A notch taper trims ~half a cell of icon colour off the seam edge that the flat
-# (notch=off) █ seam keeps, so add one trailing space when the notch draws a real
-# taper (notch=on with a seam — not the single-colour metric pill) to keep the footprint.
-itrail=""
-[ "$notch" = on ] && [ "$ibg" != "$tbg" ] && itrail=" "
-iblock="#[fg=$ifg,bg=$ibg]$icon$itrail"
-# The text value carries its own leading space; add a trailing one so the block
-# is padded both sides (the icon block is) and the right cap — squared █, rounded
-# bulge, or the inward slant — has a cell to sit against. Re-assert the block bg
-# first, so a self-styled text cannot leak its last colour into the pad/cap.
+# The icon value carries its OWN padding. The shipped module icons are "<glyph> "
+# (trailing space only, so the glyph sits flush to the left cap — catppuccin-style).
+# Keeping the pad in the value lets each icon be nudged on its own: nerd-font glyphs
+# sit off-centre in their cell by different amounts, so no single rule places them
+# all — tune the leading/trailing spaces in @themux_<name>_icon per glyph.
+# Badge padding (@themux_*_padding -> L S T): L pads BOTH sides of the leading
+# (icon) block so it stays centred, S is the icon<->text separator, T trails the
+# text. The icon's own per-glyph compensation stays in @themux_<name>_icon.
+iblock="#[fg=$ifg,bg=$ibg]$(spaces "$plead")$icon$(spaces "$plead")"
+# The text value carries its own leading space; add a trailing one so the right cap
+# — squared █, rounded bulge, or the inward slant — has a cell to sit against.
+# Re-assert the block bg first, so a self-styled text cannot leak its last colour
+# into the pad/cap.
 #
 # A self-styled text (e.g. gitmux) sets its own colours and resets to default
 # between segments; #[push-default] makes those resets fall back to the block's
@@ -154,7 +156,7 @@ text_open="" text_close="#[bg=$tbg]"
 if [ "$self_styled" = yes ]; then
   text_open="#[push-default]" text_close="#[pop-default]#[bg=$tbg]"
 fi
-tblock="#[fg=$tfg,bg=$tbg]${text_open}${text}${text_close} "
+tblock="#[fg=$tfg,bg=$tbg]${text_open}$(spaces "$psep")${text}${text_close}$(spaces "$ptrail")"
 
 # Block order follows the leading position: icon-then-text (left, default) or
 # text-then-icon (right). first/second are the blocks in display order, fbg/sbg
@@ -165,18 +167,15 @@ else
   first="$iblock" fbg="$ibg" facc="$accent" second="$tblock" sbg="$tbg" sacc="$(chan "$text_aacc" "$text_acc")"
 fi
 
-# Seam between the two blocks, drawn only when they differ (matching bg would be
-# an invisible phantom cell; else the plain separator). notch=on takes the shape's
-# right cap; notch=off takes a flat block (█) so icon and text get a clean divider
-# instead of abutting.
-if [ "$fbg" != "$sbg" ]; then
+# Seam between the two blocks. notch=on (with differing backgrounds) takes the
+# shape's right cap — the icon colour tapering into the text background. Otherwise
+# the blocks abut through the plain middle separator (@themux_module_middle_separator,
+# empty by default), so the icon and text backgrounds are themselves the divider
+# (catppuccin-style) and the module stays compact — no extra full-block cell.
+if [ "$fbg" != "$sbg" ] && [ "$notch" = on ]; then
   seamcol="$fbg"
   [ "$fbg" = default ] && seamcol="$facc"
-  if [ "$notch" = on ]; then
-    seam="#[fg=$seamcol,bg=$sbg]$rglyph"
-  else
-    seam="#[fg=$seamcol,bg=$sbg]$(printf '\342\226\210')"
-  fi
+  seam="#[fg=$seamcol,bg=$sbg]$rglyph"
 else
   seam="$midsep"
 fi

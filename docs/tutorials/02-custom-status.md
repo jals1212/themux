@@ -1,41 +1,47 @@
-# User Defined Status Line Modules
+# Adding your own status line content
 
-To create your own status line module that uses the active theme,
-all you need to do is add it to the `status-left` or `status-right` options.
+themux builds the status line from module **name** tokens in the row grammar
+(`@themux_status_line_1` … `_5`; see the
+[Status Line reference](../reference/status-line.md)). Beyond the built-in modules,
+you can pin your own content to a row.
 
-You can add arbitrary things to the status line like so:
+## Arbitrary content: prepend / append
 
-```sh
-# ~/.tmux.conf
-
-set -agF status-right "#[fg=#{@thm_crust},bg=#{@thm_teal}] ##H "
-```
-
-This will append the current hostname (`#H`) to the status line with a teal
-background and dark black text.
-
-You can also use icons for styling, for example to show the used memory percentage
-on MacOS:
-
-```sh  
-set -g status-right "#[bg=#{@thm_flamingo},fg=#{@thm_crust}]#[reverse]#[noreverse]󱀙  "
-set -ag status-right "#[fg=#{@thm_fg},bg=#{@thm_mantle}] #(memory_pressure | awk '/percentage/{print $5}') "
-```
-
-![Example of the custom ram module](../../assets/ram-example.webp)
-
-To use the status module formatting that themux uses, do the following:
+`@themux_status_line_<N>_prepend` and `@themux_status_line_<N>_append` pin any
+content — text, emoji, `#{...}` formats, `#[...]` styles or `#(command)` output — to
+the far left / far right of that row. For example, a flamingo "used memory" pill on
+the right (macOS):
 
 ```sh
-# In ~/.tmux.conf, before the themux plugin has been loaded.
-
-%hidden MODULE_NAME="my_custom_module"
-
-set -g "@themux_${MODULE_NAME}_icon" " "
-set -gF "@themux_${MODULE_NAME}_color" "#{E:@thm_pink}"
-set -g "@themux_${MODULE_NAME}_text" "#{pane_current_command}"
-
-source "<path to themux plugin>/utils/module_block.conf"
-
-set -g status-right "#{E:@themux_module_application}#{E:@themux_module_my_custom_module}"
+set -gF @themux_status_line_1_append \
+  "#[bg=#{@thm_flamingo},fg=#{@thm_crust}] 󱀙 #(memory_pressure | awk '/percentage/{print $5}') "
 ```
+
+![Example of a custom memory pill](../../assets/ram-example.webp)
+
+The `#[...]` syntax is an embedded style, similar to inline CSS: `bg=#{@thm_flamingo}`
+paints the background with the theme's flamingo accent and `fg=#{@thm_crust}` the
+text. `@thm_*` are user options the plugin creates, so they only work *after* themux
+has loaded. `#(...)` runs a shell command and inserts its output, and `#H`, `#S`, …
+are the usual tmux format codes.
+
+> A literal `%` in a plain string must be written `%%` — tmux reads `%` as a
+> `strftime` escape. Output produced by `#(command)` is inserted as-is.
+
+## A theme-styled module
+
+To get a pill that matches the built-in modules — the same shape, variants and
+padding — model it on the shipped ones. Each `modules/<name>.conf` sets three
+options and registers the module:
+
+```sh
+set -ogq "@themux_<name>_icon"  "<glyph> "
+set -ogq "@themux_<name>_color" "#{E:@thm_pink}"   # a @thm_* accent
+set -ogq "@themux_<name>_text"  "#{pane_current_command}"
+source "<path to themux>/utils/module_block.conf"
+```
+
+Copy one of the existing modules as a template, then add your module's name to a
+`@themux_status_line_*` row. Per-module overrides (`@themux_<name>_shape`,
+`@themux_<name>_padding`, `@themux_<name>_text_variant`, …) tune just that pill — see
+the [Configuration reference](../reference/configuration.md).

@@ -30,6 +30,9 @@ text_active=$(themux_prop pane text_active_variant)
 [ -n "$text_active" ] || text_active="$text_style"
 notch=$(themux_prop pane notch)
 shape=$(themux_prop pane shape)
+# Badge padding (@themux_pane_padding -> L S T): L pads BOTH sides of the index
+# block (centred), S is the index<->text separator, T trails the text block.
+read -r plead psep ptrail <<<"$(pad_parse "$(themux_prop pane padding)")"
 
 # Shape glyphs (octal UTF-8). squared has none — the block padding is its edge.
 case "$shape" in
@@ -83,9 +86,11 @@ seam_glyph=""
   squared)   seam_glyph=$(printf '\342\226\210') ;;
 esac
 
-# Centred blocks: " idx " on the leading bg, " text " on the text bg.
-lead_block="#[fg=$lead_fg,bg=$lead_bg] $index "
-txt_block="#[fg=$txt_fg,bg=$txt_bg] $text "
+# The leading (number) block is flush both sides — no pad. Plain digits don't need
+# the body a nerd-font icon glyph does, so the index hugs its caps (catppuccin-style);
+# the text block keeps both pads, its leading space being the number<->text separator.
+lead_block="#[fg=$lead_fg,bg=$lead_bg]$(spaces "$plead")$index$(spaces "$plead")"
+txt_block="#[fg=$txt_fg,bg=$txt_bg]$(spaces "$psep")$text$(spaces "$ptrail")"
 
 # A cap is the shape glyph over the bare border, coloured by the block it tapers
 # (its cap colour). Empty glyph (squared) -> no cap, the block fills its own edge.

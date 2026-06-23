@@ -54,10 +54,10 @@ rl=$(tmux show -gqv @_tmx_module_host_lbg) rr=$(tmux show -gqv @_tmx_module_host
 printf "\nposition_swaps_edges "
 { [ "$ll" = "$rr" ] && [ "$lr" = "$rl" ] && [ "$ll" != "$lr" ]; } && printf "Y" || printf "n"
 
-# notch=on tapers the icon's seam edge (trimming the icon colour a flat notch=off
-# █ keeps), so a trailing space is added to the icon to keep the 1+1 footprint. The
-# metric's solid icon over its subtle text differs in bg like any module, so it is
-# padded the same way.
+# notch=off lets the icon and text blocks abut (compact, catppuccin-style — no seam
+# cell). notch=on draws the shape's tapered cap as the seam between them, so the
+# notched module is wider. The metric's solid icon over its subtle text differs in
+# bg like any module, so the seam is drawn there too.
 tmux set -gu @themux_module_leading_position
 tmux set -g @themux_status_line_1 "host cpu"
 tmux set -g @themux_all_shape "rounded"
@@ -65,5 +65,26 @@ tmux set -g @themux_all_notch "on"; src
 hon=$(core host | wc -c | tr -d ' '); con=$(core cpu | wc -c | tr -d ' ')
 tmux set -g @themux_all_notch "off"; src
 hoff=$(core host | wc -c | tr -d ' '); coff=$(core cpu | wc -c | tr -d ' ')
-printf "\nnotch_pads_host_icon "; { [ "$hon" -eq "$((hoff + 1))" ]; } && printf "Y" || printf "n"
-printf "\nnotch_pads_metric_icon "; { [ "$con" -eq "$((coff + 1))" ]; } && printf "Y" || printf "n"
+printf "\nnotch_adds_seam_host_icon "; { [ "$hon" -gt "$hoff" ]; } && printf "Y" || printf "n"
+printf "\nnotch_adds_seam_metric_icon "; { [ "$con" -gt "$coff" ]; } && printf "Y" || printf "n"
+
+# Badge padding "<L> <S> <T>": a bigger value widens the module, and S widens the
+# icon<->text separator on its own (leading/trailing left at 0).
+tmux set -g @themux_status_line_1 "host"
+tmux set -g @themux_module_padding "0"; src
+p0=$(core host | wc -c | tr -d ' ')
+tmux set -g @themux_module_padding "3"; src
+p3=$(core host | wc -c | tr -d ' ')
+tmux set -g @themux_module_padding "0 3 0"; src
+psep=$(core host | wc -c | tr -d ' ')
+tmux set -gu @themux_module_padding
+printf "\npadding_widens_badge "; { [ "$p3" -gt "$p0" ]; } && printf "Y" || printf "n"
+printf "\npadding_sep_widens "; { [ "$psep" -gt "$p0" ]; } && printf "Y" || printf "n"
+
+# Plugin-data modules carry their value as a #{var} literal that only resolves
+# through the plugin's do_interpolation; _expand + _plugin let the layout apply it
+# in any zone (the live interpolation is verified outside the harness, which has no
+# plugins installed).
+src
+printf "\nbattery_interp_wired "; { [ "$(tmux show -gqv @themux_battery_expand)" = "yes" ] && [ -n "$(tmux show -gqv @themux_battery_plugin)" ]; } && printf "Y" || printf "n"
+printf "\ncpu_interp_wired "; { [ "$(tmux show -gqv @themux_cpu_expand)" = "yes" ] && [ -n "$(tmux show -gqv @themux_cpu_plugin)" ]; } && printf "Y" || printf "n"

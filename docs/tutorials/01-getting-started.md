@@ -35,37 +35,24 @@ be a bit more colorful. Edit your tmux config again so it looks like this.
 # Pick a softer palette.
 set -g @themux_theme 'catppuccin_frappe'
 
+# Compose the status line. Modules are name tokens placed in the row grammar
+# "<left> / windows / <right>": here the window list sits on the left and the
+# session module on the right.
+set -g @themux_status_line_1 "windows / session"
+
 run ~/.config/tmux/plugins/themux/themux.tmux
-
-# Make the status line more pleasant.
-set -g status-left ""
-set -g status-right '#[fg=#{@thm_crust},bg=#{@thm_teal}] session: #S '
-
-# Ensure that everything on the right side of the status line
-# is included.
-set -g status-right-length 100
 ```
 
-There is some new stuff here. Firstly, everything is documented in
-the "[tmux man page](https://man7.org/linux/man-pages/man1/tmux.1.html)".
-Go check it out if anything is unclear. The lines `set -g ...` are setting
-"options". The `-g` means that the option is global, so it applies everywhere.
-When an option name begins with `@`, then it is a "user" option and has no
-effect on tmux itself. This is used to essentially set global variables.
+There is some new stuff here. The `set -g ...` lines set tmux "options" (`-g` makes
+an option global). An option whose name begins with `@` is a "user" option — themux
+reads its own `@themux_*` options to build the look.
 
-Three options are set that control how tmux looks, `status-left`,
-`status-right`, and `status-right-length`. These options are documented
-in the man page, but the tl;dr is that they control what appears on the left
-and right of the status line.
-
-The `#[]` syntax is an embedded style, similar to inline css.
-`fg=#{@thm_crust}` says "make the text the crust color". `@thm_crust` is a
-user option set by the plugin. It is created by the line
-`run ~/.config/tmux/plugins/themux/themux.tmux`, so if you try
-and use colors before that line, it won't work. The `#S` is a special sequence
-that tmux replaces with the current session name. There are a long, long
-"[list of special sequences](https://man7.org/linux/man-pages/man1/tmux.1.html#FORMATS)"
-that tmux can replace.
+`@themux_status_line_1` is themux's status-line **grammar**. `/` splits the row into
+zones (`<left> / windows / <right>`), and a zone lists module names (a space gives
+each module its own pill). themux owns tmux's `status-format`, so it composes the
+whole bar from these rows — you do not set `status-left` / `status-right` yourself.
+See the "[Status Line reference](../reference/status-line.md)" for the full grammar
+and the available modules.
 
 If everything is working right, your version should look like this:
 
