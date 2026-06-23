@@ -131,21 +131,16 @@ cap() { # $1 glyph, $2 block bg, $3 naked-accent for that block
   fi
 }
 
-# The icon value carries its OWN padding (the shipped icons are " <glyph> " for the
-# default 1+1, matching the window number block " #I "). Keeping the pad in the
-# value lets each icon be nudged on its own: nerd-font glyphs sit off-centre in
-# their cell by different amounts, so no single rule places them all — tune the
-# leading/trailing spaces in @themux_<name>_icon per glyph.
-# A notch taper trims ~half a cell of icon colour off the seam edge that the flat
-# (notch=off) █ seam keeps, so add one trailing space when the notch draws a real
-# taper (notch=on with a seam — not the single-colour metric pill) to keep the footprint.
-itrail=""
-[ "$notch" = on ] && [ "$ibg" != "$tbg" ] && itrail=" "
-iblock="#[fg=$ifg,bg=$ibg]$icon$itrail"
-# The text value carries its own leading space; add a trailing one so the block
-# is padded both sides (the icon block is) and the right cap — squared █, rounded
-# bulge, or the inward slant — has a cell to sit against. Re-assert the block bg
-# first, so a self-styled text cannot leak its last colour into the pad/cap.
+# The icon value carries its OWN padding. The shipped module icons are "<glyph> "
+# (trailing space only, so the glyph sits flush to the left cap — catppuccin-style).
+# Keeping the pad in the value lets each icon be nudged on its own: nerd-font glyphs
+# sit off-centre in their cell by different amounts, so no single rule places them
+# all — tune the leading/trailing spaces in @themux_<name>_icon per glyph.
+iblock="#[fg=$ifg,bg=$ibg]$icon"
+# The text value carries its own leading space; add a trailing one so the right cap
+# — squared █, rounded bulge, or the inward slant — has a cell to sit against.
+# Re-assert the block bg first, so a self-styled text cannot leak its last colour
+# into the pad/cap.
 #
 # A self-styled text (e.g. gitmux) sets its own colours and resets to default
 # between segments; #[push-default] makes those resets fall back to the block's
@@ -165,18 +160,15 @@ else
   first="$iblock" fbg="$ibg" facc="$accent" second="$tblock" sbg="$tbg" sacc="$(chan "$text_aacc" "$text_acc")"
 fi
 
-# Seam between the two blocks, drawn only when they differ (matching bg would be
-# an invisible phantom cell; else the plain separator). notch=on takes the shape's
-# right cap; notch=off takes a flat block (█) so icon and text get a clean divider
-# instead of abutting.
-if [ "$fbg" != "$sbg" ]; then
+# Seam between the two blocks. notch=on (with differing backgrounds) takes the
+# shape's right cap — the icon colour tapering into the text background. Otherwise
+# the blocks abut through the plain middle separator (@themux_module_middle_separator,
+# empty by default), so the icon and text backgrounds are themselves the divider
+# (catppuccin-style) and the module stays compact — no extra full-block cell.
+if [ "$fbg" != "$sbg" ] && [ "$notch" = on ]; then
   seamcol="$fbg"
   [ "$fbg" = default ] && seamcol="$facc"
-  if [ "$notch" = on ]; then
-    seam="#[fg=$seamcol,bg=$sbg]$rglyph"
-  else
-    seam="#[fg=$seamcol,bg=$sbg]$(printf '\342\226\210')"
-  fi
+  seam="#[fg=$seamcol,bg=$sbg]$rglyph"
 else
   seam="$midsep"
 fi

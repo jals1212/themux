@@ -54,10 +54,10 @@ rl=$(tmux show -gqv @_tmx_module_host_lbg) rr=$(tmux show -gqv @_tmx_module_host
 printf "\nposition_swaps_edges "
 { [ "$ll" = "$rr" ] && [ "$lr" = "$rl" ] && [ "$ll" != "$lr" ]; } && printf "Y" || printf "n"
 
-# notch=on tapers the icon's seam edge (trimming the icon colour a flat notch=off
-# █ keeps), so a trailing space is added to the icon to keep the 1+1 footprint. The
-# metric's solid icon over its subtle text differs in bg like any module, so it is
-# padded the same way.
+# notch=off lets the icon and text blocks abut (compact, catppuccin-style — no seam
+# cell). notch=on draws the shape's tapered cap as the seam between them, so the
+# notched module is wider. The metric's solid icon over its subtle text differs in
+# bg like any module, so the seam is drawn there too.
 tmux set -gu @themux_module_leading_position
 tmux set -g @themux_status_line_1 "host cpu"
 tmux set -g @themux_all_shape "rounded"
@@ -65,5 +65,5 @@ tmux set -g @themux_all_notch "on"; src
 hon=$(core host | wc -c | tr -d ' '); con=$(core cpu | wc -c | tr -d ' ')
 tmux set -g @themux_all_notch "off"; src
 hoff=$(core host | wc -c | tr -d ' '); coff=$(core cpu | wc -c | tr -d ' ')
-printf "\nnotch_pads_host_icon "; { [ "$hon" -eq "$((hoff + 1))" ]; } && printf "Y" || printf "n"
-printf "\nnotch_pads_metric_icon "; { [ "$con" -eq "$((coff + 1))" ]; } && printf "Y" || printf "n"
+printf "\nnotch_adds_seam_host_icon "; { [ "$hon" -gt "$hoff" ]; } && printf "Y" || printf "n"
+printf "\nnotch_adds_seam_metric_icon "; { [ "$con" -gt "$coff" ]; } && printf "Y" || printf "n"

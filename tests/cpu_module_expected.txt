@@ -1,2 +1,2 @@
 
-E:@themux_module_cpu #[fg=#{cpu_bg_color}]#[bg=default]█#[fg=#11111b,bg=#{cpu_bg_color}]  #[fg=#{cpu_bg_color},bg=#313244]█#[fg=#{cpu_bg_color},bg=#313244] #{cpu_percentage}#[bg=#313244] #[fg=#313244]#[bg=default]█
+E:@themux_module_cpu #[fg=#{cpu_bg_color}]#[bg=default]█#[fg=#11111b,bg=#{cpu_bg_color}] #[fg=#{cpu_bg_color},bg=#313244] #{cpu_percentage}#[bg=#313244] #[fg=#313244]#[bg=default]█

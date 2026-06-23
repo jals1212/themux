@@ -112,7 +112,7 @@ render_side() {
     CW_ICAP="$icap" CW_TCAP="$tcap"
   fi
 
-  nblock="#[fg=$ifg,bg=$ibg] $number "
+  nblock="#[fg=$ifg,bg=$ibg]$number"
 
   if [ "$position" = left ]; then
     # number block, then the name block (only when the window has a name). The

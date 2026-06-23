@@ -1,23 +1,23 @@
 
-window-status-format #[bg=#9399b2] #[fg=#11111b,bg=#9399b2] #I #{?#{E:@_tmx_w_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_w_text} ,}#[bg=#{?#{E:@_tmx_w_text},#313244,#9399b2}] 
+window-status-format #[bg=#9399b2] #[fg=#11111b,bg=#9399b2]#I#{?#{E:@_tmx_w_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_w_text} ,}#[bg=#{?#{E:@_tmx_w_text},#313244,#9399b2}] 
 
-window-status-current-format #[bg=#cba6f7] #[fg=#11111b,bg=#cba6f7] #I #{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_cw_text} ,}#[bg=#{?#{E:@_tmx_cw_text},#313244,#cba6f7}] 
+window-status-current-format #[bg=#cba6f7] #[fg=#11111b,bg=#cba6f7]#I#{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_cw_text} ,}#[bg=#{?#{E:@_tmx_cw_text},#313244,#cba6f7}] 
 
-window-status-format #[fg=#9399b2,bg=default]#[fg=#11111b,bg=#9399b2] #I #{?#{E:@_tmx_w_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_w_text} ,}#[fg=#{?#{E:@_tmx_w_text},#313244,#9399b2},bg=default]
+window-status-format #[fg=#9399b2,bg=default]#[fg=#11111b,bg=#9399b2]#I#{?#{E:@_tmx_w_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_w_text} ,}#[fg=#{?#{E:@_tmx_w_text},#313244,#9399b2},bg=default]
 
-window-status-current-format #[fg=#cba6f7,bg=default]#[fg=#11111b,bg=#cba6f7] #I #{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_cw_text} ,}#[fg=#{?#{E:@_tmx_cw_text},#313244,#cba6f7},bg=default]
+window-status-current-format #[fg=#cba6f7,bg=default]#[fg=#11111b,bg=#cba6f7]#I#{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_cw_text} ,}#[fg=#{?#{E:@_tmx_cw_text},#313244,#cba6f7},bg=default]
 
-window-status-format #[bg=#313244] #[fg=#cdd6f4,bg=#313244]#{E:@_tmx_w_text} #[fg=#11111b,bg=#9399b2] #I #[bg=#9399b2] 
+window-status-format #[bg=#313244] #[fg=#cdd6f4,bg=#313244]#{E:@_tmx_w_text} #[fg=#11111b,bg=#9399b2]#I#[bg=#9399b2] 
 
-window-status-current-format #[bg=#313244] #[fg=#cdd6f4,bg=#313244]#{E:@_tmx_cw_text} #[fg=#11111b,bg=#cba6f7] #I #[bg=#cba6f7] 
+window-status-current-format #[bg=#313244] #[fg=#cdd6f4,bg=#313244]#{E:@_tmx_cw_text} #[fg=#11111b,bg=#cba6f7]#I#[bg=#cba6f7] 
 
-window-status-format #[bg=#9399b2] #[fg=#11111b,bg=#9399b2] #I #{?#{E:@_tmx_w_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_w_text} ,}#[bg=#{?#{E:@_tmx_w_text},#313244,#9399b2}] 
+window-status-format #[bg=#9399b2] #[fg=#11111b,bg=#9399b2]#I#{?#{E:@_tmx_w_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_w_text} ,}#[bg=#{?#{E:@_tmx_w_text},#313244,#9399b2}] 
 
-window-status-current-format #[bg=#cba6f7] #[fg=#11111b,bg=#cba6f7] #I #{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_cw_text} ,}#[bg=#{?#{E:@_tmx_cw_text},#313244,#cba6f7}] 
+window-status-current-format #[bg=#cba6f7] #[fg=#11111b,bg=#cba6f7]#I#{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_cw_text} ,}#[bg=#{?#{E:@_tmx_cw_text},#313244,#cba6f7}] 
 
-window-status-format #{?#{==:#{window_index},0},#{?@_tmx_win_flush_left,,#[fg=#9399b2]#[bg=default]},}#[fg=#11111b,bg=#9399b2] #I #{?#{E:@_tmx_w_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_w_text} ,}#{?loop_last_flag,#{?@_tmx_win_flush_right,,#[fg=#{?#{E:@_tmx_w_text},#313244,#9399b2}]#[bg=default]},}
+window-status-format #{?#{==:#{window_index},0},#{?@_tmx_win_flush_left,,#[fg=#9399b2]#[bg=default]},}#[fg=#11111b,bg=#9399b2]#I#{?#{E:@_tmx_w_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_w_text} ,}#{?loop_last_flag,#{?@_tmx_win_flush_right,,#[fg=#{?#{E:@_tmx_w_text},#313244,#9399b2}]#[bg=default]},}
 
-window-status-current-format #{?#{==:#{window_index},0},#{?@_tmx_win_flush_left,,#[fg=#cba6f7]#[bg=default]},}#[fg=#11111b,bg=#cba6f7] #I #{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_cw_text} ,}#{?loop_last_flag,#{?@_tmx_win_flush_right,,#[fg=#{?#{E:@_tmx_cw_text},#313244,#cba6f7}]#[bg=default]},}
+window-status-current-format #{?#{==:#{window_index},0},#{?@_tmx_win_flush_left,,#[fg=#cba6f7]#[bg=default]},}#[fg=#11111b,bg=#cba6f7]#I#{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_cw_text} ,}#{?loop_last_flag,#{?@_tmx_win_flush_right,,#[fg=#{?#{E:@_tmx_cw_text},#313244,#cba6f7}]#[bg=default]},}
 
 window-status-separator #{?window_active,#[fg=#{?#{E:@_tmx_cw_text},#313244,#cba6f7}]#[bg=#9399b2],#{?#{==:#{active_window_index},#{e|+:#{window_index},1}},#[fg=#cba6f7]#[bg=#{?#{E:@_tmx_w_text},#313244,#9399b2}],#[fg=#{?#{E:@_tmx_w_text},#313244,#9399b2}]#[bg=#9399b2]}}
 
@@ -27,8 +27,8 @@ window-status-separator #[fg=#{?#{==:#{active_window_index},#{e|+:#{window_index
 
 window-status-separator #[fg=#{?window_active,#{?#{E:@_tmx_cw_text},#313244,#cba6f7},#{?#{E:@_tmx_w_text},#313244,#9399b2}}]#[bg=#{?#{==:#{active_window_index},#{e|+:#{window_index},1}},#cba6f7,#9399b2}]▌
 
-window-status-current-format #[fg=#313244,bg=default]#[fg=#cba6f7,bg=#313244] #I #{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_cw_text} ,}#[fg=#{?#{E:@_tmx_cw_text},#313244,#313244},bg=default]
+window-status-current-format #[fg=#313244,bg=default]#[fg=#cba6f7,bg=#313244]#I#{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_cw_text} ,}#[fg=#{?#{E:@_tmx_cw_text},#313244,#313244},bg=default]
 
-window-status-format #[fg=#9399b2,bg=default]#[fg=#11111b,bg=#9399b2] #I #{?#{E:@_tmx_w_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_w_text} ,}#[fg=#{?#{E:@_tmx_w_text},#313244,#9399b2},bg=default]
+window-status-format #[fg=#9399b2,bg=default]#[fg=#11111b,bg=#9399b2]#I#{?#{E:@_tmx_w_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_w_text} ,}#[fg=#{?#{E:@_tmx_w_text},#313244,#9399b2},bg=default]
 
-window-status-current-format #[fg=#cba6f7,bg=default]#[fg=#11111b,bg=#cba6f7] #I #{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_cw_text} ,}#[fg=#{?#{E:@_tmx_cw_text},#313244,#cba6f7},bg=default]
+window-status-current-format #[fg=#cba6f7,bg=default]#[fg=#11111b,bg=#cba6f7]#I#{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244]#{E:@_tmx_cw_text} ,}#[fg=#{?#{E:@_tmx_cw_text},#313244,#cba6f7},bg=default]

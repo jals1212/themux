@@ -83,8 +83,10 @@ seam_glyph=""
   squared)   seam_glyph=$(printf '\342\226\210') ;;
 esac
 
-# Centred blocks: " idx " on the leading bg, " text " on the text bg.
-lead_block="#[fg=$lead_fg,bg=$lead_bg] $index "
+# The leading (number) block is flush both sides — no pad. Plain digits don't need
+# the body a nerd-font icon glyph does, so the index hugs its caps (catppuccin-style);
+# the text block keeps both pads, its leading space being the number<->text separator.
+lead_block="#[fg=$lead_fg,bg=$lead_bg]$index"
 txt_block="#[fg=$txt_fg,bg=$txt_bg] $text "
 
 # A cap is the shape glyph over the bare border, coloured by the block it tapers
