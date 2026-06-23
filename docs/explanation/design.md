@@ -15,7 +15,7 @@ the same `@thm_*` colors, and everything else is expressed in terms of them. A
 theme switch is just a different palette; pick one with `@themux_theme`.
 
 Because the palette is plain tmux options, it composes with any other tmux
-configuration: `#{@thm_blue}` works in your own `status-left`, a custom module,
+configuration: `#{@thm_blue}` works in a status-line append, a custom module,
 or anywhere a format string is accepted.
 
 ### Orthogonal props over endless options

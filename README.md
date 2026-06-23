@@ -427,24 +427,17 @@ set -g default-terminal "tmux-256color"
 set -g @themux_theme "catppuccin_mocha"
 set -g @themux_window_shape "rounded"
 
-# Load themux
-run ~/.config/tmux/plugins/themux/themux.tmux
-# For TPM, instead use `run ~/.tmux/plugins/themux/themux.tmux`
+# Compose the status line. Modules are NAME tokens placed inside the row grammar
+# ("<left> / windows / <right>"); see the Status Line guide for the full grammar.
+set -g @themux_status_line_1 "windows / application cpu ram session uptime"
 
-# Make the status line pretty and add some modules
-set -g status-right-length 100
-set -g status-left-length 100
-set -g status-left ""
-set -g status-right "#{E:@themux_module_application}"
-set -agF status-right "#{E:@themux_module_cpu}"
-set -agF status-right "#{E:@themux_module_ram}"
-set -ag status-right "#{E:@themux_module_session}"
-set -ag status-right "#{E:@themux_module_uptime}"
-set -agF status-right "#{E:@themux_module_battery}"
+# Plugins via TPM. TPM exports TMUX_PLUGIN_MANAGER_PATH, so themux can find
+# tmux-cpu — the cpu and ram modules read its live values.
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-cpu'
+set -g @plugin 'jals1212/themux'
 
-run ~/.config/tmux/plugins/tmux-plugins/tmux-cpu/cpu.tmux
-run ~/.config/tmux/plugins/tmux-plugins/tmux-battery/battery.tmux
-# Or, if using TPM, just run TPM
+run '~/.config/tmux/plugins/tpm/tpm'
 ```
 
 ## Documentation

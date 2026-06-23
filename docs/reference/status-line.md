@@ -1,23 +1,26 @@
 ## Using the theme's built-in status modules
 
-To use the theme's built in status modules, set the `status-left` and
-`status-right` tmux options _after_ the plugin has been loaded with `run`.
+themux composes the whole status line from the row grammar in
+`@themux_status_line_1` … `_5` — it owns tmux's `status-format`, so `status-left`
+and `status-right` are not used. A module is simply its **name** as a token in a
+row; list the names you want and themux renders the pills.
 
-The tmux status line modules are set as variables and prefixed with `@themux_module_<module>`.
-
-To use the `application` and `session` modules on the right and have nothing on
+To put the `application` and `session` modules on the right with the window list on
 the left:
 
 ```sh
-set -g status-right-length 100
-
-set -g status-right "#{E:@themux_module_application}#{E:@themux_module_session}"
-set -g status-left ""
+set -g @themux_status_line_1 "windows / application session"
 ```
-Some notes about expanding options when setting the status line:
-* Options are expanded as format strings by placing `E:` before the option name.
-* When a module status string contains a reference to another variable, you have to add the `-F` flag that treats the value passed as a format string that is immediately expanded, that is use `set -gF` (see tmux [`set-option`](https://man.openbsd.org/OpenBSD-current/man1/tmux.1#set-option) man page).
-* Example for such a case is the [battery](#battery-module) module below, where the status contains the format string `#{battery_percentage}` that needs to be further expanded.
+
+`/` splits a row into zones (`<left> / windows / <right>`); within a zone a space
+leaves each module its own pill, `|` adds a divider, and `=` `>` `<` merge modules
+into one capped group. Set `@themux_status_line_*` **before** `run`-ing themux. See
+the [Configuration reference](./configuration.md) and the README for the full
+status-line grammar.
+
+A module that pulls live data from a tmux plugin (cpu, ram, …) needs that plugin
+installed; the per-module sections below note which. With TPM that is automatic —
+themux finds the plugin through `TMUX_PLUGIN_MANAGER_PATH`.
 
 ## Customizing modules
 
@@ -26,15 +29,15 @@ Every module supports the following overrides:
 ### Override the specific module icon
 
 ```sh
-set -g @themux_[module_name]_icon " <glyph> "
+set -g @themux_[module_name]_icon "<glyph> "
 ```
 
-The icon value carries its **own** padding — the shipped icons are `" <glyph> "`
-(a leading and a trailing space) for the default footprint. Tune those spaces per
-icon to nudge a glyph: nerd-font glyphs sit off-centre in their cell by different
-amounts, so no single rule places them all (e.g. `"<glyph> "` pulls it to the
-left cap, `" <glyph>  "` gives it more room on the right). An override with no
-leading space sits flush against the left cap.
+The icon value carries the glyph plus its own per-glyph nudge — the shipped icons
+are `"<glyph> "`. Nerd-font glyphs sit off-centre in their cell by different
+amounts, so tune the spaces per icon to compensate (e.g. `"<glyph> "` keeps it
+flush-left, `" <glyph>"` nudges it right). The badge's overall tightness is a
+separate, cascading prop — see `@themux_<item>_padding` in the
+[Configuration reference](./configuration.md).
 
 ### Override the specific module color
 
@@ -69,27 +72,20 @@ set -g @themux_date_time_icon ""
 
 ### Notes for TPM users
 
-Make sure you load themux prior to setting the status-left and/or
-status-* options. This ensures the themux options (such as colors and
-status modules) are defined so they can then be used.
-
-After status-left and/or status-right have been set, make sure to run TPM to load
-the modules. This runs any plugins that may replace text in the status line.
+Set your `@themux_status_line_*` rows (and any other `@themux_*` options) **before**
+TPM runs — TPM loads themux, which reads them when it builds the status line. A
+module that depends on a tmux plugin only needs that plugin listed: TPM exports
+`TMUX_PLUGIN_MANAGER_PATH`, so themux can find it and resolve the module's live data.
 
 ```bash
-# load themux ...
-run '~/.config/tmux/plugins/themux/themux.tmux' # or where this file is located on your machine
+set -g @themux_theme "catppuccin_mocha"
+set -g @themux_status_line_1 "windows / application cpu session"
 
-# ... and then set status-left & status-right ...
-set -g status-left "#{E:@themux_module_session}"
-
-set -g status-right "#{E:@themux_module_[module_name]}"
-set -ag status-right "#{E:@themux_module_[module_name]}"
-set -agF status-right "#{E:@themux_module_[module_name]}"
-
-# ... and finally start TPM
 set -g @plugin 'tmux-plugins/tpm'
-run '~/.tmux/plugins/tpm/tpm'
+set -g @plugin 'tmux-plugins/tmux-cpu'   # needed by the cpu module
+set -g @plugin 'jals1212/themux'
+
+run '~/.config/tmux/plugins/tpm/tpm'
 ```
 
 ## Battery module
@@ -101,12 +97,10 @@ run '~/.tmux/plugins/tpm/tpm'
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/themux/themux.tmux
-
-set -agF status-right "#{E:@themux_module_battery}"
+set -g @themux_status_line_1 "windows / battery"
 
 set -g @plugin 'tmux-plugins/tmux-battery'
-run '~/.tmux/plugins/tpm/tpm'
+run '~/.config/tmux/plugins/tpm/tpm'
 ```
 
 ## CPU module
@@ -118,12 +112,10 @@ run '~/.tmux/plugins/tpm/tpm'
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/themux/themux.tmux
-
-set -agF status-right "#{E:@themux_module_cpu}"
+set -g @themux_status_line_1 "windows / cpu"
 
 set -g @plugin 'tmux-plugins/tmux-cpu'
-run '~/.tmux/plugins/tpm/tpm'
+run '~/.config/tmux/plugins/tpm/tpm'
 ```
 
 ## RAM module
@@ -135,12 +127,10 @@ run '~/.tmux/plugins/tpm/tpm'
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/themux/themux.tmux
-
-set -agF status-right "#{E:@themux_module_ram}"
+set -g @themux_status_line_1 "windows / ram"
 
 set -g @plugin 'tmux-plugins/tmux-cpu'
-run '~/.tmux/plugins/tpm/tpm'
+run '~/.config/tmux/plugins/tpm/tpm'
 ```
 
 ## Weather modules
@@ -154,12 +144,10 @@ run '~/.tmux/plugins/tpm/tpm'
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/themux/themux.tmux
-
-set -agF status-right "#{E:@themux_module_weather}"
+set -g @themux_status_line_1 "windows / weather"
 
 set -g @plugin 'xamut/tmux-weather'
-run '~/.tmux/plugins/tpm/tpm'
+run '~/.config/tmux/plugins/tpm/tpm'
 ```
 
 ### tmux-clima
@@ -171,12 +159,10 @@ run '~/.tmux/plugins/tpm/tpm'
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/themux/themux.tmux
-
-set -agF status-right "#{E:@themux_module_clima}"
+set -g @themux_status_line_1 "windows / clima"
 
 set -g @plugin 'vascomfnunes/tmux-clima'
-run '~/.tmux/plugins/tpm/tpm'
+run '~/.config/tmux/plugins/tpm/tpm'
 ```
 
 ## Load module
@@ -184,9 +170,7 @@ run '~/.tmux/plugins/tpm/tpm'
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/themux/themux.tmux
-
-set -agF status-right "#{E:@themux_module_load}"
+set -g @themux_status_line_1 "windows / load"
 ```
 
 ## Gitmux module
@@ -200,9 +184,7 @@ set -agF status-right "#{E:@themux_module_load}"
 Add the gitmux module to the status modules list.
 
 ```sh
-run ~/.config/tmux/plugins/themux/themux.tmux
-
-set -agF status-right "#{@themux_module_gitmux}"
+set -g @themux_status_line_1 "windows / gitmux"
 ```
 
 Follow the instructions in the [gitmux documentation](https://github.com/arl/gitmux/blob/main/README.md#customizing)
@@ -238,12 +220,10 @@ tmux:
 **Configure:**
 
 ```sh
-run ~/.config/tmux/plugins/themux/themux.tmux
-
-set -agF status-right "#{E:@themux_module_pomodoro_plus}"
+set -g @themux_status_line_1 "windows / pomodoro_plus"
 
 set -g @plugin 'olimorris/tmux-pomodoro-plus'
-run '~/.tmux/plugins/tpm/tpm'
+run '~/.config/tmux/plugins/tpm/tpm'
 ```
 
 ## Kube module
@@ -258,10 +238,8 @@ run '~/.tmux/plugins/tpm/tpm'
 set -g @themux_kube_context_color "#{@thm_red}"
 set -g @themux_kube_namespace_color "#{@thm_sky}"
 
-run ~/.config/tmux/plugins/themux/themux.tmux
-
-set -agF status-right "#{E:@themux_module_kube}"
+set -g @themux_status_line_1 "windows / kube"
 
 set -g @plugin 'tony-sol/tmux-kubectx'
-run '~/.tmux/plugins/tpm/tpm'
+run '~/.config/tmux/plugins/tpm/tpm'
 ```
