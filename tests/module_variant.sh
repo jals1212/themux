@@ -80,3 +80,11 @@ psep=$(core host | wc -c | tr -d ' ')
 tmux set -gu @themux_module_padding
 printf "\npadding_widens_badge "; { [ "$p3" -gt "$p0" ]; } && printf "Y" || printf "n"
 printf "\npadding_sep_widens "; { [ "$psep" -gt "$p0" ]; } && printf "Y" || printf "n"
+
+# Plugin-data modules carry their value as a #{var} literal that only resolves
+# through the plugin's do_interpolation; _expand + _plugin let the layout apply it
+# in any zone (the live interpolation is verified outside the harness, which has no
+# plugins installed).
+src
+printf "\nbattery_interp_wired "; { [ "$(tmux show -gqv @themux_battery_expand)" = "yes" ] && [ -n "$(tmux show -gqv @themux_battery_plugin)" ]; } && printf "Y" || printf "n"
+printf "\ncpu_interp_wired "; { [ "$(tmux show -gqv @themux_cpu_expand)" = "yes" ] && [ -n "$(tmux show -gqv @themux_cpu_plugin)" ]; } && printf "Y" || printf "n"
