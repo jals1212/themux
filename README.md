@@ -15,34 +15,37 @@
 
 ## Themes
 
-themux ships the catppuccin, kanagawa and kanso palettes and adds its own
-component-based styling — see [multi-theme selection](#multi-theme-selection)
-for the full list. Catppuccin flavor previews:
+themux ships three palette families — **catppuccin**, **kanagawa** and **kanso**
+— and adds its own component-based styling on top. Every flavor below is the same
+status line, swapped only by `@themux_theme`:
 
-<details>
-<summary>🌻 Latte</summary>
+### Catppuccin
 
-![Latte Flavor Preview](./assets/latte.webp)
+<!-- markdownlint-disable -->
+| `@themux_theme` | Preview |
+| --- | --- |
+| `catppuccin_latte` | ![catppuccin latte](./assets/catppuccin_latte.webp) |
+| `catppuccin_frappe` | ![catppuccin frappe](./assets/catppuccin_frappe.webp) |
+| `catppuccin_macchiato` | ![catppuccin macchiato](./assets/catppuccin_macchiato.webp) |
+| `catppuccin_mocha` | ![catppuccin mocha](./assets/catppuccin_mocha.webp) |
 
-</details>
-<details>
-<summary>🪴 Frappé</summary>
+### Kanagawa
 
-![Frappe Flavor Preview](./assets/frappe.webp)
+| `@themux_theme` | Preview |
+| --- | --- |
+| `kanagawa_wave` | ![kanagawa wave](./assets/kanagawa_wave.webp) |
+| `kanagawa_dragon` | ![kanagawa dragon](./assets/kanagawa_dragon.webp) |
+| `kanagawa_lotus` | ![kanagawa lotus](./assets/kanagawa_lotus.webp) |
 
-</details>
-<details>
-<summary>🌺 Macchiato</summary>
+### Kanso
 
-![Macchiato Flavor Preview](./assets/macchiato.webp)
-
-</details>
-<details>
-<summary>🌿 Mocha</summary>
-
-![Mocha Flavor Preview](./assets/mocha.webp)
-
-</details>
+| `@themux_theme` | Preview |
+| --- | --- |
+| `kanso_zen` | ![kanso zen](./assets/kanso_zen.webp) |
+| `kanso_ink` | ![kanso ink](./assets/kanso_ink.webp) |
+| `kanso_mist` | ![kanso mist](./assets/kanso_mist.webp) |
+| `kanso_pearl` | ![kanso pearl](./assets/kanso_pearl.webp) |
+<!-- markdownlint-enable -->
 
 ### Multi-theme selection
 This fork is a multi-theme manager: besides the catppuccin flavors, other
@@ -66,6 +69,57 @@ Available themes: `catppuccin_latte`, `catppuccin_frappe`,
 `kanagawa_dragon`, `kanagawa_lotus`, `kanso_zen`, `kanso_ink`,
 `kanso_mist`, `kanso_pearl`.
 
+### Preset looks
+The same components compose into very different bars. Four to copy and tweak — each
+is just a theme plus a handful of `@themux_*` options.
+
+**Catppuccin classic** — rounded pills with solid icon blocks, the signature look.
+
+![Preset: catppuccin classic](./assets/look-catppuccin-classic.webp)
+
+```sh
+set -g @themux_theme "catppuccin_mocha"
+set -g @themux_all_shape "rounded"
+set -g @themux_module_leading_variant "solid"
+set -g @themux_status_line_1 "windows / application cpu ram session uptime"
+```
+
+**Nvim / lualine** — powerline chevrons flushed to both terminal edges (the leading
+and trailing `=`), the way a neovim statusline fills the row.
+
+![Preset: nvim / lualine](./assets/look-nvim.webp)
+
+```sh
+set -g @themux_theme "kanagawa_wave"
+set -g @themux_all_shape "powerline"
+set -g @themux_status_line_1 "=session>application / windows / cpu<ram="
+```
+
+**Slanted tabs** — parallelogram caps on every item for an angled, tabbed bar.
+
+![Preset: slanted tabs](./assets/look-slanted.webp)
+
+```sh
+set -g @themux_theme "kanso_zen"
+set -g @themux_all_shape "slanted"
+set -g @themux_status_line_1 "windows / cpu ram date_time"
+```
+
+**Minimal** — a fully transparent bar: naked blocks, no backgrounds, colored text
+only.
+
+![Preset: minimal](./assets/look-minimal.webp)
+
+```sh
+set -g @themux_theme "catppuccin_mocha"
+set -g @themux_status_background "none"
+set -g @themux_module_leading_variant "naked"
+set -g @themux_module_text_variant    "naked"
+set -g @themux_window_leading_variant "naked"
+set -g @themux_window_text_variant    "naked"
+set -g @themux_status_line_1 "windows / application cpu ram session"
+```
+
 ### Style variants
 Every item of the UI — status modules, the window list, panes — is a
 *component* with independent props, so any combination is valid:
@@ -80,7 +134,16 @@ set -g @themux_module_notch           "off"
 - **shape** — `squared`, `rounded`, `slanted`, `powerline` (blocks with square /
   round / slant / arrow caps — `powerline` is the classic powerline/lualine
   chevron `  `) or `unstyled` to leave the item untouched and build it by hand
-  with the `@thm_*` palette.
+  with the `@thm_*` palette. The window list under each shape:
+
+  <!-- markdownlint-disable -->
+  | `@themux_window_shape` | Window list |
+  | --- | --- |
+  | `squared` | ![squared window shape](./assets/shape-squared.webp) |
+  | `rounded` | ![rounded window shape](./assets/shape-rounded.webp) |
+  | `slanted` | ![slanted window shape](./assets/shape-slanted.webp) |
+  | `powerline` | ![powerline window shape](./assets/shape-powerline.webp) |
+  <!-- markdownlint-enable -->
 - **leading / text** — the icon-or-number block and the text block each take a
   style: `solid` (accent block), `soft` (grey block), `subtle` (grey block,
   accent text) or `naked` (transparent, accent text — pair with
@@ -414,7 +477,7 @@ This configuration shows some customisation options, that can be further
 extended as desired.
 This is what is used for the previews above.
 
-![Example configuration](./assets/mocha.webp)
+![Example configuration](./assets/catppuccin_mocha.webp)
 
 ```bash
 # ~/.tmux.conf
