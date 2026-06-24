@@ -13,7 +13,7 @@ the far left / far right of that row. For example, a flamingo "used memory" pill
 the right (macOS):
 
 ```sh
-set -gF @themux_status_line_1_append \
+set -g @themux_status_line_1_append \
   "#[bg=#{@thm_flamingo},fg=#{@thm_crust}] 󱀙 #(memory_pressure | awk '/percentage/{print $5}') "
 ```
 
@@ -21,9 +21,11 @@ set -gF @themux_status_line_1_append \
 
 The `#[...]` syntax is an embedded style, similar to inline CSS: `bg=#{@thm_flamingo}`
 paints the background with the theme's flamingo accent and `fg=#{@thm_crust}` the
-text. `@thm_*` are user options the plugin creates, so they only work *after* themux
-has loaded. `#(...)` runs a shell command and inserts its output, and `#H`, `#S`, …
-are the usual tmux format codes.
+text. Use `set -g` here, **not** `-gF`: the `#{@thm_*}` and `#(...)` must stay
+literal so tmux resolves them at *draw* time — `@thm_*` are user options the plugin
+creates, so they only exist once themux has loaded, and `-gF` would expand them
+immediately (before the palette exists, leaving `bg=` empty). `#(...)` runs a shell
+command and inserts its output, and `#H`, `#S`, … are the usual tmux format codes.
 
 > A literal `%` in a plain string must be written `%%` — tmux reads `%` as a
 > `strftime` escape. Output produced by `#(command)` is inserted as-is.

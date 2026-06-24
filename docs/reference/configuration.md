@@ -1,7 +1,5 @@
 ## Configuration Reference
 
-<img src="../../assets/structure.svg" style="background: #eff1f5" />
-
 Every option is a tmux user option (`@themux_*`). Set them **before the plugin
 loads** unless noted. Colors accept a hex code (`#ff0000`) or a palette token
 (`#{@thm_<name>}`, e.g. `#{@thm_mauve}`). themux re-derives its state on every
@@ -10,6 +8,33 @@ load, so changing an option and reloading is enough — no `kill-server`.
 The three UI items — **status modules**, **windows**, **panes** — are each a
 *component* styled through a few independent props: a **shape**, a
 **leading** style, a **text** style, a **notch** flag, and **padding**.
+
+### Anatomy of a component
+
+Every status module, window and pane label has the same skeleton: a **leading**
+block next to a **text** block, wrapped by the **shape**'s caps, with a **notch**
+at the seam between them.
+
+```text
+   ╭───────────┬───────────────╮
+   │   icon    │     value     │   one component (module · window · pane)
+   ╰───────────┴───────────────╯
+     leading        text
+   ▲ shape caps   ▲ notch = the leading↔text seam
+```
+
+![Component anatomy: solid leading vs subtle text](../../assets/structure-anatomy.webp)
+
+Above, the `session` module renders its leading block `solid` (accent fill) and
+its text block `subtle` (grey fill, accent text), so the two halves stand apart.
+
+- **shape** — the caps around the whole block (`squared` / `rounded` / `slanted`
+  / `powerline` / `unstyled`).
+- **leading** — the icon block on a module, the number block on a window or pane.
+- **text** — the value on a module, the window or pane name.
+- **notch** — when `on`, the seam between leading and text inherits the shape's
+  cap instead of a flat edge.
+- **padding** — the spacing inside each block.
 
 ---
 
