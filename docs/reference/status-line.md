@@ -118,6 +118,16 @@ set -g @plugin 'tmux-plugins/tmux-cpu'
 run '~/.config/tmux/plugins/tpm/tpm'
 ```
 
+**Level colours:** cpu and ram escalate through three colours as the value climbs
+— `low` (default green), `medium` (yellow), `high` (red). Recolour a single level
+with `@themux_<name>_{low,medium,high}_color`, taking a palette token or a literal
+hex. Each defaults to its slot and still tracks a theme switch.
+
+```sh
+set -g @themux_cpu_high_color "#{@thm_peach}"  # cpu, high level → palette slot
+set -g @themux_ram_low_color  "#5e857a"         # ram, low level  → literal hex
+```
+
 ## RAM module
 
 **Requirements:** This module depends on [tmux-cpu](https://github.com/tmux-plugins/tmux-cpu/tree/master).
@@ -132,6 +142,9 @@ set -g @themux_status_line_1 "windows / ram"
 set -g @plugin 'tmux-plugins/tmux-cpu'
 run '~/.config/tmux/plugins/tpm/tpm'
 ```
+
+Per-level colours work the same as the [CPU module](#cpu-module) — override with
+`@themux_ram_{low,medium,high}_color`.
 
 ## Weather modules
 
