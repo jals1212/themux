@@ -11,7 +11,8 @@
 #
 # Three property tiers, most specific wins: @themux_<name>_<prop> (this module) >
 # @themux_module_<prop> (all modules) > @themux_all_<prop> (everything). Colours
-# fall back @themux_<name>_<slot>_color > @themux_<name>_color.
+# fall back @themux_<name>_<slot>_color > internal slot default >
+# @themux_<name>_color.
 #
 # The accent (@themux_<name>_color, a #{@thm_*} token) is expanded to the current
 # theme's concrete colour here, so the segment stays literal and is re-baked on
@@ -38,21 +39,23 @@ US=$(printf '\037')
 # Empty-check (not truthy) so a literal "0" value (valid for padding) is honoured;
 # tmux's #{?...} would read "0" as false and skip the tier.
 casc() { printf '#{?#{==:#{@themux_%s_%s},},#{?#{==:#{@themux_module_%s},},#{@themux_all_%s},#{@themux_module_%s}},#{@themux_%s_%s}}' "$name" "$1" "$1" "$1" "$1" "$name" "$1"; }
-# A resting accent: @themux_<name>_<slot>_color > @themux_<name>_color.
-acc() { printf '#{?#{@themux_%s_%s_color},#{@themux_%s_%s_color},#{@themux_%s_color}}' "$name" "$1" "$name" "$1" "$name"; }
+# A resting accent: @themux_<name>_<slot>_color > internal slot default >
+# @themux_<name>_color. Metrics use the internal tier to route their live level
+# colour without overwriting user-owned per-slot overrides.
+acc() { printf '#{?#{@themux_%s_%s_color},#{@themux_%s_%s_color},#{?#{@_tmx_%s_%s_color},#{@_tmx_%s_%s_color},#{@themux_%s_color}}}' "$name" "$1" "$name" "$1" "$name" "$1" "$name" "$1" "$name"; }
 # An active accent: @themux_<name>_<slot>_active_color > @themux_<name>_active_color > the resting accent ($2).
 aacc() { printf '#{?#{@themux_%s_%s_active_color},#{@themux_%s_%s_active_color},#{?#{@themux_%s_active_color},#{@themux_%s_active_color},%s}}' "$name" "$1" "$name" "$1" "$name" "$name" "$2"; }
 
 lead_acc=$(acc leading) text_acc=$(acc text)
 IFS="$US" read -ra V < <(tmux display -p \
-"$(casc shape)${US}$(casc leading_variant)${US}$(casc text_variant)${US}$(casc notch)${US}#{@themux_module_connect_separator}${US}${lead_acc}${US}${text_acc}${US}#{@thm_surface_0}${US}#{@thm_crust}${US}#{@thm_fg}${US}#{@themux_${name}_icon}${US}#{@themux_${name}_self_styled}${US}#{@themux_module_middle_separator}${US}#{@themux_${name}_when}${US}$(casc leading_position)${US}$(casc leading_active_variant)${US}$(casc text_active_variant)${US}$(aacc leading "$lead_acc")${US}$(aacc text "$text_acc")${US}#{@themux_${name}_active_when}${US}#{E:${lead_acc}}${US}#{E:${text_acc}}${US}#{E:$(aacc leading "$lead_acc")}${US}#{E:$(aacc text "$text_acc")}${US}#{@themux_${name}_icon_bg}${US}#{@themux_${name}_icon_fg}${US}#{@themux_${name}_text_bg}${US}#{@themux_${name}_text_fg}${US}$(casc padding)${US}END")
+"$(casc shape)${US}$(casc leading_variant)${US}$(casc text_variant)${US}$(casc notch)${US}#{@themux_module_connect_separator}${US}${lead_acc}${US}${text_acc}${US}#{@thm_surface_0}${US}#{@thm_crust}${US}#{@thm_fg}${US}#{@themux_${name}_icon}${US}#{@themux_${name}_label}${US}$(casc leading_show)${US}$(casc state_target)${US}#{@themux_${name}_self_styled}${US}#{@themux_module_middle_separator}${US}#{@themux_${name}_when}${US}$(casc leading_position)${US}$(casc leading_active_variant)${US}$(casc text_active_variant)${US}$(aacc leading "$lead_acc")${US}$(aacc text "$text_acc")${US}#{@themux_${name}_active_when}${US}#{E:${lead_acc}}${US}#{E:${text_acc}}${US}#{E:$(aacc leading "$lead_acc")}${US}#{E:$(aacc text "$text_acc")}${US}#{@themux_${name}_icon_bg}${US}#{@themux_${name}_icon_fg}${US}#{@themux_${name}_text_bg}${US}#{@themux_${name}_text_fg}${US}$(casc padding)${US}END")
 shape=${V[0]} leading=${V[1]} text_style=${V[2]} notch=${V[3]} connect=${V[4]}
-lead_acc=${V[5]} text_acc=${V[6]} surface=${V[7]} crust=${V[8]} fg=${V[9]} icon=${V[10]}
-self_styled=${V[11]} midsep=${V[12]} when=${V[13]} position=${V[14]}
-lead_av=${V[15]} text_av=${V[16]} lead_aacc=${V[17]} text_aacc=${V[18]} active_when=${V[19]}
-lead_acc_E=${V[20]} text_acc_E=${V[21]} lead_aacc_E=${V[22]} text_aacc_E=${V[23]}
-icon_bg_ov=${V[24]} icon_fg_ov=${V[25]} text_bg_ov=${V[26]} text_fg_ov=${V[27]}
-padding=${V[28]}
+lead_acc=${V[5]} text_acc=${V[6]} surface=${V[7]} crust=${V[8]} fg=${V[9]} icon=${V[10]} label=${V[11]} leading_show=${V[12]} state_target=${V[13]}
+self_styled=${V[14]} midsep=${V[15]} when=${V[16]} position=${V[17]}
+lead_av=${V[18]} text_av=${V[19]} lead_aacc=${V[20]} text_aacc=${V[21]} active_when=${V[22]}
+lead_acc_E=${V[23]} text_acc_E=${V[24]} lead_aacc_E=${V[25]} text_aacc_E=${V[26]}
+icon_bg_ov=${V[27]} icon_fg_ov=${V[28]} text_bg_ov=${V[29]} text_fg_ov=${V[30]}
+padding=${V[31]}
 read -r pleft pright tleft tright <<<"$(pad_parse "$padding")"
 # The active variant defaults to the resting one — the active state keeps the same
 # shape unless _active_variant is set, so only the colour swaps.
@@ -73,6 +76,41 @@ lead_acc=$(bake "$lead_acc" "$lead_acc_E")
 text_acc=$(bake "$text_acc" "$text_acc_E")
 lead_aacc=$(bake "$lead_aacc" "$lead_aacc_E")
 text_aacc=$(bake "$text_aacc" "$text_aacc_E")
+
+# Select leading content before routing state. `auto` state needs to know if the
+# leading slot exists: visible leading keeps state on leading; hidden leading
+# moves state to text. Invalid leading values intentionally fall back to icons.
+case "$leading_show" in
+  label) leading_content="$label" ;;
+  off) leading_content="" ;;
+  auto)
+    if [ -n "$icon" ]; then
+      leading_content="$icon"
+    else
+      leading_content="$label"
+    fi
+    ;;
+  *) leading_content="$icon" ;;
+esac
+leading_visible=no
+[ -n "$leading_content" ] && leading_visible=yes
+
+case "$state_target" in
+  auto|leading|text|both|off) ;;
+  *) state_target=auto ;;
+esac
+[ "$state_target" = auto ] && {
+  if [ "$leading_visible" = yes ]; then
+    state_target=leading
+  else
+    state_target=text
+  fi
+}
+case "$state_target" in
+  leading) text_aacc="$text_acc"; text_av="$text_style" ;;
+  text) lead_aacc="$lead_acc"; lead_av="$leading" ;;
+  off) lead_aacc="$lead_acc"; text_aacc="$text_acc"; lead_av="$leading"; text_av="$text_style" ;;
+esac
 
 [ "$shape" = unstyled ] && exit 0
 
@@ -135,11 +173,14 @@ cap() { # $1 glyph, $2 block bg, $3 naked-accent for that block
   fi
 }
 
-# The icon value is the glyph, not spacing. Badge padding owns spacing:
-# @themux_*_padding = "<leading-left> <leading-right>|<text-left> <text-right>".
-# Keep per-glyph nudging in the icon only when a glyph truly needs optical
-# compensation, not as general padding.
-iblock="#[fg=$ifg,bg=$ibg]$(spaces "$pleft")$icon$(spaces "$pright")"
+# The leading value was selected before state routing. Empty selected content
+# hides the leading slot so the text slot remains on its own. Badge padding owns
+# spacing; labels/icons should not carry general padding.
+if [ -n "$leading_content" ]; then
+  iblock="#[fg=$ifg,bg=$ibg]$(spaces "$pleft")$leading_content$(spaces "$pright")"
+else
+  iblock=""
+fi
 # Text padding is owned by @themux_*_padding. Re-assert the block bg first, so a
 # self-styled text cannot leak its last colour into the pad/cap.
 #
@@ -155,7 +196,10 @@ tblock="#[fg=$tfg,bg=$tbg]${text_open}$(spaces "$tleft")${text}${text_close}$(sp
 # Block order follows the leading position: icon-then-text (left, default) or
 # text-then-icon (right). first/second are the blocks in display order, fbg/sbg
 # their backgrounds; the rest of the assembly is order-agnostic.
-if [ "$position" = right ]; then
+text_accent="$(chan "$text_aacc" "$text_acc")"
+if [ -z "$iblock" ]; then
+  first="$tblock" fbg="$tbg" facc="$text_accent" second="" sbg="$tbg" sacc="$text_accent"
+elif [ "$position" = right ]; then
   first="$tblock" fbg="$tbg" facc="$(chan "$text_aacc" "$text_acc")" second="$iblock" sbg="$ibg" sacc="$accent"
 else
   first="$iblock" fbg="$ibg" facc="$accent" second="$tblock" sbg="$tbg" sacc="$(chan "$text_aacc" "$text_acc")"
@@ -166,7 +210,9 @@ fi
 # the blocks abut through the plain middle separator (@themux_module_middle_separator,
 # empty by default), so the icon and text backgrounds are themselves the divider
 # (catppuccin-style) and the module stays compact — no extra full-block cell.
-if [ "$fbg" != "$sbg" ] && [ "$notch" = on ]; then
+if [ -z "$second" ]; then
+  seam=""
+elif [ "$fbg" != "$sbg" ] && [ "$notch" = on ]; then
   seamcol="$fbg"
   [ "$fbg" = default ] && seamcol="$facc"
   seam="#[fg=$seamcol,bg=$sbg]$rglyph"

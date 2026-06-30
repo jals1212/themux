@@ -1,10 +1,16 @@
 
-cpu_live 1
+cpu_live 2
 cpu_not_blank ok
 cpu_icon_solid Y
 cpu_text_subtle Y
+ram_live 2
 host_text_naked n
 session_prefix 1
+session_state_default_leading Y
+session_state_text_moves_active Y
+session_state_off_removes_active Y
+session_state_invalid_auto_visible_leading Y
+session_state_auto_hidden_uses_text Y
 
 position_swaps_edges Y
 notch_adds_seam_host_icon Y
@@ -15,5 +21,21 @@ padding_side_shorthand_matches Y
 padding_invalid_falls_back Y
 padding_leading_right_widens Y
 padding_text_left_widens Y
+leading_label_uses_label Y
+leading_label_keeps_text_slot Y
+leading_label_missing_label_hides_leading Y
+leading_hidden_drops_middle_separator Y
+leading_off_hides_leading Y
+leading_auto_prefers_icon Y
+leading_auto_falls_back_label Y
+leading_module_override_keeps_icon Y
+leading_invalid_uses_icon Y
+cpu_state_default_both Y
+ram_state_default_both Y
+cpu_state_text_moves_live Y
+metric_slot_override_wins Y
+cpu_state_off_removes_live Y
+cpu_state_auto_hidden_uses_text Y
+cpu_state_invalid_auto_visible_leading Y
 battery_interp_wired Y
 cpu_interp_wired Y
