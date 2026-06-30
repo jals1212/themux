@@ -31,25 +31,32 @@ themux_prop() { # $1 item, $2 prop
   tmux display -p "#{?#{==:#{@themux_$1_$2},},#{@themux_all_$2},#{@themux_$1_$2}}"
 }
 
-# Parse a @themux_*_padding value into a badge's three pads "<L> <S> <T>" (cells):
-#   L = pad on BOTH sides of the leading (icon/number) block — keeps it centred.
-#   S = separator between the leading block and the text.
-#   T = trailing pad after the text (the right-cap room).
-# Grammar (cell numbers, no named tokens):
-#   ""    -> 1 1 1   (the default)
-#   "N"   -> N N N   (one number sets all three)
-#   "A B" -> A 1 B   (two are the extremes; the centre keeps the default)
-#   "L S T" -> taken as-is
-# The icon glyph's own per-glyph compensation lives in @themux_<name>_icon and is
-# independent of this.
-pad_parse() { # $1 raw value -> "L S T"
-  local -a f; read -ra f <<<"$1"
+# Parse a @themux_*_padding value into four side pads
+# "<leading-left> [leading-right]|<text-left> [text-right]" (cells).
+#
+# This is intentionally breaking: padding has one grammar only. The "|" marks
+# the leading<->text seam, so each side can be spaced independently. A single
+# value on either side expands to both sides there: "1 | 1" -> "1 1|1 1".
+# Invalid or omitted cells fall back to 0 via spaces(), not to legacy defaults.
+pad_side_parse() { # $1 side value -> "left right"
+  local -a f
+  read -ra f <<<"$1"
   case "${#f[@]}" in
-    0) printf '1 1 1' ;;
-    1) printf '%s %s %s' "${f[0]}" "${f[0]}" "${f[0]}" ;;
-    2) printf '%s 1 %s' "${f[0]}" "${f[1]}" ;;
-    *) printf '%s %s %s' "${f[0]}" "${f[1]}" "${f[2]}" ;;
+    0) printf '0 0' ;;
+    1) printf '%s %s' "${f[0]}" "${f[0]}" ;;
+    *) printf '%s %s' "${f[0]}" "${f[1]}" ;;
   esac
+}
+
+pad_parse() { # $1 raw value -> "leading_left leading_right text_left text_right"
+  local left right
+  case "$1" in
+    *'|'*) ;;
+    *) printf '0 0 0 0'; return ;;
+  esac
+  left="${1%%|*}"
+  right="${1#*|}"
+  printf '%s %s' "$(pad_side_parse "$left")" "$(pad_side_parse "$right")"
 }
 
 # Emit N space cells (a non-numeric or empty N -> nothing).
