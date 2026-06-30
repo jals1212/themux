@@ -200,9 +200,9 @@ Directions mix freely: `a>b<c` makes `b` the peak (it pushes into both
 neighbours), `a<b>c` makes it the valley.
 
 > [!NOTE]
-> Connectors need a shape with caps — `rounded`, `slanted` or `powerline`.
-> `squared` and `unstyled` have no caps, so every module is its own block and
-> `=`/`>`/`<` collapse to a plain space.
+> Connectors need a shape with caps. `squared` uses a square `█` cap, while
+> `rounded`, `slanted`, and `powerline` use taper glyphs. Only `unstyled` has no
+> caps, so there `=`/`>`/`<` collapse to a plain space.
 
 #### Flushing to the terminal edge
 
@@ -218,14 +218,10 @@ set -g @themux_status_line_1 "=session>application / windows / cpu<ram="
 ```
 
 It is the same `=` that flat-merges two modules, carried out to the bar's edge:
-one marker flushes whatever sits there — a module group or the window ribbon (a
-leading/trailing `windows` token). It is per row, so each line flushes
-independently. Capped shapes only (`squared`/`unstyled` already fill the edge).
-
-> [!NOTE]
-> The window list shares one global format, so flushing assumes it sits at the
-> same edge on every row. Separate window pills (`@themux_window_seam "|"`) are not
-> flushed — use a ribbon (`<>`/`>`/`<`/`=`) for an edge-to-edge window bar.
+one marker flushes whatever sits there — a module group or a leading/trailing
+`windows` token. It is per row, so each line flushes independently. `squared` drops its
+square `█` cap; rounded/slanted/powerline drop their taper cap. `unstyled` has no
+cap to drop.
 
 Rows render up to the last non-empty line, so a blank (`""`) line in between
 becomes an empty row — handy for spacing. The window list aligns to its zone:

@@ -171,15 +171,17 @@ The character between two modules sets how they join:
 | `\|` | separate pills + the modules divider |
 
 `=`/`>`/`<` build one capped **group** (a space or `|` breaks it) and need a
-capped shape — `rounded`, `slanted` or `powerline`. With `squared`/`unstyled`
-they collapse to a plain space.
+capped shape. `squared` uses a square `█` cap; `rounded`, `slanted`, and
+`powerline` use taper glyphs. Only `unstyled` has no cap, so connectors collapse
+to a plain space there.
 
 **Edge flush** — a leading `=` on a row's left zone (or a trailing `=` on its
 right zone) drops that edge's outer cap so the block fills flat to the terminal
 border (nvim-style) — the same `=` "no cap" seam carried out to the bar's edge.
-One marker flushes whatever sits there: a module group or the window ribbon (a
-leading/trailing `windows` token). Capped shapes only; a row's prepend/append
-cancels its flush. An inline `=` between two modules stays a flat-merge connector.
+One marker flushes whatever sits there: a module group or the window list (a
+leading/trailing `windows` token). `squared` drops its square `█` cap;
+rounded/slanted/powerline drop their taper cap. `unstyled` has no cap to drop. A
+row's prepend/append cancels its flush. An inline `=` between two modules stays a flat-merge connector.
 
 ```sh
 set -g @themux_status_line_1 "=session>application / windows / cpu<ram="
