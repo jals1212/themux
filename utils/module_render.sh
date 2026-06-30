@@ -53,7 +53,7 @@ lead_av=${V[15]} text_av=${V[16]} lead_aacc=${V[17]} text_aacc=${V[18]} active_w
 lead_acc_E=${V[20]} text_acc_E=${V[21]} lead_aacc_E=${V[22]} text_aacc_E=${V[23]}
 icon_bg_ov=${V[24]} icon_fg_ov=${V[25]} text_bg_ov=${V[26]} text_fg_ov=${V[27]}
 padding=${V[28]}
-read -r plead psep ptrail <<<"$(pad_parse "$padding")"
+read -r pleft pright tleft tright <<<"$(pad_parse "$padding")"
 # The active variant defaults to the resting one — the active state keeps the same
 # shape unless _active_variant is set, so only the colour swaps.
 [ -n "$lead_av" ] || lead_av="$leading"
@@ -135,19 +135,13 @@ cap() { # $1 glyph, $2 block bg, $3 naked-accent for that block
   fi
 }
 
-# The icon value carries its OWN padding. The shipped module icons are "<glyph> "
-# (trailing space only, so the glyph sits flush to the left cap — catppuccin-style).
-# Keeping the pad in the value lets each icon be nudged on its own: nerd-font glyphs
-# sit off-centre in their cell by different amounts, so no single rule places them
-# all — tune the leading/trailing spaces in @themux_<name>_icon per glyph.
-# Badge padding (@themux_*_padding -> L S T): L pads BOTH sides of the leading
-# (icon) block so it stays centred, S is the icon<->text separator, T trails the
-# text. The icon's own per-glyph compensation stays in @themux_<name>_icon.
-iblock="#[fg=$ifg,bg=$ibg]$(spaces "$plead")$icon$(spaces "$plead")"
-# The text value carries its own leading space; add a trailing one so the right cap
-# — squared █, rounded bulge, or the inward slant — has a cell to sit against.
-# Re-assert the block bg first, so a self-styled text cannot leak its last colour
-# into the pad/cap.
+# The icon value is the glyph, not spacing. Badge padding owns spacing:
+# @themux_*_padding = "<leading-left> <leading-right>|<text-left> <text-right>".
+# Keep per-glyph nudging in the icon only when a glyph truly needs optical
+# compensation, not as general padding.
+iblock="#[fg=$ifg,bg=$ibg]$(spaces "$pleft")$icon$(spaces "$pright")"
+# Text padding is owned by @themux_*_padding. Re-assert the block bg first, so a
+# self-styled text cannot leak its last colour into the pad/cap.
 #
 # A self-styled text (e.g. gitmux) sets its own colours and resets to default
 # between segments; #[push-default] makes those resets fall back to the block's
@@ -156,7 +150,7 @@ text_open="" text_close="#[bg=$tbg]"
 if [ "$self_styled" = yes ]; then
   text_open="#[push-default]" text_close="#[pop-default]#[bg=$tbg]"
 fi
-tblock="#[fg=$tfg,bg=$tbg]${text_open}$(spaces "$psep")${text}${text_close}$(spaces "$ptrail")"
+tblock="#[fg=$tfg,bg=$tbg]${text_open}$(spaces "$tleft")${text}${text_close}$(spaces "$tright")"
 
 # Block order follows the leading position: icon-then-text (left, default) or
 # text-then-icon (right). first/second are the blocks in display order, fbg/sbg

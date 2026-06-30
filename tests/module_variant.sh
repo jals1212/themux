@@ -68,18 +68,26 @@ hoff=$(core host | wc -c | tr -d ' '); coff=$(core cpu | wc -c | tr -d ' ')
 printf "\nnotch_adds_seam_host_icon "; { [ "$hon" -gt "$hoff" ]; } && printf "Y" || printf "n"
 printf "\nnotch_adds_seam_metric_icon "; { [ "$con" -gt "$coff" ]; } && printf "Y" || printf "n"
 
-# Badge padding "<L> <S> <T>": a bigger value widens the module, and S widens the
-# icon<->text separator on its own (leading/trailing left at 0).
+# Badge padding "<leading-left> <leading-right>|<text-left> <text-right>":
+# each side around the leading<->text seam can be widened independently.
 tmux set -g @themux_status_line_1 "host"
-tmux set -g @themux_module_padding "0"; src
+tmux set -g @themux_module_padding "0 0|0 0"; src
 p0=$(core host | wc -c | tr -d ' ')
-tmux set -g @themux_module_padding "3"; src
+tmux set -g @themux_module_padding "3 3|3 3"; src
 p3=$(core host | wc -c | tr -d ' ')
-tmux set -g @themux_module_padding "0 3 0"; src
-psep=$(core host | wc -c | tr -d ' ')
+tmux set -g @themux_module_padding "1 | 1"; src
+pshort=$(core host | wc -c | tr -d ' ')
+tmux set -g @themux_module_padding "1 1|1 1"; src
+pfull=$(core host | wc -c | tr -d ' ')
+tmux set -g @themux_module_padding "0 3|0 0"; src
+plr=$(core host | wc -c | tr -d ' ')
+tmux set -g @themux_module_padding "0 0|3 0"; src
+ptl=$(core host | wc -c | tr -d ' ')
 tmux set -gu @themux_module_padding
 printf "\npadding_widens_badge "; { [ "$p3" -gt "$p0" ]; } && printf "Y" || printf "n"
-printf "\npadding_sep_widens "; { [ "$psep" -gt "$p0" ]; } && printf "Y" || printf "n"
+printf "\npadding_side_shorthand_matches "; { [ "$pshort" -eq "$pfull" ]; } && printf "Y" || printf "n"
+printf "\npadding_leading_right_widens "; { [ "$plr" -gt "$p0" ]; } && printf "Y" || printf "n"
+printf "\npadding_text_left_widens "; { [ "$ptl" -gt "$p0" ]; } && printf "Y" || printf "n"
 
 # Plugin-data modules carry their value as a #{var} literal that only resolves
 # through the plugin's do_interpolation; _expand + _plugin let the layout apply it

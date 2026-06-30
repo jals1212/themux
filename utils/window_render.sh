@@ -27,9 +27,9 @@ name_active=$(themux_prop window text_active_variant)
 [ -n "$name_active" ] || name_active="$name_style"
 notch=$(themux_prop window notch)
 shape=$(themux_prop window shape)
-# Badge padding (@themux_window_padding -> L S T): L pads BOTH sides of the number
-# block (centred), S is the number<->name separator, T trails the name block.
-read -r plead psep ptrail <<<"$(pad_parse "$(themux_prop window padding)")"
+# Badge padding (@themux_window_padding):
+# "<leading-left> <leading-right>|<text-left> <text-right>".
+read -r pleft pright tleft tright <<<"$(pad_parse "$(themux_prop window padding)")"
 crust=$(expand "#{@thm_crust}")
 fg=$(expand "#{@thm_fg}")
 flags=$(expand "#{@_tmx_w_flags}")
@@ -122,7 +122,7 @@ render_side() {
     CW_ICAP="$icap" CW_TCAP="$tcap"
   fi
 
-  nblock="#[fg=$ifg,bg=$ibg]$(spaces "$plead")$number$(spaces "$plead")"
+  nblock="#[fg=$ifg,bg=$ibg]$(spaces "$pleft")$number$(spaces "$pright")"
 
   if [ "$position" = left ]; then
     # number block, then the name block (only when the window has a name). The
@@ -132,7 +132,7 @@ render_side() {
     # Styles inside the #{?name,...} conditional must not carry a literal comma
     # (#{?} splits on commas), so set fg and bg as separate #[...] directives.
     [ -n "$seam_glyph" ] && [ "$ibg" != "$tbg" ] && seam="#[fg=$icap]#[bg=$tbg]$seam_glyph"
-    nameblock="#{?${text},${seam}#[fg=$tfg]#[bg=$tbg]$(spaces "$psep")${text}$(spaces "$ptrail"),}"
+    nameblock="#{?${text},${seam}#[fg=$tfg]#[bg=$tbg]$(spaces "$tleft")${text}$(spaces "$tright"),}"
     if [ "$connected" = 1 ]; then
       # Inner seams come from the separator. The first window opens the ribbon
       # with a left cap and the last closes it with a tail cap, both over the bar

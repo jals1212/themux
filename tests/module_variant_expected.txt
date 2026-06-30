@@ -10,6 +10,8 @@ position_swaps_edges Y
 notch_adds_seam_host_icon Y
 notch_adds_seam_metric_icon Y
 padding_widens_badge Y
-padding_sep_widens Y
+padding_side_shorthand_matches Y
+padding_leading_right_widens Y
+padding_text_left_widens Y
 battery_interp_wired Y
 cpu_interp_wired Y

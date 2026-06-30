@@ -1,6 +1,6 @@
 
-@themux_module_application #[fg=#eba0ac]#[bg=default]█#[fg=#11111b,bg=#eba0ac]   #[fg=#cdd6f4,bg=#313244] #{E:@themux_application_text}#[bg=#313244] #[fg=#313244]#[bg=default]█
+@themux_module_application #[fg=#eba0ac]#[bg=default]█#[fg=#11111b,bg=#eba0ac]  #[fg=#cdd6f4,bg=#313244] #{E:@themux_application_text}#[bg=#313244] #[fg=#313244]#[bg=default]█
 
-@themux_module_application #[fg=#eba0ac]#[bg=default]#[fg=#11111b,bg=#eba0ac]   #[fg=#eba0ac,bg=#313244]#[fg=#cdd6f4,bg=#313244] #{E:@themux_application_text}#[bg=#313244] #[fg=#313244]#[bg=default]
+@themux_module_application #[fg=#eba0ac]#[bg=default]#[fg=#11111b,bg=#eba0ac]  #[fg=#eba0ac,bg=#313244]#[fg=#cdd6f4,bg=#313244] #{E:@themux_application_text}#[bg=#313244] #[fg=#313244]#[bg=default]
 
-@themux_module_application #[fg=#eba0ac]#[bg=default]#[fg=#11111b,bg=#eba0ac]   #[fg=#cdd6f4,bg=#313244] #{E:@themux_application_text}#[bg=#313244] #[fg=#313244]#[bg=default]
+@themux_module_application #[fg=#eba0ac]#[bg=default]#[fg=#11111b,bg=#eba0ac]  #[fg=#cdd6f4,bg=#313244] #{E:@themux_application_text}#[bg=#313244] #[fg=#313244]#[bg=default]
