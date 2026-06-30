@@ -259,10 +259,11 @@ set -g @themux_window_divider " "                     # window-status-separator
 set -g @themux_window_divider_color "#{@thm_overlay_0}"
 ```
 
-Modules merge into a powerline run only through the explicit `=`/`>`/`<`
-connectors above. The window list merges the same way, but through one option —
-it is a uniform list, so there is nothing to annotate inline — `@themux_window_seam`,
-with symbols mirroring the connectors:
+Status-line items merge into a powerline run only through the explicit `=`/`>`/`<`
+connectors above; those connectors can bridge modules and the `windows` token in
+the same zone. The windows inside the list merge with each other through one
+option — it is a uniform list, so there is nothing to annotate inline —
+`@themux_window_seam`, with symbols mirroring the connectors:
 
 | `@themux_window_seam` | Window list |
 | --- | --- |

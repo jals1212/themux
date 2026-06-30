@@ -13,8 +13,9 @@ set -g @themux_status_line_1 "windows / application session"
 ```
 
 `/` splits a row into zones (`<left> / windows / <right>`); within a zone a space
-leaves each module its own pill, `|` adds a divider, and `=` `>` `<` merge modules
-into one capped group. Set `@themux_status_line_*` **before** `run`-ing themux. See
+leaves each item its own pill/list, `|` adds a divider, and `=` `>` `<` merge
+adjacent modules and/or the `windows` token into one capped strip. Set
+`@themux_status_line_*` **before** `run`-ing themux. See
 the [Configuration reference](./configuration.md) and the README for the full
 status-line grammar.
 

@@ -25,6 +25,10 @@ printf "\ncpu_icon_solid "
 printf "\ncpu_text_subtle "
 # subtle text: the live colour is the digit fg, on a static grey block
 { core cpu | grep -q 'fg=#{l:#{cpu_bg_color}}'; } && printf "Y" || printf "n"
+tmux set -g @themux_module_text_variant "solid"; src
+printf "\nmetric_module_text_variant_wins "
+{ [ "$(grep -o 'bg=#{l:#{cpu_bg_color}}' <<<"$(core cpu)" | wc -l | tr -d ' ')" -ge 2 ]; } && printf "Y" || printf "n"
+tmux set -gu @themux_module_text_variant
 printf "\nram_live "
 core ram | grep -c 'ram_bg_color' || true
 
@@ -48,6 +52,7 @@ sess_before_icon=${sess%%*}
 sess_after_icon=${sess#*}
 printf "\nsession_state_default_leading "
 { [[ "$sess_before_icon" == *client_prefix* ]] && [[ "$sess_after_icon" != *client_prefix* ]]; } && printf "Y" || printf "n"
+tmux set -g @themux_session_text_variant "solid"
 tmux set -g @themux_session_state_target "text"; src
 sess=$(core session)
 sess_before_icon=${sess%%*}
@@ -67,8 +72,11 @@ tmux set -g @themux_session_state_target "auto"
 tmux set -g @themux_session_leading_show "off"; src
 printf "\nsession_state_auto_hidden_uses_text "
 { core session | grep -q 'client_prefix' && ! core session | grep -qF ''; } && printf "Y" || printf "n"
+printf "\nsession_active_inherits_text_variant "
+{ [ "$(grep -o 'client_prefix' <<<"$(core session)" | wc -l | tr -d ' ')" -eq 1 ]; } && printf "Y" || printf "n"
 tmux set -gu @themux_session_leading_show
 tmux set -gu @themux_session_state_target
+tmux set -gu @themux_session_text_variant
 
 # Leading position: right swaps the block order, so the left/right edge colours
 # swap too (icon-then-text -> text-then-icon).

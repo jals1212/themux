@@ -3,8 +3,8 @@
 #
 # Each line is split into zones by "/": none -> one left column, one ->
 # left + right, two -> left / center / right. A zone is a module list (token
-# NAMEs; "|" inserts the divider, a space leaves each module its own pill, and
-# =/>/< merge modules into one capped group) or the special token "windows".
+# NAMEs; "|" inserts the divider, a space leaves each item its own pill/list, and
+# =/>/< merge adjacent modules or the special token "windows" into one strip.
 # Rows render up to the last non-empty line, so a blank ("") line in between
 # becomes an empty row (status off when every line is empty).
 
@@ -88,6 +88,10 @@ full_pill() { # $1 module -> its own pill, caps included (inlined for tmux-cpu)
   else
     printf '%s' "#{E:@themux_module_${1}}"
   fi
+}
+
+win_field() { # $1 edge option (lcol|rcol|lbg|rbg) -> a usable window-list colour
+  tmux show -gqv "@_tmx_windows_${1}"
 }
 
 # Connect a GROUP of modules (joined in the layout string by =, > or <) into one
@@ -174,26 +178,84 @@ powerline_run() {
 
 # Expand one zone ($1) into a format fragment, aligned per $2 (left|centre|right),
 # with $3 = which side touches the terminal and should flush (left|right|none).
-# Modules connect only through explicit tokens in the layout string: = (flat
+# Items connect only through explicit tokens in the layout string: = (flat
 # merge, squared seam), > (left penetrates right) and < (right penetrates left)
-# join modules into one capped group; a plain space leaves each module its own
-# full pill; "|" separates and draws the divider. unstyled has no caps, so
-# connectors are inert there — every module is its own pill.
+# join adjacent modules and/or the window list into one strip; a plain space
+# leaves each item its own full pill/list; "|" separates and draws the divider.
+# unstyled has no caps, so connectors are inert there — every module is its own
+# pill.
 #
 # Tokens are first collected into items (G=group, D=divider, W=windows) so the
 # first/last *group* is known: that is the one whose outer cap flushes to the
 # terminal edge when $3 asks for it; a leading/trailing divider or window list
 # owns the edge instead, so no module flushes there.
 expand_zone() {
-  local zone align edge token pending i out fl fr fg lg last wedge wfmt
-  local -a it_type it_mods it_conns grp_mods grp_conns m
+  local zone align edge token pending i out fl fr fg lg last can_join grp_in
+  local left_join right_join next cur_lcol cur_lbg prev_rcol prev_rbg seam idx
+  local local_vis next_vis drop_right keep_right
+  local -a it_type it_mods it_conns it_in grp_mods grp_conns m
   align="$2"; edge="$3"
-  pending=""
+  pending="" can_join=0 grp_in=""
+
   push_group() {
     [ ${#grp_mods[@]} -eq 0 ] && return
-    it_type+=("G"); it_mods+=("${grp_mods[*]}"); it_conns+=("${grp_conns[*]}")
-    grp_mods=(); grp_conns=()
+    it_type+=("G"); it_mods+=("${grp_mods[*]}"); it_conns+=("${grp_conns[*]}"); it_in+=("$grp_in")
+    grp_mods=(); grp_conns=(); grp_in=""; can_join=1
   }
+  item_lcol() { local -a mm; read -ra mm <<<"${it_mods[$1]}"; case "${it_type[$1]}" in G) mod_field "${mm[0]}" lcol ;; W) win_field lcol ;; esac; }
+  item_lbg() { local -a mm; read -ra mm <<<"${it_mods[$1]}"; case "${it_type[$1]}" in G) mod_field "${mm[0]}" lbg ;; W) win_field lbg ;; esac; }
+  item_rcol() { local -a mm; read -ra mm <<<"${it_mods[$1]}"; case "${it_type[$1]}" in G) idx=$(( ${#mm[@]} - 1 )); mod_field "${mm[$idx]}" rcol ;; W) win_field rcol ;; esac; }
+  item_rbg() { local -a mm; read -ra mm <<<"${it_mods[$1]}"; case "${it_type[$1]}" in G) idx=$(( ${#mm[@]} - 1 )); mod_field "${mm[$idx]}" rbg ;; W) win_field rbg ;; esac; }
+  item_seam() { # $1 connector, $2 prev rcol, $3 prev rbg, $4 current lcol, $5 current lbg
+    case "$1" in
+      lt) printf '#[fg=%s,bg=%s]%s' "$4" "$3" "$mpll" ;; # < penetrate left
+      eq) printf '' ;;                                      # = flat squared seam
+      *)  printf '#[fg=%s,bg=%s]%s' "$2" "$5" "$mprr" ;; # > penetrate right
+    esac
+  }
+  item_visible() { # $1 item index -> 1 or a tmux condition for conditional groups
+    local -a mm
+    local m cond vis=""
+    case "${it_type[$1]}" in
+      W) printf '1' ;;
+      G)
+        read -ra mm <<<"${it_mods[$1]}"
+        for m in "${mm[@]}"; do
+          cond=$(tmux show -gqv "@themux_${m}_when")
+          [ -z "$cond" ] && { printf '1'; return; }
+          if [ -z "$vis" ]; then vis="$cond"; else vis="#{||:${vis},${cond}}"; fi
+        done
+        printf '%s' "${vis:-1}"
+        ;;
+      *) printf '1' ;;
+    esac
+  }
+  render_item() { # $1 item index, $2 flush-left, $3 flush-right
+    local idx="$1" fl2="$2" fr2="$3" wedge2 wfmt2
+    local -a mm2
+    case "${it_type[idx]}" in
+      W)
+        case "$fl2:$fr2" in
+          1:1) wedge2=both ;;
+          1:0) wedge2=left ;;
+          0:1) wedge2=right ;;
+          *)   wedge2=none ;;
+        esac
+        wfmt2="${windows_block//%ALIGN%/$align}"
+        printf '%s' "${wfmt2//%WEDGE%/$wedge2}"
+        ;;
+      D) [ -n "$mdiv" ] && printf '%s' "#{E:@_tmx_module_divider}" ;;
+      G)
+        read -ra mm2 <<<"${it_mods[idx]}"
+        if [ ${#mm2[@]} -eq 1 ] && [ "$fl2" = 0 ] && [ "$fr2" = 0 ]; then
+          full_pill "${mm2[0]}"
+        else
+          powerline_run "${it_mods[idx]}" "${it_conns[idx]}" "$fl2" "$fr2"
+        fi
+        ;;
+    esac
+  }
+
   # Make the connectors standalone tokens so a plain space (a group break) is
   # told apart from an explicit join. Module names never contain these glyphs.
   zone="$1"
@@ -203,22 +265,35 @@ expand_zone() {
   zone="${zone//=/ __eq__ }"
   for token in $zone; do
     case "$token" in
-      windows) push_group; it_type+=("W"); it_mods+=(""); it_conns+=(""); pending="" ;;
-      __div__) push_group; it_type+=("D"); it_mods+=(""); it_conns+=(""); pending="" ;;
+      windows)
+        push_group
+        it_type+=("W"); it_mods+=(""); it_conns+=(""); it_in+=("$pending")
+        pending=""; can_join=1
+        ;;
+      __div__)
+        push_group
+        it_type+=("D"); it_mods+=(""); it_conns+=(""); it_in+=("")
+        pending=""; can_join=0
+        ;;
       __gt__|__lt__|__eq__)
-        # Joins the next module to the open group; nothing on its left = no-op.
-        [ ${#grp_mods[@]} -ge 1 ] && pending="${token//_/}"
+        # Joins the next item to the open group/list; nothing on its left = no-op.
+        { [ ${#grp_mods[@]} -ge 1 ] || [ "$can_join" = 1 ]; } && pending="${token//_/}"
         ;;
       *)
         # unstyled has no caps, so connectors are inert: each module is its
         # own one-module group. Otherwise a pending connector extends the
         # open group; a plain space starts a fresh one (its "head").
         if [ -z "$mpll" ]; then
-          push_group; it_type+=("G"); it_mods+=("$token"); it_conns+=("head"); pending=""
+          push_group; it_type+=("G"); it_mods+=("$token"); it_conns+=("head"); it_in+=(""); pending=""; can_join=1
         elif [ -n "$pending" ]; then
-          grp_mods+=("$token"); grp_conns+=("$pending"); pending=""
+          if [ ${#grp_mods[@]} -ge 1 ]; then
+            grp_mods+=("$token"); grp_conns+=("$pending")
+          else
+            grp_mods+=("$token"); grp_conns+=("head"); grp_in="$pending"
+          fi
+          pending=""; can_join=1
         else
-          push_group; grp_mods+=("$token"); grp_conns+=("head")
+          push_group; grp_mods+=("$token"); grp_conns+=("head"); grp_in=""; can_join=1
         fi
         ;;
     esac
@@ -230,34 +305,50 @@ expand_zone() {
   [ "$last" -ge 0 ] && [ "${it_type[0]}" = G ] && fg=0
   [ "$last" -ge 0 ] && [ "${it_type[last]}" = G ] && lg=$last
 
-  out=""
+  out=""; prev_rcol=""; prev_rbg=""
   for i in "${!it_type[@]}"; do
+    local_vis=$(item_visible "$i")
+    next_vis="1"
+    left_join=0; right_join=0
+    [ -n "${it_in[i]}" ] && left_join=1
+    next=$((i + 1))
+    if [ "$next" -le "$last" ] && [ -n "${it_in[next]}" ]; then
+      right_join=1
+      next_vis=$(item_visible "$next")
+    fi
+
+    if [ "$left_join" = 1 ]; then
+      cur_lcol=$(item_lcol "$i"); cur_lbg=$(item_lbg "$i")
+      seam=$(item_seam "${it_in[i]}" "$prev_rcol" "$prev_rbg" "$cur_lcol" "$cur_lbg")
+      if [ "$local_vis" = 1 ]; then
+        out+="$seam"
+      else
+        tmux set -g "@_tmx_item_seam_${i}" "$seam"
+        out+="#{?${local_vis},#{E:@_tmx_item_seam_${i}},}"
+      fi
+    fi
+
+    fl=0; fr=0
+    [ "${it_type[i]}" = G ] && [ -n "$mpll" ] && [ "$edge" = left ]  && [ "$i" = "$fg" ] && fl=1
+    [ "${it_type[i]}" = G ] && [ -n "$mpll" ] && [ "$edge" = right ] && [ "$i" = "$lg" ] && fr=1
+    [ "${it_type[i]}" = W ] && [ "$edge" = left ]  && [ "$i" = 0 ]       && fl=1
+    [ "${it_type[i]}" = W ] && [ "$edge" = right ] && [ "$i" = "$last" ] && fr=1
+    [ "$left_join" = 1 ] && fl=1
+    [ "$right_join" = 1 ] && fr=1
+
+    if [ "$right_join" = 1 ] && [ "$next_vis" != 1 ]; then
+      drop_right=$(render_item "$i" "$fl" 1)
+      keep_right=$(render_item "$i" "$fl" 0)
+      tmux set -g "@_tmx_item_drop_${i}" "$drop_right"
+      tmux set -g "@_tmx_item_keep_${i}" "$keep_right"
+      out+="#{?${next_vis},#{E:@_tmx_item_drop_${i}},#{E:@_tmx_item_keep_${i}}}"
+    else
+      out+="$(render_item "$i" "$fl" "$fr")"
+    fi
+
     case "${it_type[i]}" in
-      W)
-        fl=0; fr=0
-        [ "$edge" = left ]  && [ "$i" = 0 ]       && fl=1
-        [ "$edge" = right ] && [ "$i" = "$last" ] && fr=1
-        case "$fl:$fr" in
-          1:1) wedge=both ;;
-          1:0) wedge=left ;;
-          0:1) wedge=right ;;
-          *)   wedge=none ;;
-        esac
-        wfmt="${windows_block//%ALIGN%/$align}"
-        out+="${wfmt//%WEDGE%/$wedge}"
-        ;;
-      D) [ -n "$mdiv" ] && out+="#{E:@_tmx_module_divider}" ;;
-      G)
-        fl=0; fr=0
-        [ -n "$mpll" ] && [ "$edge" = left ]  && [ "$i" = "$fg" ] && fl=1
-        [ -n "$mpll" ] && [ "$edge" = right ] && [ "$i" = "$lg" ] && fr=1
-        read -ra m <<<"${it_mods[i]}"
-        if [ ${#m[@]} -eq 1 ] && [ "$fl" = 0 ] && [ "$fr" = 0 ]; then
-          out+="$(full_pill "${m[0]}")"
-        else
-          out+="$(powerline_run "${it_mods[i]}" "${it_conns[i]}" "$fl" "$fr")"
-        fi
-        ;;
+      G|W) prev_rcol=$(item_rcol "$i"); prev_rbg=$(item_rbg "$i") ;;
+      *) prev_rcol=""; prev_rbg="" ;;
     esac
   done
   printf '%s' "$out"
@@ -287,7 +378,7 @@ for i in 1 2 3 4 5; do
 
   # Edge flush marker: a leading "=" on the left zone flushes the left border, a
   # trailing "=" on the right zone the right border. Strip it before the zone is
-  # parsed (an inline "=" between two modules stays a flat-merge connector). A
+  # parsed (an inline "=" between two adjacent items stays a flat-merge connector). A
   # single-zone row has no right border, so only the left marker applies there.
   l_flush=0; r_flush=0
   lz="${left#"${left%%[![:space:]]*}"}"     # left zone, leading whitespace trimmed

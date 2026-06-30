@@ -46,6 +46,11 @@ flush_off_mprr 2
 win_flush_left_edge 1
 win_flush_left_inner 1
 win_flush_right_edge 1
+win_join_left 1
+win_join_right 1
+win_join_right_text_aware 1
+win_join_both 1
+win_join_conditional_keeps_cap 1
 
 prepend_pinned 1
 append_pinned 1
