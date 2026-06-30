@@ -94,6 +94,27 @@ run_layout
 printf "\neq_mpll "; glyphs "$mpll"
 printf "eq_mprr "; glyphs "$mprr"
 
+# Squared also has caps (█), so "=" must still use the connected core path and
+# edge flush must drop the outer square cap. This is not visually decorative: it
+# is how a squared block reaches the terminal edge without an extra border cell.
+block=$(printf '\342\226\210')
+tmux set -g @themux_module_shape "squared"
+tmux set -g @themux_status_line_1 "session=host"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "\nsq_eq_uses_core "
+tmux show -gv 'status-format[0]' | grep -c '@_tmx_module_session_core' || true
+printf "sq_eq_blocks "; glyphs "$block"       # head + tail -> 2
+
+tmux set -g @themux_status_line_1 "=session=host"
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "\nsq_flush_left_blocks "; glyphs "$block" # head dropped -> tail only
+
+tmux set -g @themux_module_shape "rounded"
+
 # A plain space breaks the group: each module is its own full pill (a reference),
 # so no run core is emitted.
 tmux set -g @themux_status_line_1 "session host"
@@ -141,30 +162,31 @@ run_layout
 printf "\nflush_off_mpll "; glyphs "$mpll"     # 1
 printf "flush_off_mprr "; glyphs "$mprr"       # 2
 
-# Window ribbon flush: the same "=" flags the window list (@_tmx_win_flush_left/
-# right) when a "windows" token sits at that edge; window_render then drops the
-# ribbon's opening/closing cap.
+# Window-list flush: the same "=" selects a per-occurrence window format when a
+# "windows" token sits at that edge; no global flush flag should leak to another
+# row/position.
 tmux set -g @themux_window_shape "rounded"
 tmux set -g @themux_window_seam "<>"
 tmux set -g @themux_status_line_1 "=windows / / host"
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
-printf "\nwin_flush_left_edge "; tmux show -gqv @_tmx_win_flush_left    # 1
+printf "\nwin_flush_left_edge "; tmux show -gv 'status-format[0]' | grep -c '@_tmx_wfmt_left' || true
 
-# "windows" not first -> not flagged (window flush only targets a leading windows).
+# "windows" not first -> no window edge variant; the leading module group owns
+# the flush instead.
 tmux set -g @themux_status_line_1 "=host windows / / "
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
-printf "win_flush_left_inner "; tmux show -gqv @_tmx_win_flush_left    # 0
+printf "win_flush_left_inner "; tmux show -gv 'status-format[0]' | grep -c '@_tmx_wfmt_none' || true
 
 # Right edge: "windows" as the last token of a "="-flushed right zone.
 tmux set -g @themux_status_line_1 "host / / windows="
 tmux source "${script_dir}/../themux_options.conf"
 tmux source "${script_dir}/../themux.conf"
 run_layout
-printf "win_flush_right_edge "; tmux show -gqv @_tmx_win_flush_right    # 1
+printf "win_flush_right_edge "; tmux show -gv 'status-format[0]' | grep -c '@_tmx_wfmt_right' || true
 
 # Per-line prepend/append: a prepend cancels that row's left "=" flush, an append
 # the right "=" flush (the edge block is no longer against the border), so both

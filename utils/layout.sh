@@ -40,14 +40,15 @@ interp() { # $1 module, $2 string -> the string with the module's plugin literal
 
 windows_block=$(tmux show -gqv @_tmx_fmt_windows)
 
-# Powerline cap glyphs for the module shape. Empty for squared/unstyled (no caps,
-# so the =/>/< connectors are inert and every module stays its own full pill).
+# Cap glyphs for the module shape. Empty only for unstyled; squared uses a full
+# block cap, so `=` and edge flush still work for square-cornered modules.
 mshape=$(tmux display -p "#{?#{@themux_module_shape},#{@themux_module_shape},#{@themux_all_shape}}")
 case "$mshape" in
   rounded)   mpll=$(printf '\356\202\266'); mprr=$(printf '\356\202\264') ;;
   slanted)   mpll=$(printf '\356\202\272'); mprr=$(printf '\356\202\274') ;;
   powerline) mpll=$(printf '\356\202\262'); mprr=$(printf '\356\202\260') ;;
-  *)         mpll=""; mprr="" ;;
+  unstyled)  mpll=""; mprr="" ;;
+  *)         mpll=$(printf '\342\226\210'); mprr=$(printf '\342\226\210') ;; # squared/unknown
 esac
 
 # The divider "|" inserts between modules; emptying it ("") just drops the
@@ -58,7 +59,7 @@ mdiv=$(tmux show -gqv @themux_module_divider)
 # left zone, or a trailing "=" on the right zone, drops that edge's outer cap so
 # the block fills flat to the terminal border. It mirrors the "=" connector (a
 # flat, capless seam) carried out to the bar's edge. One marker flushes whatever
-# sits there — a module group OR the window ribbon — and it is per line; the
+# sits there — a module group OR the window list — and it is per line; the
 # centre zone never touches an edge. Parsed in the per-line loop below.
 
 # An _expand module (cpu/ram, battery, ...) carries its plugin's #{var} literals;
@@ -176,15 +177,15 @@ powerline_run() {
 # Modules connect only through explicit tokens in the layout string: = (flat
 # merge, squared seam), > (left penetrates right) and < (right penetrates left)
 # join modules into one capped group; a plain space leaves each module its own
-# full pill; "|" separates and draws the divider. squared/unstyled has no caps,
-# so the connectors are inert there — every module is its own pill.
+# full pill; "|" separates and draws the divider. unstyled has no caps, so
+# connectors are inert there — every module is its own pill.
 #
 # Tokens are first collected into items (G=group, D=divider, W=windows) so the
 # first/last *group* is known: that is the one whose outer cap flushes to the
-# terminal edge when $3 asks for it (capped shapes only; a leading/trailing
-# divider or window list owns the edge instead, so no module flushes there).
+# terminal edge when $3 asks for it; a leading/trailing divider or window list
+# owns the edge instead, so no module flushes there.
 expand_zone() {
-  local zone align edge token pending i out fl fr fg lg last
+  local zone align edge token pending i out fl fr fg lg last wedge wfmt
   local -a it_type it_mods it_conns grp_mods grp_conns m
   align="$2"; edge="$3"
   pending=""
@@ -209,8 +210,8 @@ expand_zone() {
         [ ${#grp_mods[@]} -ge 1 ] && pending="${token//_/}"
         ;;
       *)
-        # squared/unstyled has no caps, so connectors are inert: each module is
-        # its own one-module group. Otherwise a pending connector extends the
+        # unstyled has no caps, so connectors are inert: each module is its
+        # own one-module group. Otherwise a pending connector extends the
         # open group; a plain space starts a fresh one (its "head").
         if [ -z "$mpll" ]; then
           push_group; it_type+=("G"); it_mods+=("$token"); it_conns+=("head"); pending=""
@@ -232,7 +233,19 @@ expand_zone() {
   out=""
   for i in "${!it_type[@]}"; do
     case "${it_type[i]}" in
-      W) out+="${windows_block//%ALIGN%/$align}" ;;
+      W)
+        fl=0; fr=0
+        [ "$edge" = left ]  && [ "$i" = 0 ]       && fl=1
+        [ "$edge" = right ] && [ "$i" = "$last" ] && fr=1
+        case "$fl:$fr" in
+          1:1) wedge=both ;;
+          1:0) wedge=left ;;
+          0:1) wedge=right ;;
+          *)   wedge=none ;;
+        esac
+        wfmt="${windows_block//%ALIGN%/$align}"
+        out+="${wfmt//%WEDGE%/$wedge}"
+        ;;
       D) [ -n "$mdiv" ] && out+="#{E:@_tmx_module_divider}" ;;
       G)
         fl=0; fr=0
@@ -256,10 +269,6 @@ for i in 1 2 3 4 5; do
   [ -n "$(tmux show -gqv "@themux_status_line_${i}")" ] && last=$i
 done
 
-# Window-list edge flush: 1 when the "windows" token is the first item of a
-# flushing left zone or the last of a flushing right zone (any row). Read by
-# window_render.sh to drop the ribbon's opening/closing cap at that edge.
-win_fl=0; win_fr=0
 for i in 1 2 3 4 5; do
   [ "$i" -gt "$last" ] && break
   line=$(tmux show -gqv "@themux_status_line_${i}")
@@ -293,16 +302,10 @@ for i in 1 2 3 4 5; do
   prepend=$(tmux show -gqv "@themux_status_line_${i}_prepend")
   append=$(tmux show -gqv "@themux_status_line_${i}_append")
 
-  # One "=" flushes whatever sits at that edge: a leading/trailing "windows" token
-  # flags the ribbon (@_tmx_win_flush_left/right, read by window_render.sh to drop
-  # its opening/closing cap); a module group drops its outer cap via the edge arg
-  # to expand_zone below. A prepend/append cancels the flush on its edge (the
-  # block is no longer against the terminal border).
-  read -r _lfirst _ <<<"$left"
-  _rlast=""; for _t in $right; do _rlast="$_t"; done
-  [ "$l_flush" = 1 ] && [ "$_lfirst" = windows ] && [ -z "$prepend" ] && win_fl=1
-  [ "$r_flush" = 1 ] && [ "$_rlast" = windows ]  && [ -z "$append" ]  && win_fr=1
-
+  # One "=" flushes whatever sits at that edge. expand_zone applies that edge
+  # locally: a module group drops its outer cap; a "windows" token selects the
+  # matching per-occurrence window-list variant (%WEDGE%). A prepend/append
+  # cancels the flush on its edge because the item no longer touches the border.
   # "nolist" leaves the window-list region the "windows" token turns on, so a
   # zone after it still pins to its own edge (otherwise the right zone stays
   # glued to the window list instead of the right edge).
@@ -314,9 +317,6 @@ for i in 1 2 3 4 5; do
 
   tmux set -g "status-format[$((i - 1))]" "$fmt"
 done
-
-tmux set -g @_tmx_win_flush_left "$win_fl"
-tmux set -g @_tmx_win_flush_right "$win_fr"
 
 tmux set -gu @_tmx_layout_tmp
 # `status` takes off / on (1 row) / 2..5; a literal "1" is rejected.

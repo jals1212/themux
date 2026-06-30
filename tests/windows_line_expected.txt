@@ -23,6 +23,11 @@ lt_mprr 1
 eq_mpll 1
 eq_mprr 1
 
+sq_eq_uses_core 1
+sq_eq_blocks 2
+
+sq_flush_left_blocks 1
+
 space_session_pill 1
 space_no_run_core 0
 
@@ -39,7 +44,7 @@ flush_off_mpll 1
 flush_off_mprr 2
 
 win_flush_left_edge 1
-win_flush_left_inner 0
+win_flush_left_inner 1
 win_flush_right_edge 1
 
 prepend_pinned 1

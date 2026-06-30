@@ -81,14 +81,21 @@ cap() {
   fi
 }
 
-# Render one side into option $3. $1: var prefix (w|cw); $2: option infix
-# (""|current_). Sets the option directly (no command substitution) so the cap
-# colours it stashes survive for the connected separator built afterwards. Each
-# side resolves its own variant + accent: the inactive side the resting ones, the
-# active side the _active_ ones — independent, so no channel is "frozen".
+# Render one side into the stock tmux option plus four hidden variants consumed
+# by the status-line grammar's `windows` token. The hidden variants differ only
+# in the OUTER edge caps: none/left/right/both. That keeps edge flushing local to
+# the `=` marker that selected this specific window-list occurrence instead of a
+# global @_tmx_win_flush_left/right flag that leaks across rows.
+#
+# $1: var prefix (w|cw); $2: option infix (""|current_); $3: stock tmux option;
+# $4: hidden option prefix (@_tmx_wfmt|@_tmx_cwfmt). Sets options directly (no
+# command substitution) so cap colours survive for the connected separator.
+# Each side resolves its own variant + accent: the inactive side the resting
+# ones, the active side the _active_ ones — independent, so no channel is frozen.
 render_side() {
-  local p="$1" o="$2" opt="$3"
-  local lvar tvar lead_acc txt_acc ibg ifg tbg tfg icap tcap number text seam lcap rcap nblock nameblock out
+  local p="$1" o="$2" opt="$3" prefix="$4"
+  local lvar tvar lead_acc txt_acc ibg ifg tbg tfg icap tcap number text seam nblock nameblock
+  local first_cap last_cap raw_lcap raw_rcap flags_out none_out left_out right_out both_out
   if [ "$p" = w ]; then
     lvar="$leading" tvar="$name_style"
     lead_acc=$(expand "#{E:@themux_window_leading_color}")
@@ -129,33 +136,53 @@ render_side() {
     if [ "$connected" = 1 ]; then
       # Inner seams come from the separator. The first window opens the ribbon
       # with a left cap and the last closes it with a tail cap, both over the bar
-      # — each dropped when layout.sh flags the list as flushing that terminal
-      # edge (@_tmx_win_flush_left/right), so the ribbon fills the border.
-      lcap="#{?#{==:#{window_index},${base}},#{?@_tmx_win_flush_left,,#[fg=${icap}]#[bg=default]${lglyph}},}"
-      rcap="#{?loop_last_flag,#{?@_tmx_win_flush_right,,#[fg=#{?${text},${tcap},${icap}}]#[bg=default]${rglyph}},}"
-      out="${lcap}${nblock}${nameblock}${flags}${rcap}"
+      # — each can be dropped by choosing the left/right/both hidden variant.
+      first_cap="#{?#{==:#{window_index},${base}},#[fg=${icap}]#[bg=default]${lglyph},}"
+      last_cap="#{?loop_last_flag,#[fg=#{?${text},${tcap},${icap}}]#[bg=default]${rglyph},}"
     else
-      lcap=$(cap "$lglyph" "$icap" "$ibg")
-      rcap=$(cap "$rglyph" "#{?${text},${tcap},${icap}}" "#{?${text},${tbg},${ibg}}")
-      out="${lcap}${nblock}${nameblock}${flags}${rcap}"
+      raw_lcap=$(cap "$lglyph" "$icap" "$ibg")
+      raw_rcap=$(cap "$rglyph" "#{?${text},${tcap},${icap}}" "#{?${text},${tbg},${ibg}}")
+      first_cap="$raw_lcap"
+      last_cap="$raw_rcap"
     fi
+    flags_out="${nblock}${nameblock}${flags}"
   elif [ -n "$(tmux show -gqv "@_tmx_${p}_text")" ]; then
     # number on the right: name block first, then the number block.
-    lcap=$(cap "$lglyph" "$tcap" "$tbg")
+    raw_lcap=$(cap "$lglyph" "$tcap" "$tbg")
     nameblock="#[fg=$tfg,bg=$tbg]${text} "
-    rcap=$(cap "$rglyph" "$icap" "$ibg")
-    out="${lcap}${nameblock}${flags}${nblock}${rcap}"
+    raw_rcap=$(cap "$rglyph" "$icap" "$ibg")
+    first_cap="$raw_lcap"
+    last_cap="$raw_rcap"
+    flags_out="${nameblock}${flags}${nblock}"
   else
     # number on the right, no name: just the number block.
-    lcap=$(cap "$lglyph" "$icap" "$ibg")
-    rcap=$(cap "$rglyph" "$icap" "$ibg")
-    out="${lcap}${nblock}${flags}${rcap}"
+    raw_lcap=$(cap "$lglyph" "$icap" "$ibg")
+    raw_rcap=$(cap "$rglyph" "$icap" "$ibg")
+    first_cap="$raw_lcap"
+    last_cap="$raw_rcap"
+    flags_out="${nblock}${flags}"
   fi
-  tmux set -g "$opt" "$out"
+
+  none_out="${first_cap}${flags_out}${last_cap}"
+  if [ "$connected" = 1 ]; then
+    left_out="${flags_out}${last_cap}"
+    right_out="${first_cap}${flags_out}"
+    both_out="$flags_out"
+  else
+    left_out="#{?#{==:#{window_index},${base}},,${first_cap}}${flags_out}${last_cap}"
+    right_out="${first_cap}${flags_out}#{?loop_last_flag,,${last_cap}}"
+    both_out="#{?#{==:#{window_index},${base}},,${first_cap}}${flags_out}#{?loop_last_flag,,${last_cap}}"
+  fi
+
+  tmux set -g "$opt" "$none_out" \; \
+    set -g "${prefix}_none" "$none_out" \; \
+    set -g "${prefix}_left" "$left_out" \; \
+    set -g "${prefix}_right" "$right_out" \; \
+    set -g "${prefix}_both" "$both_out"
 }
 
-render_side w "" window-status-format
-render_side cw current_ window-status-current-format
+render_side w "" window-status-format @_tmx_wfmt
+render_side cw current_ window-status-current-format @_tmx_cwfmt
 
 # Neighbour-aware separator for the connected ribbon. Drawn after each window in
 # that window's draw context, so window_active is the left window and a small
