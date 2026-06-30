@@ -117,9 +117,9 @@ render_side() {
   # Cap colours are stashed for the connected separator (the bg channel is the
   # block colour, or the accent the block uses when transparent/naked).
   if [ "$p" = w ]; then
-    W_ICAP="$icap" W_TCAP="$tcap"
+    W_ICAP="$icap" W_TCAP="$tcap" W_IBG="$ibg" W_TBG="$tbg"
   else
-    CW_ICAP="$icap" CW_TCAP="$tcap"
+    CW_ICAP="$icap" CW_TCAP="$tcap" CW_IBG="$ibg" CW_TBG="$tbg"
   fi
 
   nblock="#[fg=$ifg,bg=$ibg]$(spaces "$pleft")$number$(spaces "$pright")"
@@ -183,6 +183,41 @@ render_side() {
 
 render_side w "" window-status-format @_tmx_wfmt
 render_side cw current_ window-status-current-format @_tmx_cwfmt
+
+# Edge colours for status-line grammar seams around the `windows` token. The left
+# edge follows the first window, the right edge the last (assuming contiguous
+# indexes, same as the connected separator below). Which block sits at an edge
+# depends on the layout: with numbers on the left the right edge is the name block
+# and the left edge the number block; numbers on the right mirror it. The name
+# (text) edge is text-aware — it falls back to the number cap when the window
+# shows no name, matching the per-window last_cap and the separator. @_tmx_*_text
+# resolves against the active window, so the text edge is exact for the always and
+# never name modes and for the active edge; a manual-mode inactive edge degrades
+# to the active window's name state, like the rest of this contiguous-index seam.
+last_index="#{e|+:${base},#{e|-:#{window_count},1}}"
+first_active="#{==:#{active_window_index},${base}}"
+last_active="#{==:#{active_window_index},${last_index}}"
+w_txt_col="#{?#{E:@_tmx_w_text},${W_TCAP},${W_ICAP}}"
+w_txt_bg="#{?#{E:@_tmx_w_text},${W_TBG},${W_IBG}}"
+cw_txt_col="#{?#{E:@_tmx_cw_text},${CW_TCAP},${CW_ICAP}}"
+cw_txt_bg="#{?#{E:@_tmx_cw_text},${CW_TBG},${CW_IBG}}"
+if [ "$position" = left ]; then
+  # numbers left: number block on the left edge, name block on the right.
+  win_lcol="#{?${first_active},${CW_ICAP},${W_ICAP}}"
+  win_lbg="#{?${first_active},${CW_IBG},${W_IBG}}"
+  win_rcol="#{?${last_active},${cw_txt_col},${w_txt_col}}"
+  win_rbg="#{?${last_active},${cw_txt_bg},${w_txt_bg}}"
+else
+  # numbers right: name block on the left edge, number block on the right.
+  win_lcol="#{?${first_active},${cw_txt_col},${w_txt_col}}"
+  win_lbg="#{?${first_active},${cw_txt_bg},${w_txt_bg}}"
+  win_rcol="#{?${last_active},${CW_ICAP},${W_ICAP}}"
+  win_rbg="#{?${last_active},${CW_IBG},${W_IBG}}"
+fi
+tmux set -g @_tmx_windows_lcol "$win_lcol" \; \
+  set -g @_tmx_windows_lbg "$win_lbg" \; \
+  set -g @_tmx_windows_rcol "$win_rcol" \; \
+  set -g @_tmx_windows_rbg "$win_rbg"
 
 # Neighbour-aware separator for the connected ribbon. Drawn after each window in
 # that window's draw context, so window_active is the left window and a small

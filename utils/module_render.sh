@@ -35,10 +35,11 @@ name="$1"
 
 US=$(printf '\037')
 
-# A property cascade: @themux_<name>_<prop> > @themux_module_<prop> > @themux_all_<prop>.
-# Empty-check (not truthy) so a literal "0" value (valid for padding) is honoured;
-# tmux's #{?...} would read "0" as false and skip the tier.
-casc() { printf '#{?#{==:#{@themux_%s_%s},},#{?#{==:#{@themux_module_%s},},#{@themux_all_%s},#{@themux_module_%s}},#{@themux_%s_%s}}' "$name" "$1" "$1" "$1" "$1" "$name" "$1"; }
+# A property cascade: @themux_<name>_<prop> > @themux_module_<prop> >
+# internal module default > @themux_all_<prop>. Empty-check (not truthy) so a
+# literal "0" value (valid for padding) is honoured; tmux's #{?...} would read
+# "0" as false and skip the tier.
+casc() { printf '#{?#{==:#{@themux_%s_%s},},#{?#{==:#{@themux_module_%s},},#{?#{==:#{@_tmx_%s_%s},},#{@themux_all_%s},#{@_tmx_%s_%s}},#{@themux_module_%s}},#{@themux_%s_%s}}' "$name" "$1" "$1" "$name" "$1" "$1" "$name" "$1" "$1" "$name" "$1"; }
 # A resting accent: @themux_<name>_<slot>_color > internal slot default >
 # @themux_<name>_color. Metrics use the internal tier to route their live level
 # colour without overwriting user-owned per-slot overrides.

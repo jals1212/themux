@@ -188,6 +188,38 @@ tmux source "${script_dir}/../themux.conf"
 run_layout
 printf "win_flush_right_edge "; tmux show -gv 'status-format[0]' | grep -c '@_tmx_wfmt_right' || true
 
+# Inline connectors also work across the window-list token. A left join drops the
+# window list's left cap, a right join drops its right cap, and both sides select
+# the both-edge variant.
+tmux set -g @themux_status_line_1 "host>windows / / "
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "win_join_left "; tmux show -gv 'status-format[0]' | grep -c '@_tmx_wfmt_left' || true
+
+tmux set -g @themux_status_line_1 "windows>host / / "
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "win_join_right "; tmux show -gv 'status-format[0]' | grep -c '@_tmx_wfmt_right' || true
+# The right seam carries the list's text-aware right edge: with numbers on the left
+# the last window's right cap is the name block, so the seam colour falls back from
+# the name cap to the number cap through @_tmx_w_text (matching last_cap/separator).
+printf "win_join_right_text_aware "; tmux show -gv 'status-format[0]' | grep -c '@_tmx_w_text' || true
+
+tmux set -g @themux_status_line_1 "host>windows>session / / "
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "win_join_both "; tmux show -gv 'status-format[0]' | grep -c '@_tmx_wfmt_both' || true
+
+tmux set -g @themux_status_line_1 "windows>zoom / / "
+tmux source "${script_dir}/../themux_options.conf"
+tmux source "${script_dir}/../themux.conf"
+run_layout
+printf "win_join_conditional_keeps_cap "
+{ tmux show -gv 'status-format[0]' | grep -q 'window_zoomed_flag' && tmux show -gv 'status-format[0]' | grep -q '@_tmx_item_keep'; } && printf "1" || printf "0"
+
 # Per-line prepend/append: a prepend cancels that row's left "=" flush, an append
 # the right "=" flush (the edge block is no longer against the border), so both
 # the head and tail caps return.

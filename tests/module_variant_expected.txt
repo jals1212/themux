@@ -3,6 +3,7 @@ cpu_live 2
 cpu_not_blank ok
 cpu_icon_solid Y
 cpu_text_subtle Y
+metric_module_text_variant_wins Y
 ram_live 2
 host_text_naked n
 session_prefix 1
@@ -11,6 +12,7 @@ session_state_text_moves_active Y
 session_state_off_removes_active Y
 session_state_invalid_auto_visible_leading Y
 session_state_auto_hidden_uses_text Y
+session_active_inherits_text_variant Y
 
 position_swaps_edges Y
 notch_adds_seam_host_icon Y

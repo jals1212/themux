@@ -159,24 +159,24 @@ with the resting accent and its active variant with the active accent.
 ### Status layout
 
 The bar is built from up to five rows. Each is `"<left> / <center> / <right>"`;
-a zone is a module list (token `NAME` → the `@themux_module_NAME` segment) or the
-special token `windows`. Blank zones render nothing; the number of non-empty rows
-sets how many status lines show.
+a zone is an item list: module tokens (`NAME` → the `@themux_module_NAME`
+segment) and/or the special token `windows`. Blank zones render nothing; the
+number of non-empty rows sets how many status lines show.
 
-The character between two modules sets how they join:
+The character between two adjacent items sets how they join:
 
 | Connector | Result |
 | --- | --- |
 | space | separate pills, each with its own caps |
 | `=` | one merged pill, flat (squared) seam |
-| `>` | merged, seam points right (left module into right) |
-| `<` | merged, seam points left (right module into left) |
+| `>` | merged, seam points right (left item into right) |
+| `<` | merged, seam points left (right item into left) |
 | `\|` | separate pills + the modules divider |
 
-`=`/`>`/`<` build one capped **group** (a space or `|` breaks it) and need a
-capped shape. `squared` uses a square `█` cap; `rounded`, `slanted`, and
-`powerline` use taper glyphs. Only `unstyled` has no cap, so connectors collapse
-to a plain space there.
+`=`/`>`/`<` build one capped **group** across adjacent modules and/or the
+`windows` token (a space or `|` breaks it) and need a capped shape. `squared`
+uses a square `█` cap; `rounded`, `slanted`, and `powerline` use taper glyphs.
+Only `unstyled` has no cap, so connectors collapse to a plain space there.
 
 **Edge flush** — a leading `=` on a row's left zone (or a trailing `=` on its
 right zone) drops that edge's outer cap so the block fills flat to the terminal
@@ -184,7 +184,8 @@ border (nvim-style) — the same `=` "no cap" seam carried out to the bar's edge
 One marker flushes whatever sits there: a module group or the window list (a
 leading/trailing `windows` token). `squared` drops its square `█` cap;
 rounded/slanted/powerline drop their taper cap. `unstyled` has no cap to drop. A
-row's prepend/append cancels its flush. An inline `=` between two modules stays a flat-merge connector.
+row's prepend/append cancels its flush. An inline `=` between two adjacent items
+stays a flat-merge connector.
 
 ```sh
 set -g @themux_status_line_1 "=session>application / windows / cpu<ram="
@@ -373,9 +374,11 @@ The `cpu`/`ram` threshold modules carry tmux-cpu's live level colour
 `#{<name>_bg_color}` as their accent — green at rest, warming yellow → red as the
 value climbs. The default variants place it on both slots: the **icon** is `solid`
 (a coloured block that escalates) and the **text** is `subtle` (grey block, the
-digits take the live colour). Metrics default `@themux_cpu_state_target` and
-`@themux_ram_state_target` to `both`; set them to `auto`, `leading`, `text`, or
-`off` to choose where the live threshold colour appears. Set
+digits take the live colour). That metric-specific `subtle` text style is only an
+internal fallback: `@themux_module_text_variant` and per-module
+`@themux_<name>_text_variant` still win. Metrics default
+`@themux_cpu_state_target` and `@themux_ram_state_target` to `both`; set them to
+`auto`, `leading`, `text`, or `off` to choose where the live threshold colour appears. Set
 `@themux_<name>_{leading,text}_variant` to restyle (text `naked` for bare digits,
 `soft` to mute), pin a calm/base accent with `@themux_<name>_color`, or override a
 slot explicitly with `@themux_<name>_{leading,text}_color` (explicit slot colours
