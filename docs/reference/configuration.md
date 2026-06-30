@@ -322,8 +322,28 @@ in a layout zone). Built-in modules: `session`, `application`, `directory`,
 | Option | Effect |
 | --- | --- |
 | `@themux_<name>_icon` | The module's icon. |
+| `@themux_<name>_label` | Optional text for the leading slot when label mode is selected. |
 | `@themux_<name>_color` | The module's accent color (feeds both slots; per-slot `@themux_<name>_leading_color` / `_text_color` override it). |
 | `@themux_<name>_text` | The module's text *content* (any tmux format). |
+
+Leading content defaults to icons. Set `@themux_module_leading_show` to choose
+what appears before the text/value slot:
+
+| Value | Behavior |
+| --- | --- |
+| `icon` | Use `@themux_<name>_icon`; hide leading if it is empty. |
+| `label` | Use `@themux_<name>_label`; hide leading if it is empty. |
+| `off` | Always hide leading. |
+| `auto` | Use the icon if present, otherwise the label if present, otherwise hide leading. |
+
+Invalid values behave like `icon`. Override one module with
+`@themux_<name>_leading_show`, for example keep `session` iconic while others use
+labels. Labels are intentionally per-module: built-ins only define them where a
+prefix helps (for example `cpu`, `ram`, `battery`, `load`, `uptime`, `kube`,
+`weather`/`clima`, `pomodoro_plus`). Modules without a selected leading value hide
+the leading slot and keep only their text/value. Add a label with
+`@themux_<name>_label` when you want one. Labels should be bare text, not padded;
+`@themux_*_padding` owns spacing.
 
 Per-module overrides (advanced): any cascadable prop can be set for a single
 module — `@themux_<name>_leading_variant`, `@themux_<name>_text_variant`, their
@@ -332,13 +352,34 @@ module — `@themux_<name>_leading_variant`, `@themux_<name>_text_variant`, thei
 `session`) and raw per-channel colour overrides
 `@themux_<name>_{icon,text}_{fg,bg}` that pin a concrete colour over the variant.
 
+State and alert colour placement is controlled by `@themux_module_state_target`
+(`auto` by default) or a per-module `@themux_<name>_state_target` override:
+
+| Value | Behavior |
+| --- | --- |
+| `auto` | Use the leading slot when it is visible; move to text when leading is hidden. |
+| `leading` | Show active/alert colour in the leading slot only. |
+| `text` | Show active/alert colour in the text slot only. |
+| `both` | Show active/alert colour in both slots. |
+| `off` | Keep both slots on their calm/resting colour. |
+
+Invalid values behave like `auto`. For example, `session` keeps the existing
+prefix behavior by default while its leading is visible (red leading when
+`client_prefix` is active), but `@themux_session_state_target text` moves that red
+active accent to the text and `@themux_session_leading_show off` lets `auto` move
+it there for you.
+
 The `cpu`/`ram` threshold modules carry tmux-cpu's live level colour
 `#{<name>_bg_color}` as their accent — green at rest, warming yellow → red as the
 value climbs. The default variants place it on both slots: the **icon** is `solid`
 (a coloured block that escalates) and the **text** is `subtle` (grey block, the
-digits take the live colour). Set `@themux_<name>_{leading,text}_variant` to restyle
-(text `naked` for bare digits, `soft` to mute), pin a fixed icon accent with
-`@themux_<name>_color`, restyle the levels with tmux-cpu's
+digits take the live colour). Metrics default `@themux_cpu_state_target` and
+`@themux_ram_state_target` to `both`; set them to `auto`, `leading`, `text`, or
+`off` to choose where the live threshold colour appears. Set
+`@themux_<name>_{leading,text}_variant` to restyle (text `naked` for bare digits,
+`soft` to mute), pin a calm/base accent with `@themux_<name>_color`, or override a
+slot explicitly with `@themux_<name>_{leading,text}_color` (explicit slot colours
+win over metric state-target routing). Restyle the levels with tmux-cpu's
 `@<name>_{low,medium,high}_bg_color` (themux bases low on `@thm_green`), and move the
 boundary with `@<name>_{medium,high}_thresh`. A variant *switch* on alert cannot work
 here (the segment is composed inline for tmux-cpu, so a draw-time condition is baked
@@ -348,7 +389,9 @@ Shared status options:
 
 | Option | Default | Effect |
 | --- | --- | --- |
-| `@themux_module_middle_separator` | `""` | Gap between a module's icon and text. |
+| `@themux_module_leading_show` | `icon` | `icon` \| `label` \| `off` \| `auto` — selects module leading content; invalid values behave like `icon`. |
+| `@themux_module_state_target` | `auto` | `auto` \| `leading` \| `text` \| `both` \| `off` — selects where module active/alert colour appears; invalid values behave like `auto`. |
+| `@themux_module_middle_separator` | `""` | Gap between a module's leading content and text. |
 | `@themux_module_connect_separator` | `no` | `yes` \| `no` — whether adjacent pills connect. |
 
 ### Menu & popups
