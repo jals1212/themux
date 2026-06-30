@@ -31,32 +31,57 @@ themux_prop() { # $1 item, $2 prop
   tmux display -p "#{?#{==:#{@themux_$1_$2},},#{@themux_all_$2},#{@themux_$1_$2}}"
 }
 
-# Parse a @themux_*_padding value into four side pads
-# "<leading-left> [leading-right]|<text-left> [text-right]" (cells).
+# Parse a @themux_*_padding value into four side pads:
+#   "N" -> "N N|N N"
+#   "<leading-left> [leading-right]|<text-left> [text-right]"
 #
 # This is intentionally breaking: padding has one grammar only. The "|" marks
 # the leading<->text seam, so each side can be spaced independently. A single
-# value on either side expands to both sides there: "1 | 1" -> "1 1|1 1".
-# Invalid or omitted cells fall back to 0 via spaces(), not to legacy defaults.
+# value without "|" expands to all four sides; a single value on either side of
+# "|" expands to both sides there. Invalid or malformed values fall back to the
+# default "1" -> "1 1|1 1".
+pad_default() { printf '1 1 1 1'; }
+
+pad_is_cell() { [[ "$1" =~ ^[0-9]+$ ]]; }
+
 pad_side_parse() { # $1 side value -> "left right"
   local -a f
   read -ra f <<<"$1"
   case "${#f[@]}" in
-    0) printf '0 0' ;;
-    1) printf '%s %s' "${f[0]}" "${f[0]}" ;;
-    *) printf '%s %s' "${f[0]}" "${f[1]}" ;;
+    1)
+      pad_is_cell "${f[0]}" || return 1
+      printf '%s %s' "${f[0]}" "${f[0]}"
+      ;;
+    2)
+      pad_is_cell "${f[0]}" && pad_is_cell "${f[1]}" || return 1
+      printf '%s %s' "${f[0]}" "${f[1]}"
+      ;;
+    *) return 1 ;;
   esac
 }
 
 pad_parse() { # $1 raw value -> "leading_left leading_right text_left text_right"
-  local left right
+  local left right left_pad right_pad
+  local -a f
   case "$1" in
     *'|'*) ;;
-    *) printf '0 0 0 0'; return ;;
+    *)
+      read -ra f <<<"$1"
+      case "${#f[@]}" in
+        1)
+          pad_is_cell "${f[0]}" || { pad_default; return; }
+          printf '%s %s %s %s' "${f[0]}" "${f[0]}" "${f[0]}" "${f[0]}"
+          ;;
+        *) pad_default ;;
+      esac
+      return
+      ;;
   esac
   left="${1%%|*}"
   right="${1#*|}"
-  printf '%s %s' "$(pad_side_parse "$left")" "$(pad_side_parse "$right")"
+  left_pad=$(pad_side_parse "$left") || { pad_default; return; }
+  right_pad=$(pad_side_parse "$right") || { pad_default; return; }
+  printf '%s %s' "$left_pad" "$right_pad"
 }
 
 # Emit N space cells (a non-numeric or empty N -> nothing).

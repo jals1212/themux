@@ -75,17 +75,23 @@ tmux set -g @themux_module_padding "0 0|0 0"; src
 p0=$(core host | wc -c | tr -d ' ')
 tmux set -g @themux_module_padding "3 3|3 3"; src
 p3=$(core host | wc -c | tr -d ' ')
+tmux set -g @themux_module_padding "1"; src
+pglobal=$(core host | wc -c | tr -d ' ')
 tmux set -g @themux_module_padding "1 | 1"; src
 pshort=$(core host | wc -c | tr -d ' ')
 tmux set -g @themux_module_padding "1 1|1 1"; src
 pfull=$(core host | wc -c | tr -d ' ')
+tmux set -g @themux_module_padding "0 3 1"; src
+pinvalid=$(core host | wc -c | tr -d ' ')
 tmux set -g @themux_module_padding "0 3|0 0"; src
 plr=$(core host | wc -c | tr -d ' ')
 tmux set -g @themux_module_padding "0 0|3 0"; src
 ptl=$(core host | wc -c | tr -d ' ')
 tmux set -gu @themux_module_padding
 printf "\npadding_widens_badge "; { [ "$p3" -gt "$p0" ]; } && printf "Y" || printf "n"
+printf "\npadding_global_shorthand_matches "; { [ "$pglobal" -eq "$pfull" ]; } && printf "Y" || printf "n"
 printf "\npadding_side_shorthand_matches "; { [ "$pshort" -eq "$pfull" ]; } && printf "Y" || printf "n"
+printf "\npadding_invalid_falls_back "; { [ "$pinvalid" -eq "$pfull" ]; } && printf "Y" || printf "n"
 printf "\npadding_leading_right_widens "; { [ "$plr" -gt "$p0" ]; } && printf "Y" || printf "n"
 printf "\npadding_text_left_widens "; { [ "$ptl" -gt "$p0" ]; } && printf "Y" || printf "n"
 

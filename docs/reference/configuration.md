@@ -64,7 +64,7 @@ set -g @themux_module_notch           "off"
 | `@themux_<item>_text_variant` † | `solid` · `soft` · `subtle` · `naked` | `soft` |
 | `@themux_<item>_notch` | `on` · `off` | `off` |
 | `@themux_<item>_leading_position` | `left` · `right` | `left` |
-| `@themux_<item>_padding` | `"<LL> [LR]\|<TL> [TR]"` cells (see below) | `1\|1` |
+| `@themux_<item>_padding` | `"N"` or `"<LL> [LR]\|<TL> [TR]"` cells (see below) | `1` |
 | `@themux_<item>_leading_active_variant` | `solid` · `soft` · `subtle` · `naked` | resting variant |
 | `@themux_<item>_text_active_variant` | `solid` · `soft` · `subtle` · `naked` | resting variant |
 
@@ -84,17 +84,18 @@ tier — `@themux_<name>_<prop>` (e.g. `@themux_cpu_text_variant`) overrides
 `leading_active_variant`, `text_active_variant`.
 
 **Padding** (`@themux_<item>_padding`) sets a badge's four inner sides:
-`"<LL> [LR]|<TL> [TR]"`. **LL/LR** pad the leading block's left/right sides
-(icon or number); **TL/TR** pad the text block's left/right sides. The `|` is the
-leading↔text seam. A single value on either side expands to both sides there:
-`"1 | 1"` means `"1 1|1 1"`. This is the only grammar: old three-cell values
-such as `"0 3 1"` are not expanded after this breaking change. The default is
-`1|1`.
+`"N"` or `"<LL> [LR]|<TL> [TR]"`. **LL/LR** pad the leading block's left/right
+sides (icon or number); **TL/TR** pad the text block's left/right sides. A single
+value without `|` expands to all four sides: `"1"` means `"1 1|1 1"`. The `|` is
+the leading↔text seam; a single value on either side expands to both sides there,
+so `"1 | 1"` also means `"1 1|1 1"`. This is the only grammar: old three-cell
+values such as `"0 3 1"` are not expanded after this breaking change. Invalid or
+malformed values fall back to the default: `1`.
 Icon values should be glyphs, not general spacing; only keep per-glyph nudging in
 `@themux_<name>_icon` when a glyph truly needs optical compensation.
 
 ```sh
-set -g @themux_all_padding    "1 | 1"     # the default: same as 1 1|1 1
+set -g @themux_all_padding    "1"         # the default: same as 1 1|1 1
 set -g @themux_window_padding "0 0|0 0"   # flush windows (no inner padding)
 set -g @themux_cpu_padding    "1 0|0 1"   # tight icon/text seam
 ```
