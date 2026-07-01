@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.3.0](https://github.com/jals1212/themux/compare/v0.2.0...v0.3.0) (2026-07-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* split padding around leading text seam
+
+### Added
+
+* **layout:** join the windows token through inline connectors ([52b4396](https://github.com/jals1212/themux/commit/52b43965139fb1f992e664254f97651212c68b32))
+* **modules:** add leading labels and state targets ([43c4df5](https://github.com/jals1212/themux/commit/43c4df55c8a0a9e6b0ef19161135a6a88d2ceb4a))
+* **modules:** per-level colour override for cpu/ram metrics ([#7](https://github.com/jals1212/themux/issues/7)) ([7aa4be5](https://github.com/jals1212/themux/commit/7aa4be5923e89f99afd025671e092e782dc22f73))
+* split padding around leading text seam ([d6daf24](https://github.com/jals1212/themux/commit/d6daf247777328fc1370bed043e17b8920cfb3fa))
+
+
+### Fixed
+
+* fall back invalid padding to default ([757c148](https://github.com/jals1212/themux/commit/757c14825069e74b4c634f7e391e16a43cb67a4d))
+* **layout:** honor edge grammar for windows and squared modules ([ddb54d4](https://github.com/jals1212/themux/commit/ddb54d4b3a4fe6190c9c0fbdec7deb3eaabd4cd7))
+
+
+### Documentation
+
+* rebuild documentation imagery with genuine themux captures ([c5470ac](https://github.com/jals1212/themux/commit/c5470ac45186480397f1552df184d902334cc811))
+* rebuild documentation imagery with genuine themux captures ([19bccb5](https://github.com/jals1212/themux/commit/19bccb51826184644dad7bc40d5e55e2684f44ab))
+
 ## [0.2.0](https://github.com/jals1212/themux/compare/v0.1.0...v0.2.0) (2026-06-23)
 
 
