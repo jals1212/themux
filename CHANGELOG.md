@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/jals1212/themux/compare/v0.3.0...v0.3.1) (2026-07-01)
+
+
+### Fixed
+
+* **status:** repaint the command-prompt over the status line ([1c7dfca](https://github.com/jals1212/themux/commit/1c7dfcaf41afb9bc87f3402c958dde4be5f1f4df))
+
 ## [0.3.0](https://github.com/jals1212/themux/compare/v0.2.0...v0.3.0) (2026-07-01)
 
 
