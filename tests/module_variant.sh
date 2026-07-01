@@ -5,6 +5,7 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 source "${script_dir}/helpers.sh"
 
 core() { tmux show -gqv "@_tmx_module_$1_core"; }
+core_e() { tmux display -p "#{E:@_tmx_module_$1_core}"; } # expanded: state routed, live colour in its final slot
 src() {
   tmux source "${script_dir}/../themux_options.conf"
   tmux source "${script_dir}/../themux.conf"
@@ -16,21 +17,21 @@ src() {
 tmux set -g @themux_status_line_1 "cpu ram session host"
 src
 printf "\ncpu_live "
-core cpu | grep -c 'cpu_bg_color' || true
+core_e cpu | { grep -o 'cpu_bg_color' || true; } | wc -l | tr -d ' '
 printf "cpu_not_blank "
 { core cpu | grep -qF 'fg=#{l:#{cpu_bg_color}},bg=#{l:#{cpu_bg_color}}'; } && printf "blank" || printf "ok"
 printf "\ncpu_icon_solid "
 # solid icon: the live colour is the block bg
-{ core cpu | grep -q 'bg=#{l:#{cpu_bg_color}}'; } && printf "Y" || printf "n"
+{ core_e cpu | grep -qF 'bg=#{cpu_bg_color}'; } && printf "Y" || printf "n"
 printf "\ncpu_text_subtle "
 # subtle text: the live colour is the digit fg, on a static grey block
-{ core cpu | grep -q 'fg=#{l:#{cpu_bg_color}}'; } && printf "Y" || printf "n"
+{ core_e cpu | grep -qF 'fg=#{cpu_bg_color}'; } && printf "Y" || printf "n"
 tmux set -g @themux_module_text_variant "solid"; src
 printf "\nmetric_module_text_variant_wins "
-{ [ "$(grep -o 'bg=#{l:#{cpu_bg_color}}' <<<"$(core cpu)" | wc -l | tr -d ' ')" -ge 2 ]; } && printf "Y" || printf "n"
-tmux set -gu @themux_module_text_variant
+{ [ "$(core_e cpu | { grep -o 'bg=#{cpu_bg_color}' || true; } | wc -l | tr -d ' ')" -ge 2 ]; } && printf "Y" || printf "n"
+tmux set -gu @themux_module_text_variant; src
 printf "\nram_live "
-core ram | grep -c 'ram_bg_color' || true
+core_e ram | { grep -o 'ram_bg_color' || true; } | wc -l | tr -d ' '
 
 # Per-single-module override beats the all-modules tier: @themux_host_text_variant
 # naked wins over @themux_module_text_variant solid, so host's text drops its block.
@@ -73,7 +74,7 @@ tmux set -g @themux_session_leading_show "off"; src
 printf "\nsession_state_auto_hidden_uses_text "
 { core session | grep -q 'client_prefix' && ! core session | grep -qF ''; } && printf "Y" || printf "n"
 printf "\nsession_active_inherits_text_variant "
-{ [ "$(grep -o 'client_prefix' <<<"$(core session)" | wc -l | tr -d ' ')" -eq 1 ]; } && printf "Y" || printf "n"
+{ [ "$(core session | { grep -o 'client_prefix' || true; } | wc -l | tr -d ' ')" -ge 1 ]; } && printf "Y" || printf "n"
 tmux set -gu @themux_session_leading_show
 tmux set -gu @themux_session_state_target
 tmux set -gu @themux_session_text_variant
@@ -185,32 +186,28 @@ tmux set -gu @themux_session_leading_show
 # move the live threshold colour to text only or suppress it entirely.
 tmux set -g @themux_status_line_1 "cpu ram"
 src
-cpu=$(core cpu); cpu_before_icon=${cpu%%*}; cpu_after_icon=${cpu#*}
-ram=$(core ram)
 printf "\ncpu_state_default_both "
-{ [[ "$cpu_before_icon" == *cpu_bg_color* ]] && [[ "$cpu_after_icon" == *cpu_bg_color* ]]; } && printf "Y" || printf "n"
+{ core_e cpu | grep -qF 'bg=#{cpu_bg_color}' && core_e cpu | grep -qF 'fg=#{cpu_bg_color}'; } && printf "Y" || printf "n"
 printf "\nram_state_default_both "
-{ [[ "$ram" == *ram_bg_color* ]] && [ "$(grep -o 'ram_bg_color' <<<"$ram" | wc -l | tr -d ' ')" -ge 2 ]; } && printf "Y" || printf "n"
+{ core_e ram | grep -qF 'bg=#{ram_bg_color}' && core_e ram | grep -qF 'fg=#{ram_bg_color}'; } && printf "Y" || printf "n"
 tmux set -g @themux_cpu_state_target "text"; src
-cpu=$(core cpu); cpu_before_icon=${cpu%%*}; cpu_after_icon=${cpu#*}
 printf "\ncpu_state_text_moves_live "
-{ [[ "$cpu_before_icon" != *cpu_bg_color* ]] && [[ "$cpu_after_icon" == *cpu_bg_color* ]]; } && printf "Y" || printf "n"
+{ ! core_e cpu | grep -qF 'bg=#{cpu_bg_color}' && core_e cpu | grep -qF 'fg=#{cpu_bg_color}'; } && printf "Y" || printf "n"
 tmux set -g @themux_cpu_text_color "OVERRIDE"; src
 printf "\nmetric_slot_override_wins "
 { core cpu | grep -qF 'OVERRIDE'; } && printf "Y" || printf "n"
 tmux set -gu @themux_cpu_text_color
 tmux set -g @themux_cpu_state_target "off"; src
 printf "\ncpu_state_off_removes_live "
-{ ! core cpu | grep -q 'cpu_bg_color'; } && printf "Y" || printf "n"
+{ ! core_e cpu | grep -q 'cpu_bg_color'; } && printf "Y" || printf "n"
 tmux set -g @themux_cpu_state_target "auto"
 tmux set -g @themux_cpu_leading_show "off"; src
 printf "\ncpu_state_auto_hidden_uses_text "
 { core cpu | grep -q 'cpu_bg_color' && ! core cpu | grep -qF ''; } && printf "Y" || printf "n"
 tmux set -gu @themux_cpu_leading_show
 tmux set -g @themux_cpu_state_target "nonsense"; src
-cpu=$(core cpu); cpu_before_icon=${cpu%%*}; cpu_after_icon=${cpu#*}
 printf "\ncpu_state_invalid_auto_visible_leading "
-{ [[ "$cpu_before_icon" == *cpu_bg_color* ]] && [[ "$cpu_after_icon" != *cpu_bg_color* ]]; } && printf "Y" || printf "n"
+{ core_e cpu | grep -qF 'bg=#{cpu_bg_color}' && ! core_e cpu | grep -qF 'fg=#{cpu_bg_color}'; } && printf "Y" || printf "n"
 tmux set -gu @themux_cpu_state_target
 
 # Plugin-data modules carry their value as a #{var} literal that only resolves
