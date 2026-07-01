@@ -193,7 +193,7 @@ expand_zone() {
   local zone align edge token pending i out fl fr fg lg last can_join grp_in
   local left_join right_join next cur_lcol cur_lbg prev_rcol prev_rbg seam idx
   local local_vis next_vis drop_right keep_right
-  local -a it_type it_mods it_conns it_in grp_mods grp_conns m
+  local -a it_type it_mods it_conns it_in grp_mods grp_conns
   align="$2"; edge="$3"
   pending="" can_join=0 grp_in=""
 
