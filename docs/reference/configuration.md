@@ -359,8 +359,8 @@ panes exactly.
 
 Each module defines three options (and is referenced as `@themux_module_<name>`
 in a layout zone). Built-in modules: `session`, `application`, `directory`,
-`host`, `user`, `date_time`, `time`, `cpu`, `ram`, `load`, `uptime`, `gitmux`, `kube`,
-`battery`, `weather`, `clima`, `pomodoro_plus`, `zoom`.
+`host`, `user`, `date_time`, `time`, `cpu`, `ram`, `load`, `uptime`, `git`, `gitmux`,
+`kube`, `battery`, `weather`, `clima`, `pomodoro_plus`, `zoom`.
 
 | Option | Effect |
 | --- | --- |
