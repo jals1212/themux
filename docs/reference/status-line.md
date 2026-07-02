@@ -196,11 +196,13 @@ set -g @themux_status_line_1 "windows / load"
 ## Git module
 
 Native git status with no external dependency: the branch plus a minimal
-clean/dirty summary — `main ✓` on a clean work tree, `main ! 2M 1A 3?` on a
-dirty one (modified, staged, deleted and untracked counts; zero groups are
-omitted, a short SHA replaces the branch when HEAD is detached). The module
-prints plain text, so it is themed like every other pill and renders only
-inside a git work tree.
+clean/dirty summary — `main ✓` on a clean work tree, `main ! 1C 2M 1S 1D 3?` on
+a dirty one (conflicts, modified, staged, deleted and untracked counts; zero
+groups are omitted, a short SHA replaces the branch when HEAD is detached).
+Conflicted files (an unmerged XY pair, e.g. `UU`) are counted only in the
+conflicts group, never in staged/modified/deleted. The module prints plain
+text, so it is themed like every other pill and renders only inside a git
+work tree.
 
 **Configure:**
 
@@ -208,10 +210,10 @@ inside a git work tree.
 set -g @themux_status_line_1 "windows / git"
 ```
 
-**Dirty escalation:** a dirty work tree (tracked changes only — untracked files
-show in the text but do not escalate) switches the accent from
-`@themux_git_color` to `@themux_git_active_color` through the module active
-state, so the pill warms natively under any variant.
+**Dirty escalation:** a dirty work tree (any change — tracked or untracked)
+switches the accent from `@themux_git_color` to `@themux_git_active_color`
+through the module active state, so the pill warms natively under any variant
+and always agrees with the text.
 
 ```sh
 set -g @themux_git_color "#{E:@thm_teal}"          # resting (clean)
