@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.4.0](https://github.com/jals1212/themux/compare/v0.3.1...v0.4.0) (2026-07-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* **windows:** directional notch and zone-aware auto for the window list
+* **panes:** directional notch and right-position seam
+* **modules:** directional + zone-aware auto notch
+
+### Added
+
+* **modules:** directional + zone-aware auto notch ([24ef7f4](https://github.com/jals1212/themux/commit/24ef7f4ce75b5f09198f2d012d1bb42684568d13))
+* **panes:** directional notch and right-position seam ([1f755cb](https://github.com/jals1212/themux/commit/1f755cb2c1b7503a1949a1451a78a3b84d50c26d))
+* **windows:** directional notch and zone-aware auto for the window list ([24cf574](https://github.com/jals1212/themux/commit/24cf57435a677a4e5ee1ea4887ff873e6bb99b9e))
+
+
+### Fixed
+
+* **modules:** route auto notch seams through the expand pipeline ([3f05579](https://github.com/jals1212/themux/commit/3f05579199bb4a7282af9b4ecdd3bc01ef111b8c))
+* **windows:** gate right-position notch seam on name visibility ([8f57935](https://github.com/jals1212/themux/commit/8f57935b11e6db05e555846dd5b4a5cca55f5597))
+
+
+### Documentation
+
+* document the directional notch grammar ([501e17a](https://github.com/jals1212/themux/commit/501e17a94e9ef347e2edf46494163cf9b185869e))
+* squared notch colours and direct-consumption caveat ([362d209](https://github.com/jals1212/themux/commit/362d20976592078c63bd57e288cd0849f5591ff4))
+
 ## [0.3.1](https://github.com/jals1212/themux/compare/v0.3.0...v0.3.1) (2026-07-01)
 
 
