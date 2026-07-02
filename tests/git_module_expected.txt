@@ -1,0 +1,28 @@
+
+@themux_git_when #{E:@_tmx_git_in_repo}
+
+@themux_git_active_when #{E:@_tmx_git_dirty}
+
+@themux_git_active_color #{E:@thm_peach}
+
+@themux_git_color #{E:@thm_teal}
+
+in_repo_probe rev-parse --is-inside-work-tree
+dirty_probe #("#{E:@_tmx_git_script}" --dirty
+text_invocation #("#{E:@_tmx_git_script}"
+script_path utils/git_status.sh
+core_active_switch #{?#{E:@_tmx_git_dirty},
+
+@themux_gitmux_text_bg #{E:@thm_crust}
+
+script_clean [main ✓]
+script_probe_clean [0]
+script_staged [main ! 1S]
+script_modified_untracked [main ! 1M 1?]
+script_probe_dirty [1]
+script_symbols [main WARN 1M 1?]
+script_untracked_only [main ! 1?]
+script_probe_untracked_only [1]
+script_outside_repo []
+script_conflict [main ! 1C]
+script_conflict_extended [main ! 3C]

@@ -150,13 +150,17 @@ resolve_style "$lead_av" "$lead_aacc" "$surface" "$crust" "$fg"; aibg=$RS_BG aif
 # fg/bg (#{<name>_fg_color}/#{<name>_bg_color}), so the block escalates colour at
 # draw time — something a variant cannot do, since the segment is baked once at
 # layout time. The two channels take different live refs, so they always contrast.
-[ -n "$icon_bg_ov" ] && { ribg="$icon_bg_ov"; aibg="$icon_bg_ov"; }
+# A bg override is skipped on a channel whose resolved variant is naked, so naked's
+# promised transparency (RS_BG=default) is never overwritten by an opaque pin.
+[ -n "$icon_bg_ov" ] && [ "$leading" != naked ] && ribg="$icon_bg_ov"
+[ -n "$icon_bg_ov" ] && [ "$lead_av" != naked ] && aibg="$icon_bg_ov"
 [ -n "$icon_fg_ov" ] && { rifg="$icon_fg_ov"; aifg="$icon_fg_ov"; }
 ibg=$(chan "$aibg" "$ribg") ifg=$(chan "$aifg" "$rifg")
 
 resolve_style "$text_style" "$text_acc" "$surface" "$crust" "$fg"; rtbg=$RS_BG rtfg=$RS_FG
 resolve_style "$text_av" "$text_aacc" "$surface" "$crust" "$fg"; atbg=$RS_BG atfg=$RS_FG
-[ -n "$text_bg_ov" ] && { rtbg="$text_bg_ov"; atbg="$text_bg_ov"; }
+[ -n "$text_bg_ov" ] && [ "$text_style" != naked ] && rtbg="$text_bg_ov"
+[ -n "$text_bg_ov" ] && [ "$text_av" != naked ] && atbg="$text_bg_ov"
 [ -n "$text_fg_ov" ] && { rtfg="$text_fg_ov"; atfg="$text_fg_ov"; }
 tbg=$(chan "$atbg" "$rtbg") tfg=$(chan "$atfg" "$rtfg")
 

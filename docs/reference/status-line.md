@@ -55,8 +55,14 @@ set -g @themux_[module_name]_text "text"
 ### Override the specific module's background color
 
 ```sh
-set -g @themux_module_[module_name]_bg_color "#{@thm_surface_0}"
+set -g @themux_[module_name]_text_bg "#{@thm_surface_0}"
 ```
+
+The raw per-channel overrides `@themux_[module_name]_{icon,text}_{fg,bg}` pin a
+concrete colour over the variant; see the
+[Configuration reference](./configuration.md) for the full cascade. A `_bg`
+override is skipped on any channel (resting or active) whose resolved variant is
+`naked`, so a `naked` slot keeps its transparent background.
 
 ### Removing a specific module option
 
@@ -187,6 +193,39 @@ run '~/.config/tmux/plugins/tpm/tpm'
 set -g @themux_status_line_1 "windows / load"
 ```
 
+## Git module
+
+Native git status with no external dependency: the branch plus a minimal
+clean/dirty summary — `main ✓` on a clean work tree, `main ! 1C 2M 1S 1D 3?` on
+a dirty one (conflicts, modified, staged, deleted and untracked counts; zero
+groups are omitted, a short SHA replaces the branch when HEAD is detached).
+Conflicted files (an unmerged XY pair, e.g. `UU`) are counted only in the
+conflicts group, never in staged/modified/deleted. The module prints plain
+text, so it is themed like every other pill and renders only inside a git
+work tree.
+
+**Configure:**
+
+```sh
+set -g @themux_status_line_1 "windows / git"
+```
+
+**Dirty escalation:** a dirty work tree (any change — tracked or untracked)
+switches the accent from `@themux_git_color` to `@themux_git_active_color`
+through the module active state, so the pill warms natively under any variant
+and always agrees with the text.
+
+```sh
+set -g @themux_git_color "#{E:@thm_teal}"          # resting (clean)
+set -g @themux_git_active_color "#{E:@thm_peach}"  # dirty
+set -g @themux_git_symbol_clean "✓"
+set -g @themux_git_symbol_dirty "!"
+```
+
+Prefer `git` for a minimal status that follows the theme with nothing to
+install; prefer `gitmux` below for richer information (remote state, stash,
+divergence) rendered by an external binary with its own colour scheme.
+
 ## Gitmux module
 
 **Requirements:** This module depends on [gitmux](https://github.com/arl/gitmux).
@@ -199,6 +238,15 @@ Add the gitmux module to the status modules list.
 
 ```sh
 set -g @themux_status_line_1 "windows / gitmux"
+```
+
+gitmux's stock colours are designed for a black bar, so the module's text block
+defaults to the theme's darkest step (`@themux_gitmux_text_bg`, default
+`@thm_crust`) to keep them readable on any theme surface. Override it to move
+the block back onto the regular surface:
+
+```sh
+set -g @themux_gitmux_text_bg "#{E:@thm_surface_0}"
 ```
 
 Follow the instructions in the [gitmux documentation](https://github.com/arl/gitmux/blob/main/README.md#customizing)
