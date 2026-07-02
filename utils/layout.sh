@@ -271,6 +271,16 @@ expand_zone() {
     local -a mm2
     case "${it_type[idx]}" in
       W)
+        # window-status-format is ONE shared tmux option (not per-occurrence like
+        # a module core), so an auto notch cannot resolve through a splice; it
+        # dispatches at draw time on this hidden global instead (utils/
+        # window_render.sh). Last write wins if "windows" sits in more than one
+        # zone of the same row (or across rows) — documented, not fixed here.
+        case "$align2" in
+          left)  tmux set -g @_tmx_window_notch_dir gt ;;
+          right) tmux set -g @_tmx_window_notch_dir lt ;;
+          *)     tmux set -g @_tmx_window_notch_dir off ;;
+        esac
         case "$fl2:$fr2" in
           1:1) wedge2=both ;;
           1:0) wedge2=left ;;
