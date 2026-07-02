@@ -179,13 +179,16 @@ render_side() {
   elif [ -n "$(tmux show -gqv "@_tmx_${p}_text")" ]; then
     # number on the right: name block first, then the number block. The seam
     # lands immediately after the name content, before the flags, so the state
-    # icons stay adjacent to the number block.
+    # icons stay adjacent to the number block. Wrapped in the same #{?${text},…,}
+    # name-visibility conditional as the position=left nameblock above, so a
+    # window whose name resolves empty at draw time doesn't leave a floating
+    # seam taper with nothing to taper into.
     raw_lcap=$(cap "$lglyph" "$tcap" "$tbg")
-    nameblock="#[fg=$tfg,bg=$tbg]${text} "
+    nameblock="#{?${text},#[fg=$tfg,bg=$tbg]${text} ${seam},}"
     raw_rcap=$(cap "$rglyph" "$icap" "$ibg")
     first_cap="$raw_lcap"
     last_cap="$raw_rcap"
-    flags_out="${nameblock}${seam}${flags}${nblock}"
+    flags_out="${nameblock}${flags}${nblock}"
   else
     # number on the right, no name: just the number block.
     raw_lcap=$(cap "$lglyph" "$icap" "$ibg")

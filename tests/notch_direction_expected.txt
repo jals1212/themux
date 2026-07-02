@@ -35,3 +35,6 @@ active_seam_has_gt_glyph Y
 cpu_seam_not_double_wrapped Y
 cpu_seam_live_colour_present Y
 no_raw_marker_in_any_status_format_row Y
+window_right_seam_inside_text_conditional Y
+window_right_notch_dispatch_present Y
+window_right_notch_dispatch_after_conditional_open Y

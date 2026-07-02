@@ -299,3 +299,31 @@ for row_i in 0 1 2 3 4; do
 done
 { [ "$leak" -eq 0 ]; } && printf "Y" || printf "n"
 tmux set -gu @themux_all_notch
+
+# 15. FIX 3 regression: window leading_position=right + notch auto. Before the
+# fix the seam was emitted unconditionally right after the name block, so a
+# window whose name resolves empty at draw time left a floating taper with
+# nothing to taper into. The fix wraps the name content AND the seam inside the
+# SAME #{?${text},…,} name-visibility conditional the position=left path
+# already used. The exact adjacency "#{?#{E:@_tmx_w_text},#[fg=" only exists
+# once the style/name content sits inside that conditional (old position=right
+# code had no such wrapper at all), and the notch dispatch
+# (@_tmx_window_notch_dir) must appear textually after that opening, inside the
+# same conditional's branch.
+tmux set -g @themux_status_line_1 "windows"
+tmux set -g @themux_window_shape "rounded"
+tmux set -g @themux_window_leading_position "right"
+tmux set -g @themux_window_notch "auto"
+src
+run_layout
+wfmt=$(tmux show -gv window-status-format)
+printf "\nwindow_right_seam_inside_text_conditional "
+{ printf '%s' "$wfmt" | grep -qF '#{?#{E:@_tmx_w_text},#[fg='; } && printf "Y" || printf "n"
+printf "\nwindow_right_notch_dispatch_present "
+{ printf '%s' "$wfmt" | grep -qF '@_tmx_window_notch_dir'; } && printf "Y" || printf "n"
+printf "\nwindow_right_notch_dispatch_after_conditional_open "
+before=${wfmt%%@_tmx_window_notch_dir*}
+{ printf '%s' "$before" | grep -qF '#{?#{E:@_tmx_w_text},#[fg='; } && printf "Y" || printf "n"
+tmux set -gu @themux_window_leading_position
+tmux set -gu @themux_window_notch
+tmux set -gu @themux_window_shape
