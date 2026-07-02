@@ -76,15 +76,28 @@ rtcap=$rtbg; [ "$rtbg" = default ] && rtcap=$txt_base
 atcap=$atbg; [ "$atbg" = default ] && atcap=$txt_act
 txt_cap=$(sw "$atcap" "$rtcap")
 
-# The notch seam glyph mirrors the shape's right cap (octal UTF-8): slanted E0BC,
-# rounded E0B4, powerline E0B0, squared █ block.
-seam_glyph=""
-[ "$notch" = on ] && case "$shape" in
-  slanted)   seam_glyph=$(printf '\356\202\274') ;;
-  rounded)   seam_glyph=$(printf '\356\202\264') ;;
-  powerline) seam_glyph=$(printf '\356\202\260') ;;
-  squared)   seam_glyph=$(printf '\342\226\210') ;;
+# Seam glyphs, direction-aware (octal UTF-8, mirrors utils/module_render.sh): gt
+# tapers the visually-first block's colour into the second via the shape's right
+# cap; lt mirrors it, the second block's colour into the first via the left cap.
+# Squared has no outer cap (see left_glyph/right_glyph above), but the seam still
+# draws a full block — same glyph both directions, only its colours differ.
+case "$shape" in
+  rounded)   seam_lglyph=$(printf '\356\202\266'); seam_rglyph=$(printf '\356\202\264') ;;
+  slanted)   seam_lglyph=$(printf '\356\202\272'); seam_rglyph=$(printf '\356\202\274') ;;
+  powerline) seam_lglyph=$(printf '\356\202\262'); seam_rglyph=$(printf '\356\202\260') ;;
+  squared)   seam_lglyph=$(printf '\342\226\210'); seam_rglyph=$(printf '\342\226\210') ;;
+  *)         seam_lglyph=""; seam_rglyph="" ;; # unstyled: no seam
 esac
+
+# auto is position-aware: panes have no bar zone to key off (unlike modules and
+# windows), so the direction instead follows leading_position — the leading
+# block's colour penetrates rightward when it sits on the left (mirrors the
+# pre-existing on behaviour), leftward when it sits on the right. Explicit gt/lt
+# ignore position, the same way explicit modules ignore their zone.
+mode=$(themux_notch_mode "$notch")
+if [ "$mode" = auto ]; then
+  [ "$position" = right ] && mode=lt || mode=gt
+fi
 
 # Padding owns all four inner sides, including the number<->text seam.
 lead_block="#[fg=$lead_fg,bg=$lead_bg]$(spaces "$pleft")$index$(spaces "$pright")"
@@ -94,16 +107,30 @@ txt_block="#[fg=$txt_fg,bg=$txt_bg]$(spaces "$tleft")$text$(spaces "$tright")"
 # (its cap colour). Empty glyph (squared) -> no cap, the block fills its own edge.
 cap() { [ -n "$1" ] && printf '#[fg=%s,bg=default]%s' "$2" "$1"; }
 
-# Notch seam: the leading's right cap tapering into the text bg, only on the
-# number-on-the-left layout (matching windows) and only when the two blocks
-# differ — same bg would render an invisible phantom cell.
+# Notch seam: the block that is visually first tapers into the second (gt) or
+# vice versa (lt), gated on the two blocks actually differing — same bg would
+# render an invisible phantom cell. Block order follows leading_position, like
+# utils/module_render.sh: left -> leading first, text second; right -> reversed.
+# fg uses the cap-fallback colour ($lead_cap/$txt_cap, not the raw $lead_bg/
+# $txt_bg) so a naked block (bg=default) still shows a coloured seam instead of
+# an invisible fg=default one; bg stays the raw block colour since bg=default
+# there is itself legitimate — a naked block's cap over the bare border.
 seam() {
-  [ -n "$seam_glyph" ] && [ "$lead_bg" != "$txt_bg" ] &&
-    printf '#[fg=%s,bg=%s]%s' "$lead_bg" "$txt_bg" "$seam_glyph"
+  local fbg sbg fcap scap glyph
+  if [ "$position" = right ]; then
+    fbg="$txt_bg" fcap="$txt_cap" sbg="$lead_bg" scap="$lead_cap"
+  else
+    fbg="$lead_bg" fcap="$lead_cap" sbg="$txt_bg" scap="$txt_cap"
+  fi
+  [ "$fbg" = "$sbg" ] && return
+  case "$mode" in
+    gt) glyph="$seam_rglyph"; [ -n "$glyph" ] && printf '#[fg=%s,bg=%s]%s' "$fcap" "$sbg" "$glyph" ;;
+    lt) glyph="$seam_lglyph"; [ -n "$glyph" ] && printf '#[fg=%s,bg=%s]%s' "$scap" "$fbg" "$glyph" ;;
+  esac
 }
 
 if [ "$position" = right ]; then
-  fmt="$(cap "$left_glyph" "$txt_cap")$txt_block$lead_block$(cap "$right_glyph" "$lead_cap")"
+  fmt="$(cap "$left_glyph" "$txt_cap")$txt_block$(seam)$lead_block$(cap "$right_glyph" "$lead_cap")"
 else
   fmt="$(cap "$left_glyph" "$lead_cap")$lead_block$(seam)$txt_block$(cap "$right_glyph" "$txt_cap")"
 fi
