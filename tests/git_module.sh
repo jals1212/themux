@@ -40,7 +40,7 @@ print_option @themux_gitmux_text_bg
 # The script itself, against a throwaway repo: clean, staged, modified plus
 # untracked, the --dirty probe backing active_when, symbol overrides, an
 # untracked-only work tree, a plain directory outside any repo, and a
-# conflicted merge.
+# fabricated conflicted index.
 git_status="${script_dir}/../utils/git_status.sh"
 repo=$(mktemp -d)
 outside=$(mktemp -d)
@@ -73,39 +73,64 @@ printf '\nscript_probe_untracked_only [%s]' "$("$git_status" --dirty "$repo")"
 
 printf '\nscript_outside_repo [%s]' "$("$git_status" "$outside")"
 
-# Conflicts: a real UU from two branches editing the same line plus a failed
-# merge, asserted on its own first. Then an add/add and a fabricated
-# delete/delete (git plumbing — an ordinary merge almost never surfaces a
-# genuine DD pair) are layered onto the same unresolved merge, asserting
-# neither leaks into the staged/deleted groups.
+# Conflicts: fabricated deterministically via index stages, not a real merge
+# — a real `git merge` needs a committer identity and depends on the git
+# version's merge/diff machinery, so it is version- and environment-sensitive
+# (observed on CI: no git identity configured makes an un-`-c`'d merge abort
+# before it ever runs, silently swallowed by `|| true`, leaving a clean repo).
+# The index-stage combination is what git itself uses to derive the XY code:
+# stage 1 (base) + 2 (ours) + 3 (theirs) = UU; 2 + 3 with no 1 = AA; 1 alone
+# (no 2, no 3) = DD. Each fabrication is verified against a fresh
+# `git status --porcelain` right away — a stanza that fails to register turns
+# into an immediate, clearly labelled failure instead of a silently wrong
+# count later.
+require_conflict() { # $1 expected "XY path" line, $2 porcelain status text
+  grep -qF "$1" <<<"$2" && return 0
+  printf 'FIXTURE ERROR: expected "%s" in git status --porcelain, got:\n%s\n' \
+    "$1" "$2" >&2
+  exit 1
+}
+
 git -C "$conflict_repo" init -q -b main
-echo "base line" >"$conflict_repo/shared.txt"
-echo "victim" >"$conflict_repo/victim.txt"
+printf 'shared base\n' >"$conflict_repo/shared.txt"
+printf 'victim\n' >"$conflict_repo/victim.txt"
 git -C "$conflict_repo" add shared.txt victim.txt
 git -C "$conflict_repo" -c user.name=themux -c user.email=themux@test -c commit.gpgsign=false commit -q -m base
-victim_blob=$(git -C "$conflict_repo" rev-parse HEAD:victim.txt)
+shared_base=$(git -C "$conflict_repo" rev-parse HEAD:shared.txt)
+victim_base=$(git -C "$conflict_repo" rev-parse HEAD:victim.txt)
+shared_ours=$(printf 'shared ours\n' | git -C "$conflict_repo" hash-object -w --stdin)
+shared_theirs=$(printf 'shared theirs\n' | git -C "$conflict_repo" hash-object -w --stdin)
+added_ours=$(printf 'added ours\n' | git -C "$conflict_repo" hash-object -w --stdin)
+added_theirs=$(printf 'added theirs\n' | git -C "$conflict_repo" hash-object -w --stdin)
 
-git -C "$conflict_repo" checkout -q -b feature
-echo "feature line" >"$conflict_repo/shared.txt"
-git -C "$conflict_repo" -c user.name=themux -c user.email=themux@test -c commit.gpgsign=false commit -q -am feature
+# UU: drop the plain (stage 0) entry, then fabricate all three stages.
+git -C "$conflict_repo" rm -q --cached shared.txt
+{
+  printf '100644 %s 1\tshared.txt\n' "$shared_base"
+  printf '100644 %s 2\tshared.txt\n' "$shared_ours"
+  printf '100644 %s 3\tshared.txt\n' "$shared_theirs"
+} | git -C "$conflict_repo" update-index --index-info
+printf 'shared ours\n' >"$conflict_repo/shared.txt"
 
-git -C "$conflict_repo" checkout -q main
-echo "main line" >"$conflict_repo/shared.txt"
-git -C "$conflict_repo" -c user.name=themux -c user.email=themux@test -c commit.gpgsign=false commit -q -am mainedit
-
-git -C "$conflict_repo" merge feature --no-edit -q >/dev/null 2>&1 || true
+status=$(git -C "$conflict_repo" --no-optional-locks status --porcelain)
+require_conflict 'UU shared.txt' "$status"
 printf '\nscript_conflict [%s]' "$("$git_status" "$conflict_repo")"
 
-blob_one=$(printf 'one\n' | git -C "$conflict_repo" hash-object -w --stdin)
-blob_two=$(printf 'two\n' | git -C "$conflict_repo" hash-object -w --stdin)
+# AA: added.txt gets stage 2 + 3 only (no stage 1 — no common ancestor).
 {
-  printf '100644 %s 2\tadded.txt\n' "$blob_one"
-  printf '100644 %s 3\tadded.txt\n' "$blob_two"
+  printf '100644 %s 2\tadded.txt\n' "$added_ours"
+  printf '100644 %s 3\tadded.txt\n' "$added_theirs"
 } | git -C "$conflict_repo" update-index --index-info
-printf 'two\n' >"$conflict_repo/added.txt"
+printf 'added theirs\n' >"$conflict_repo/added.txt"
 
+# DD: victim.txt drops the stage 0 entry and keeps only stage 1 (both sides
+# deleted it, so no worktree file either).
 git -C "$conflict_repo" rm -q --cached victim.txt
 rm -f "$conflict_repo/victim.txt"
-printf '100644 %s 1\tvictim.txt\n' "$victim_blob" | git -C "$conflict_repo" update-index --index-info
+printf '100644 %s 1\tvictim.txt\n' "$victim_base" | git -C "$conflict_repo" update-index --index-info
 
+status=$(git -C "$conflict_repo" --no-optional-locks status --porcelain)
+require_conflict 'AA added.txt' "$status"
+require_conflict 'DD victim.txt' "$status"
+require_conflict 'UU shared.txt' "$status"
 printf '\nscript_conflict_extended [%s]\n' "$("$git_status" "$conflict_repo")"
