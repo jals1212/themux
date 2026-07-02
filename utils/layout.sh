@@ -81,44 +81,85 @@ mod_field() { # $1 module, $2 edge option (lcol|rcol|lbg) -> a usable colour
     tmux show -gqv "@_tmx_module_${1}_${2}"
   fi
 }
-# Resolve the raw seam text for one module occurrence, by zone: left -> the
+# Resolve the raw seam TEXT for one module occurrence, by zone: left -> the
 # module's baked gt seam, right -> its baked lt seam, centre -> the shared middle
 # separator (auto's "off" fallback, same replacement notch=off itself bakes).
 # Fetched RAW with `show -gqv` — NOT through mod_field: a seam carries no plugin
 # #{var} literal, and mod_field's eager #{E:} for _expand modules would prematurely
-# flatten a chan() draw-time conditional baked into the seam colour. Empty means
-# the module baked its notch directly (gt/lt/off, no marker in the core) — the
-# caller then skips the #{s///} splice entirely (safe no-op, but a needless one).
-mod_notch_seam() { # $1 module, $2 align (left|centre|right) -> raw seam text or ""
+# flatten a chan() draw-time conditional baked into the seam colour. This text can
+# be legitimately EMPTY even while the marker is present — centre's default
+# middle separator is "" — so it must never be used on its own to decide whether
+# to splice; see mod_has_marker below for that decision.
+mod_notch_seam() { # $1 module, $2 align (left|centre|right) -> raw seam text (may be empty)
   case "$2" in
     left)  tmux show -gqv "@_tmx_module_${1}_seam_gt" ;;
     right) tmux show -gqv "@_tmx_module_${1}_seam_lt" ;;
     *)     printf '%s' "$mmid" ;;
   esac
 }
+# Whether this module's core/pill carries the NOTCH_MARK control byte at all —
+# decoupled from mod_notch_seam's replacement TEXT above. module_render.sh only
+# ever bakes @_tmx_module_<name>_seam_gt (together with _seam_lt) in auto mode;
+# explicit gt/lt/off resolve the seam directly and leave both empty. So seam_gt's
+# presence alone is a reliable marker indicator, independent of which zone this
+# occurrence resolves to (including centre, whose own replacement is usually
+# empty and would otherwise look identical to "no marker" — the FIX behind this
+# helper). When there is no marker the caller keeps today's unwrapped fast path.
+mod_has_marker() { # $1 module -> non-empty (truthy) iff the module baked the marker
+  tmux show -gqv "@_tmx_module_${1}_seam_gt"
+}
+# Expand a gt/lt seam through the same #{E:} pass an _expand module's core/pill
+# gets (mod_core/full_pill's _expand branch below), so its #{l:} colour wrappers
+# are peeled exactly once, just like the core's — this is what makes a live
+# metric colour (cpu/ram) resolve instead of staying a dead literal. Only called
+# for left/right: centre's replacement ($mmid) is already a plain string with no
+# plugin literals or #{l:} wrappers, so callers splice it raw, unexpanded.
+mod_notch_seam_expand() { # $1 module, $2 align (left|right) -> #{E:}-expanded seam text
+  local opt="seam_gt"; [ "$2" = right ] && opt="seam_lt"
+  tmux set -gF @_tmx_layout_tmp "#{E:@_tmx_module_${1}_${opt}}"
+  tmux show -gv @_tmx_layout_tmp
+}
 mod_core() { # $1 module, $2 align -> its bare core (a ref normally; inlined for tmux-cpu)
-  local seam val
+  local seam has val
   seam=$(mod_notch_seam "$1" "$2")
+  case "$2" in
+    left|right) has="$seam" ;;
+    *)          has=$(mod_has_marker "$1") ;;
+  esac
   if [ "$(tmux show -gqv "@themux_${1}_expand")" = "yes" ]; then
     tmux set -gF @_tmx_layout_tmp "#{E:@_tmx_module_${1}_core}"
-    val=$(interp "$1" "$(tmux show -gv @_tmx_layout_tmp)")
-    [ -n "$seam" ] && val="${val//$NOTCH_MARK/$seam}"
-    printf '%s' "$val"
-  elif [ -n "$seam" ]; then
+    val=$(tmux show -gv @_tmx_layout_tmp)
+    if [ -n "$has" ]; then
+      case "$2" in
+        left|right) seam=$(mod_notch_seam_expand "$1" "$2") ;;
+      esac
+      val="${val//$NOTCH_MARK/$seam}"
+    fi
+    printf '%s' "$(interp "$1" "$val")"
+  elif [ -n "$has" ]; then
     printf '%s' "#{s/${NOTCH_MARK}/${seam}/:#{E:@_tmx_module_${1}_core}}"
   else
     printf '%s' "#{E:@_tmx_module_${1}_core}"
   fi
 }
 full_pill() { # $1 module, $2 align -> its own pill, caps included (inlined for tmux-cpu)
-  local seam val
+  local seam has val
   seam=$(mod_notch_seam "$1" "$2")
+  case "$2" in
+    left|right) has="$seam" ;;
+    *)          has=$(mod_has_marker "$1") ;;
+  esac
   if [ "$(tmux show -gqv "@themux_${1}_expand")" = "yes" ]; then
     tmux set -gF @_tmx_layout_tmp "#{E:@themux_module_${1}}"
-    val=$(interp "$1" "$(tmux show -gv @_tmx_layout_tmp)")
-    [ -n "$seam" ] && val="${val//$NOTCH_MARK/$seam}"
-    printf '%s' "$val"
-  elif [ -n "$seam" ]; then
+    val=$(tmux show -gv @_tmx_layout_tmp)
+    if [ -n "$has" ]; then
+      case "$2" in
+        left|right) seam=$(mod_notch_seam_expand "$1" "$2") ;;
+      esac
+      val="${val//$NOTCH_MARK/$seam}"
+    fi
+    printf '%s' "$(interp "$1" "$val")"
+  elif [ -n "$has" ]; then
     printf '%s' "#{s/${NOTCH_MARK}/${seam}/:#{E:@themux_module_${1}}}"
   else
     printf '%s' "#{E:@themux_module_${1}}"

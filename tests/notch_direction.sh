@@ -83,12 +83,26 @@ printf "\nauto_centre_zone_no_gt "
 { tmux show -gv 'status-format[0]' | grep -qF "$mprr"; } && printf "n" || printf "Y"
 printf "\nauto_centre_zone_no_lt "
 { tmux show -gv 'status-format[0]' | grep -qF "$mpll"; } && printf "n" || printf "Y"
+# FIX 2 regression: the marker IS baked into the core in auto mode regardless of
+# the centre replacement text, and the default middle separator is itself empty
+# — splicing must be decided by marker PRESENCE (mod_has_marker), not by
+# whether the replacement text is empty, or the marker leaks into the rendered
+# line. For host (a plain ref module), that splice is tmux's own draw-time
+# #{s/<mark>//:...}, so the RAW stored status-format[0] legitimately still
+# carries the marker byte as the substitution's pattern argument — that is the
+# mechanism working as designed, not a leak. What must never happen is the
+# marker surviving into the EXPANDED (drawn) text, so these two check
+# #{E:status-format[0]} instead of the raw option.
+printf "\nauto_centre_zone_default_empty_midsep_no_raw_marker "
+{ tmux display -p "#{E:status-format[0]}" | grep -qF "$(printf '\036')"; } && printf "n" || printf "Y"
 
 tmux set -g @themux_module_middle_separator "MIDSEP"
 src
 run_layout
 printf "\nauto_centre_zone_uses_custom_midsep "
 { tmux show -gv 'status-format[0]' | grep -qF "MIDSEP"; } && printf "Y" || printf "n"
+printf "\nauto_centre_zone_custom_midsep_no_raw_marker "
+{ tmux display -p "#{E:status-format[0]}" | grep -qF "$(printf '\036')"; } && printf "n" || printf "Y"
 tmux set -gu @themux_module_middle_separator
 
 # 6. "on" is a plain alias of "auto": same three zone outcomes.
@@ -251,3 +265,37 @@ printf "\nactive_seam_nested_conditional_survives "
 printf "\nactive_seam_has_gt_glyph "
 { tmux show -gv 'status-format[0]' | grep -qF "$mprr"; } && printf "Y" || printf "n"
 tmux set -gu @themux_session_notch
+
+# 14. FIX 1 regression (the user-confirmed dark notch triangle): cpu is an
+# _expand module whose accent is a LIVE #{l:#{cpu_bg_color}} plugin literal.
+# mod_core's _expand branch must run the seam through the SAME #{E:} expansion
+# the core itself gets, BEFORE interp — same pipeline the icon backgrounds
+# already ride. A dead (unpeeled) seam stays literally double-wrapped
+# `#{l:#{cpu_bg_color}...}` in the baked status-format text (an invalid fg ->
+# the dark glyph); once expanded exactly once it reads as a bare
+# `#{cpu_bg_color}` literal (interp is a no-op here — no tmux-cpu plugin in the
+# test harness — so it is not rewritten further, but the peel already
+# happened, which is what mattered). Also re-checks FIX 2 across every
+# status-format row, not just the centre case above.
+tmux set -g @themux_status_line_1 "cpu / / "
+tmux set -g @themux_all_notch "auto"
+tmux set -g @themux_module_shape "rounded"
+src
+run_layout
+fmt0=$(tmux show -gv 'status-format[0]')
+printf "\ncpu_seam_not_double_wrapped "
+{ printf '%s' "$fmt0" | grep -qF '#{l:#{cpu'; } && printf "n" || printf "Y"
+printf "\ncpu_seam_live_colour_present "
+{ printf '%s' "$fmt0" | grep -qF 'cpu_bg_color'; } && printf "Y" || printf "n"
+# Unlike the centre-zone/ref-module check above, an _expand module's splice
+# happens entirely at bash-string level (mod_core's _expand branch), before the
+# result is ever stored — so the RAW status-format text is the right thing to
+# check here; there is no draw-time #{s///} pattern argument to account for.
+printf "\nno_raw_marker_in_any_status_format_row "
+leak=0
+for row_i in 0 1 2 3 4; do
+  row=$(tmux show -gqv "status-format[$row_i]" 2>/dev/null) || true
+  { printf '%s' "$row" | grep -qF "$(printf '\036')"; } && leak=1
+done
+{ [ "$leak" -eq 0 ]; } && printf "Y" || printf "n"
+tmux set -gu @themux_all_notch

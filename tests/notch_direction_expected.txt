@@ -7,7 +7,9 @@ auto_left_zone_gt Y
 auto_right_zone_lt Y
 auto_centre_zone_no_gt Y
 auto_centre_zone_no_lt Y
+auto_centre_zone_default_empty_midsep_no_raw_marker Y
 auto_centre_zone_uses_custom_midsep Y
+auto_centre_zone_custom_midsep_no_raw_marker Y
 on_alias_left_zone_gt Y
 on_alias_right_zone_lt Y
 on_alias_centre_zone_off Y
@@ -30,3 +32,6 @@ squared_gt_lt_same_glyph_count Y
 squared_gt_lt_different_colours Y
 active_seam_nested_conditional_survives Y
 active_seam_has_gt_glyph Y
+cpu_seam_not_double_wrapped Y
+cpu_seam_live_colour_present Y
+no_raw_marker_in_any_status_format_row Y
