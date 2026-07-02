@@ -60,7 +60,9 @@ set -g @themux_[module_name]_text_bg "#{@thm_surface_0}"
 
 The raw per-channel overrides `@themux_[module_name]_{icon,text}_{fg,bg}` pin a
 concrete colour over the variant; see the
-[Configuration reference](./configuration.md) for the full cascade.
+[Configuration reference](./configuration.md) for the full cascade. A `_bg`
+override is skipped on any channel (resting or active) whose resolved variant is
+`naked`, so a `naked` slot keeps its transparent background.
 
 ### Removing a specific module option
 
