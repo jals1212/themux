@@ -31,6 +31,15 @@ themux_prop() { # $1 item, $2 prop
   tmux display -p "#{?#{==:#{@themux_$1_$2},},#{@themux_all_$2},#{@themux_$1_$2}}"
 }
 
+# Normalize a raw @themux_*_notch value to its direction: gt (>, the left block's
+# colour penetrates right), lt (<, the right block penetrates left), auto (zone-
+# aware — on is its alias) or off (default; unknown values degrade here, same
+# convention as state_target). Single home for the on->auto alias, used by all
+# three renderers (module_render.sh, window_render.sh, pane_render.sh).
+themux_notch_mode() { # $1 raw -> gt | lt | auto | off
+  case "$1" in '>') echo gt ;; '<') echo lt ;; auto|on) echo auto ;; *) echo off ;; esac
+}
+
 # Parse a @themux_*_padding value into four side pads:
 #   "N" -> "N N|N N"
 #   "<leading-left> [leading-right]|<text-left> [text-right]"

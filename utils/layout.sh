@@ -40,6 +40,14 @@ interp() { # $1 module, $2 string -> the string with the module's plugin literal
 
 windows_block=$(tmux show -gqv @_tmx_fmt_windows)
 
+# Control-byte marker for a zone-aware notch (auto), matching utils/module_render.sh
+# (both hardcode the same literal byte — they run as separate processes, so there is
+# no shared variable to pass it through). mmid is the centre/off replacement: a
+# module's own middle separator, resolved once here since it is a flat option (not
+# per-module cascaded).
+NOTCH_MARK=$(printf '\036')
+mmid=$(tmux show -gqv @themux_module_middle_separator)
+
 # Cap glyphs for the module shape. Empty only for unstyled; squared uses a full
 # block cap, so `=` and edge flush still work for square-cornered modules.
 mshape=$(tmux display -p "#{?#{@themux_module_shape},#{@themux_module_shape},#{@themux_all_shape}}")
@@ -73,18 +81,45 @@ mod_field() { # $1 module, $2 edge option (lcol|rcol|lbg) -> a usable colour
     tmux show -gqv "@_tmx_module_${1}_${2}"
   fi
 }
-mod_core() { # $1 module -> its bare core (a ref normally; inlined for tmux-cpu)
+# Resolve the raw seam text for one module occurrence, by zone: left -> the
+# module's baked gt seam, right -> its baked lt seam, centre -> the shared middle
+# separator (auto's "off" fallback, same replacement notch=off itself bakes).
+# Fetched RAW with `show -gqv` — NOT through mod_field: a seam carries no plugin
+# #{var} literal, and mod_field's eager #{E:} for _expand modules would prematurely
+# flatten a chan() draw-time conditional baked into the seam colour. Empty means
+# the module baked its notch directly (gt/lt/off, no marker in the core) — the
+# caller then skips the #{s///} splice entirely (safe no-op, but a needless one).
+mod_notch_seam() { # $1 module, $2 align (left|centre|right) -> raw seam text or ""
+  case "$2" in
+    left)  tmux show -gqv "@_tmx_module_${1}_seam_gt" ;;
+    right) tmux show -gqv "@_tmx_module_${1}_seam_lt" ;;
+    *)     printf '%s' "$mmid" ;;
+  esac
+}
+mod_core() { # $1 module, $2 align -> its bare core (a ref normally; inlined for tmux-cpu)
+  local seam val
+  seam=$(mod_notch_seam "$1" "$2")
   if [ "$(tmux show -gqv "@themux_${1}_expand")" = "yes" ]; then
     tmux set -gF @_tmx_layout_tmp "#{E:@_tmx_module_${1}_core}"
-    interp "$1" "$(tmux show -gv @_tmx_layout_tmp)"
+    val=$(interp "$1" "$(tmux show -gv @_tmx_layout_tmp)")
+    [ -n "$seam" ] && val="${val//$NOTCH_MARK/$seam}"
+    printf '%s' "$val"
+  elif [ -n "$seam" ]; then
+    printf '%s' "#{s/${NOTCH_MARK}/${seam}/:#{E:@_tmx_module_${1}_core}}"
   else
     printf '%s' "#{E:@_tmx_module_${1}_core}"
   fi
 }
-full_pill() { # $1 module -> its own pill, caps included (inlined for tmux-cpu)
+full_pill() { # $1 module, $2 align -> its own pill, caps included (inlined for tmux-cpu)
+  local seam val
+  seam=$(mod_notch_seam "$1" "$2")
   if [ "$(tmux show -gqv "@themux_${1}_expand")" = "yes" ]; then
     tmux set -gF @_tmx_layout_tmp "#{E:@themux_module_${1}}"
-    interp "$1" "$(tmux show -gv @_tmx_layout_tmp)"
+    val=$(interp "$1" "$(tmux show -gv @_tmx_layout_tmp)")
+    [ -n "$seam" ] && val="${val//$NOTCH_MARK/$seam}"
+    printf '%s' "$val"
+  elif [ -n "$seam" ]; then
+    printf '%s' "#{s/${NOTCH_MARK}/${seam}/:#{E:@themux_module_${1}}}"
   else
     printf '%s' "#{E:@themux_module_${1}}"
   fi
@@ -114,6 +149,7 @@ powerline_run() {
   read -ra mods <<<"$1"
   read -ra conns <<<"$2"
   local fl="${3:-0}" fr="${4:-0}"   # flush the left/right outer cap to the edge
+  local align="${5:-left}"          # this occurrence's zone, for the notch seam
 
   local i m c cond lcol lbg rcol rbg core head conn seg
   local out2="" prc="" prb=""   # prev visible module's right colour / right bg
@@ -123,7 +159,7 @@ powerline_run() {
     cond=$(tmux show -gqv "@themux_${m}_when")
     lcol=$(mod_field "$m" lcol); lbg=$(mod_field "$m" lbg)
     rcol=$(mod_field "$m" rcol); rbg=$(mod_field "$m" rbg)
-    core=$(mod_core "$m")
+    core=$(mod_core "$m" "$align")
     # flush_left drops the opening cap so the first block fills the terminal edge.
     if [ "$fl" = 1 ]; then head="${core}"; else head="#[fg=${lcol},bg=default]${mpll}${core}"; fi
     # The seam glyph follows this module's incoming connector token.
@@ -230,8 +266,8 @@ expand_zone() {
       *) printf '1' ;;
     esac
   }
-  render_item() { # $1 item index, $2 flush-left, $3 flush-right
-    local idx="$1" fl2="$2" fr2="$3" wedge2 wfmt2
+  render_item() { # $1 item index, $2 flush-left, $3 flush-right, $4 align (this zone)
+    local idx="$1" fl2="$2" fr2="$3" align2="$4" wedge2 wfmt2
     local -a mm2
     case "${it_type[idx]}" in
       W)
@@ -248,9 +284,9 @@ expand_zone() {
       G)
         read -ra mm2 <<<"${it_mods[idx]}"
         if [ ${#mm2[@]} -eq 1 ] && [ "$fl2" = 0 ] && [ "$fr2" = 0 ]; then
-          full_pill "${mm2[0]}"
+          full_pill "${mm2[0]}" "$align2"
         else
-          powerline_run "${it_mods[idx]}" "${it_conns[idx]}" "$fl2" "$fr2"
+          powerline_run "${it_mods[idx]}" "${it_conns[idx]}" "$fl2" "$fr2" "$align2"
         fi
         ;;
     esac
@@ -337,13 +373,13 @@ expand_zone() {
     [ "$right_join" = 1 ] && fr=1
 
     if [ "$right_join" = 1 ] && [ "$next_vis" != 1 ]; then
-      drop_right=$(render_item "$i" "$fl" 1)
-      keep_right=$(render_item "$i" "$fl" 0)
+      drop_right=$(render_item "$i" "$fl" 1 "$align")
+      keep_right=$(render_item "$i" "$fl" 0 "$align")
       tmux set -g "@_tmx_item_drop_${i}" "$drop_right"
       tmux set -g "@_tmx_item_keep_${i}" "$keep_right"
       out+="#{?${next_vis},#{E:@_tmx_item_drop_${i}},#{E:@_tmx_item_keep_${i}}}"
     else
-      out+="$(render_item "$i" "$fl" "$fr")"
+      out+="$(render_item "$i" "$fl" "$fr" "$align")"
     fi
 
     case "${it_type[i]}" in
