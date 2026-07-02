@@ -19,3 +19,4 @@ script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 "${script_dir}"/tests/harness.sh --test "${script_dir}"/tests/panes_variant.sh --expected "${script_dir}"/tests/panes_variant_expected.txt "$@"
 "${script_dir}"/tests/harness.sh --test "${script_dir}"/tests/ram_module.sh --expected "${script_dir}"/tests/ram_module_expected.txt "$@"
 "${script_dir}"/tests/harness.sh --test "${script_dir}"/tests/module_variant.sh --expected "${script_dir}"/tests/module_variant_expected.txt "$@"
+"${script_dir}"/tests/harness.sh --test "${script_dir}"/tests/notch_direction.sh --expected "${script_dir}"/tests/notch_direction_expected.txt "$@"

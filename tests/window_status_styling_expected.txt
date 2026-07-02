@@ -7,9 +7,9 @@ window-status-format #[fg=#9399b2,bg=default]#[fg=#11111b,bg=#9399b2] #I #{?#
 
 window-status-current-format #[fg=#cba6f7,bg=default]#[fg=#11111b,bg=#cba6f7] #I #{?#{E:@_tmx_cw_text},#[fg=#cdd6f4]#[bg=#313244] #{E:@_tmx_cw_text} ,}#[fg=#{?#{E:@_tmx_cw_text},#313244,#cba6f7},bg=default]
 
-window-status-format #[bg=#313244] #[fg=#cdd6f4,bg=#313244]#{E:@_tmx_w_text} #[fg=#11111b,bg=#9399b2] #I #[bg=#9399b2] 
+window-status-format #[bg=#313244] #{?#{E:@_tmx_w_text},#[fg=#cdd6f4,bg=#313244]#{E:@_tmx_w_text} ,}#[fg=#11111b,bg=#9399b2] #I #[bg=#9399b2]
 
-window-status-current-format #[bg=#313244] #[fg=#cdd6f4,bg=#313244]#{E:@_tmx_cw_text} #[fg=#11111b,bg=#cba6f7] #I #[bg=#cba6f7] 
+window-status-current-format #[bg=#313244] #{?#{E:@_tmx_cw_text},#[fg=#cdd6f4,bg=#313244]#{E:@_tmx_cw_text} ,}#[fg=#11111b,bg=#cba6f7] #I #[bg=#cba6f7]
 
 window-status-format #[bg=#9399b2] #[fg=#11111b,bg=#9399b2] #I #{?#{E:@_tmx_w_text},#[fg=#cdd6f4]#[bg=#313244] #{E:@_tmx_w_text} ,}#[bg=#{?#{E:@_tmx_w_text},#313244,#9399b2}] 
 

@@ -59,14 +59,20 @@ connected=0
 # First window index (for the ribbon's opening left cap). With contiguous indices
 # it is base-index; baked as a literal so the draw-time test stays cheap.
 base=$(tmux show -gwv base-index 2>/dev/null); [ -n "$base" ] || base=0
-# The notch seam mirrors the shape's right cap; left layout only (like panes).
-seam_glyph=""
-[ "$notch" = on ] && case "$shape" in
-  slanted)   seam_glyph=$(printf '\356\202\274') ;;
-  rounded)   seam_glyph=$(printf '\356\202\264') ;;
-  powerline) seam_glyph=$(printf '\356\202\260') ;;
-  squared)   seam_glyph=$(printf '\342\226\210') ;;
+# Seam glyphs, direction-aware (octal UTF-8, mirrors utils/module_render.sh and
+# utils/pane_render.sh): gt tapers the visually-first block's colour into the
+# second via the shape's right cap; lt mirrors it, the second block's colour into
+# the first via the left cap. Squared has no outer cap (lglyph/rglyph above are
+# empty there), but the seam still draws a full block — same glyph both
+# directions, only its colours differ.
+case "$shape" in
+  rounded)   seam_lglyph=$(printf '\356\202\266'); seam_rglyph=$(printf '\356\202\264') ;;
+  slanted)   seam_lglyph=$(printf '\356\202\272'); seam_rglyph=$(printf '\356\202\274') ;;
+  powerline) seam_lglyph=$(printf '\356\202\262'); seam_rglyph=$(printf '\356\202\260') ;;
+  squared)   seam_lglyph=$(printf '\342\226\210'); seam_rglyph=$(printf '\342\226\210') ;;
+  *)         seam_lglyph=""; seam_rglyph="" ;;
 esac
+mode=$(themux_notch_mode "$notch")
 
 # A cap. With a glyph (rounded/slanted) it is the shape glyph over the bare bar
 # in the cap colour $2 ($2 falls back to the accent when a block is naked). With
@@ -96,6 +102,7 @@ render_side() {
   local p="$1" o="$2" opt="$3" prefix="$4"
   local lvar tvar lead_acc txt_acc ibg ifg tbg tfg icap tcap number text seam nblock nameblock
   local first_cap last_cap raw_lcap raw_rcap flags_out none_out left_out right_out both_out
+  local fbg sbg fcap scap gt_txt lt_txt
   if [ "$p" = w ]; then
     lvar="$leading" tvar="$name_style"
     lead_acc=$(expand "#{E:@themux_window_leading_color}")
@@ -114,6 +121,33 @@ render_side() {
   number=$(expand "#{@themux_window_${o}number}")
   text="#{E:@_tmx_${p}_text}" # draw-time; "" when the name is hidden
 
+  # Notch seam: the block that is visually first tapers into the second (gt) or
+  # vice versa (lt), gated on the two blocks actually differing — same bg would
+  # render an invisible phantom cell. Block order follows position, like
+  # utils/module_render.sh: left -> number first, name second; right -> reversed.
+  # Style directives stay as two independent #[...] escapes (no comma) so the
+  # seam is safe wherever it lands inside a #{?name,...,} conditional (a literal
+  # comma there would be read as a branch separator, not a style attribute).
+  # gt/lt bake directly; auto dispatches at draw time on the hidden global
+  # @_tmx_window_notch_dir that utils/layout.sh sets per occurrence (left->gt,
+  # right->lt) — window-status-format is ONE shared option, so this cannot
+  # resolve per zone the way a module's marker splice does; last write wins if
+  # "windows" appears in more than one zone (documented in the options/docs).
+  seam=""
+  if [ -n "$seam_rglyph" ]; then
+    if [ "$position" = right ]; then fbg="$tbg" fcap="$tcap" sbg="$ibg" scap="$icap"
+    else fbg="$ibg" fcap="$icap" sbg="$tbg" scap="$tcap"; fi
+    if [ "$fbg" != "$sbg" ]; then
+      gt_txt="#[fg=$fcap]#[bg=$sbg]$seam_rglyph"
+      lt_txt="#[fg=$scap]#[bg=$fbg]$seam_lglyph"
+      case "$mode" in
+        gt)   seam="$gt_txt" ;;
+        lt)   seam="$lt_txt" ;;
+        auto) seam="#{?#{==:#{@_tmx_window_notch_dir},gt},${gt_txt},#{?#{==:#{@_tmx_window_notch_dir},lt},${lt_txt},}}" ;;
+      esac
+    fi
+  fi
+
   # Cap colours are stashed for the connected separator (the bg channel is the
   # block colour, or the accent the block uses when transparent/naked).
   if [ "$p" = w ]; then
@@ -128,10 +162,6 @@ render_side() {
     # number block, then the name block (only when the window has a name). The
     # right cap follows the rightmost block: the name bg when a name shows, the
     # number bg when it does not.
-    seam=""
-    # Styles inside the #{?name,...} conditional must not carry a literal comma
-    # (#{?} splits on commas), so set fg and bg as separate #[...] directives.
-    [ -n "$seam_glyph" ] && [ "$ibg" != "$tbg" ] && seam="#[fg=$icap]#[bg=$tbg]$seam_glyph"
     nameblock="#{?${text},${seam}#[fg=$tfg]#[bg=$tbg]$(spaces "$tleft")${text}$(spaces "$tright"),}"
     if [ "$connected" = 1 ]; then
       # Inner seams come from the separator. The first window opens the ribbon
@@ -147,9 +177,14 @@ render_side() {
     fi
     flags_out="${nblock}${nameblock}${flags}"
   elif [ -n "$(tmux show -gqv "@_tmx_${p}_text")" ]; then
-    # number on the right: name block first, then the number block.
+    # number on the right: name block first, then the number block. The seam
+    # lands immediately after the name content, before the flags, so the state
+    # icons stay adjacent to the number block. Wrapped in the same #{?${text},…,}
+    # name-visibility conditional as the position=left nameblock above, so a
+    # window whose name resolves empty at draw time doesn't leave a floating
+    # seam taper with nothing to taper into.
     raw_lcap=$(cap "$lglyph" "$tcap" "$tbg")
-    nameblock="#[fg=$tfg,bg=$tbg]${text} "
+    nameblock="#{?${text},#[fg=$tfg,bg=$tbg]${text} ${seam},}"
     raw_rcap=$(cap "$rglyph" "$icap" "$ibg")
     first_cap="$raw_lcap"
     last_cap="$raw_rcap"

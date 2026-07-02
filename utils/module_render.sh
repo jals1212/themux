@@ -34,6 +34,12 @@ name="$1"
 . "$(dirname "$0")/render_style.sh"
 
 US=$(printf '\037')
+# Control-byte placeholder for a zone-aware notch (auto): distinct from the US
+# field delimiter above. A literal printable placeholder is unsafe — tmux applies
+# strftime %-expansion to anything passing through #{E:}, so any %-bearing text
+# would get mangled. utils/layout.sh splices the real seam in at draw time, once
+# it knows which zone this occurrence sits in.
+NOTCH_MARK=$(printf '\036')
 
 # A property cascade: @themux_<name>_<prop> > @themux_module_<prop> >
 # internal module default > @themux_all_<prop>. Empty-check (not truthy) so a
@@ -206,19 +212,49 @@ else
   first="$iblock" fbg="$ibg" facc="$accent" second="$tblock" sbg="$tbg" sacc="$(chan "$text_aacc" "$text_acc")"
 fi
 
-# Seam between the two blocks. notch=on (with differing backgrounds) takes the
-# shape's right cap — the icon colour tapering into the text background. Otherwise
-# the blocks abut through the plain middle separator (@themux_module_middle_separator,
-# empty by default), so the icon and text backgrounds are themselves the divider
-# (catppuccin-style) and the module stays compact — no extra full-block cell.
+# Seam between the two blocks. notch normalizes to gt/lt/auto/off (themux_notch_mode,
+# render_style.sh): off (or the two blocks sharing one background) lets them abut
+# through the plain middle separator (@themux_module_middle_separator, empty by
+# default), so the icon and text backgrounds are themselves the divider
+# (catppuccin-style) and the module stays compact — no extra full-block cell. gt
+# takes the shape's right cap (the first block's colour tapering into the second —
+# today's former notch=on); lt mirrors it, the second block's colour tapering into
+# the first (colours swapped). auto is zone-aware and cannot resolve here — only
+# utils/layout.sh knows which zone this occurrence sits in — so it bakes BOTH
+# concrete seams into hidden per-direction options and leaves the control-byte
+# marker (NOTCH_MARK) in the core/pill; layout splices in the right one at draw
+# time via tmux's #{s///}.
+mode=$(themux_notch_mode "$notch")
+seam_gt="" seam_lt=""
 if [ -z "$second" ]; then
   seam=""
-elif [ "$fbg" != "$sbg" ] && [ "$notch" = on ]; then
-  seamcol="$fbg"
-  [ "$fbg" = default ] && seamcol="$facc"
-  seam="#[fg=$seamcol,bg=$sbg]$rglyph"
-else
+elif [ "$fbg" = "$sbg" ]; then
   seam="$midsep"
+else
+  case "$mode" in
+    gt)
+      seamcol="$fbg"
+      [ "$fbg" = default ] && seamcol="$facc"
+      seam="#[fg=$seamcol,bg=$sbg]$rglyph"
+      ;;
+    lt)
+      ltcol="$sbg"
+      [ "$sbg" = default ] && ltcol="$sacc"
+      seam="#[fg=$ltcol,bg=$fbg]$lglyph"
+      ;;
+    auto)
+      seamcol="$fbg"
+      [ "$fbg" = default ] && seamcol="$facc"
+      seam_gt="#[fg=$seamcol,bg=$sbg]$rglyph"
+      ltcol="$sbg"
+      [ "$sbg" = default ] && ltcol="$sacc"
+      seam_lt="#[fg=$ltcol,bg=$fbg]$lglyph"
+      seam="$NOTCH_MARK"
+      ;;
+    *)
+      seam="$midsep"
+      ;;
+  esac
 fi
 
 # Expose the bare core (blocks + seam, no outer caps) and the edge cap colours
@@ -238,7 +274,9 @@ set_args=(set -g "@_tmx_module_${name}_core" "${first}${seam}${second}"
   ';' set -g "@_tmx_module_${name}_lcol" "$lcol"
   ';' set -g "@_tmx_module_${name}_rcol" "$rcol"
   ';' set -g "@_tmx_module_${name}_lbg" "$fbg"
-  ';' set -g "@_tmx_module_${name}_rbg" "$sbg")
+  ';' set -g "@_tmx_module_${name}_rbg" "$sbg"
+  ';' set -g "@_tmx_module_${name}_seam_gt" "$seam_gt"
+  ';' set -g "@_tmx_module_${name}_seam_lt" "$seam_lt")
 if [ -n "$when" ]; then
   prefix=""
   [ "$text_style" = naked ] && prefix="#{@_tmx_module_divider}"

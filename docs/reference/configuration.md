@@ -7,7 +7,7 @@ load, so changing an option and reloading is enough — no `kill-server`.
 
 The three UI items — **status modules**, **windows**, **panes** — are each a
 *component* styled through a few independent props: a **shape**, a
-**leading** style, a **text** style, a **notch** flag, and **padding**.
+**leading** style, a **text** style, a **notch** direction, and **padding**.
 
 ### Anatomy of a component
 
@@ -32,8 +32,8 @@ its text block `subtle` (grey fill, accent text), so the two halves stand apart.
   / `powerline` / `unstyled`).
 - **leading** — the icon block on a module, the number block on a window or pane.
 - **text** — the value on a module, the window or pane name.
-- **notch** — when `on`, the seam between leading and text inherits the shape's
-  cap instead of a flat edge.
+- **notch** — the seam between leading and text: a direction (`>` / `<`), `off`
+  (flat), or the zone-aware `auto` default. See below.
 - **padding** — the spacing inside each block.
 
 ---
@@ -62,7 +62,7 @@ set -g @themux_module_notch           "off"
 | `@themux_<item>_shape` | `squared` · `rounded` · `slanted` · `powerline` · `unstyled` | `squared` |
 | `@themux_<item>_leading_variant` | `solid` · `soft` · `subtle` · `naked` | `solid` |
 | `@themux_<item>_text_variant` † | `solid` · `soft` · `subtle` · `naked` | `soft` |
-| `@themux_<item>_notch` | `on` · `off` | `off` |
+| `@themux_<item>_notch` | `off` · `>` · `<` · `auto` · `on` (alias of `auto`) | `off` |
 | `@themux_<item>_leading_position` | `left` · `right` | `left` |
 | `@themux_<item>_padding` | `"N"` or `"<LL> [LR]\|<TL> [TR]"` cells (see below) | `1` |
 | `@themux_<item>_leading_active_variant` | `solid` · `soft` · `subtle` · `naked` | resting variant |
@@ -129,9 +129,51 @@ A `naked` block keeps the shape's caps as an outline, so a `rounded` leading +
 `naked` text reads as a capsule. Pair naked styles with
 `@themux_status_background "none"` for a fully bare bar.
 
-**notch** — `on` makes the leading↔text seam inherit the shape's cap (the
-leading color tapering into the text background) instead of a flat boundary;
-it collapses to nothing when the two blocks share a background.
+**notch** — the seam between the leading and text blocks. `off` (default) keeps
+a flat boundary (a module falls back to `@themux_module_middle_separator`
+there); `>` bakes the shape's cap with the leading (visually first) block's
+colour tapering into the second; `<` mirrors it, the second block's colour
+tapering back into the first, cap and colours reversed. Either direction
+collapses to nothing when the two blocks share one background — no phantom
+cell. With the `squared` shape both directions draw the same full-block glyph
+(there is no taper to mirror), so `>` vs `<` differ only in which side the
+colour lands on, not in the glyph itself.
+
+`auto` (`on` is an alias) resolves a direction per placement instead of a fixed
+one:
+
+| Item | Resolves by | first / left | last / right | centre |
+| --- | --- | --- | --- | --- |
+| module, window | status-line zone | `>` | `<` | `off` |
+| pane | `@themux_<item>_leading_position` | `>` (`left`) | `<` (`right`) | — |
+
+A module referenced in more than one zone gets one seam per zone — each
+occurrence resolves independently. The window list is the one exception:
+`window-status-format` is a single shared tmux option, so if the `windows`
+token appears in more than one zone (or row), the last one themux processes
+wins for all of them.
+
+This is a different axis from the module [connectors](#status-layout) (`>` /
+`<` between adjacent items in a zone): notch shapes the seam *inside* one
+item, between its own leading and text blocks; connectors join *between*
+items. They share glyphs by design — the same taper reads the same way either
+side of the axis — but are configured and resolved independently.
+
+`auto`/`on` only resolve when a module is read through the layout grammar (a
+token in `@themux_status_line_N`, or a pane's `leading_position`) — that is
+what tells themux which zone/side this occurrence sits in. If you consume
+`@themux_module_<name>` directly instead — your own tmux formats, or a
+`_prepend`/`_append` value — there is no zone to resolve against, so the
+internal placeholder byte themux uses to defer that choice is never replaced.
+tmux's status-line renderer silently drops that byte at draw time (it has no
+visible glyph), so the leading and text blocks simply abut with no seam, as if
+notch were `off`. Pin an explicit `>` or `<` on any module you consume
+directly this way.
+
+> **Breaking**: the old `on` always drew the `>` seam. As an alias of `auto`
+> it can now draw `>`, `<`, or nothing depending on where the item sits — pin
+> `>` explicitly (`@themux_<item>_notch ">"`) if you relied on the old fixed
+> direction.
 
 For windows and panes, each part has a resting and an active accent: the resting
 one (`@themux_window_leading_color`, `@themux_pane_leading_color`, and the
