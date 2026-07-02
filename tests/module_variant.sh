@@ -92,9 +92,11 @@ printf "\nposition_swaps_edges "
 { [ "$ll" = "$rr" ] && [ "$lr" = "$rl" ] && [ "$ll" != "$lr" ]; } && printf "Y" || printf "n"
 
 # notch=off lets the icon and text blocks abut (compact, catppuccin-style — no seam
-# cell). notch=on draws the shape's tapered cap as the seam between them, so the
-# notched module is wider. The metric's solid icon over its subtle text differs in
-# bg like any module, so the seam is drawn there too.
+# cell). notch=on (an alias of auto) leaves a one-byte NOTCH_MARK control-byte
+# placeholder in this RAW core instead of a baked glyph — utils/layout.sh splices
+# the real per-zone seam in later — so this length assertion only measures
+# marker-vs-empty, not the rendered glyph's width. Real glyph coverage (colour,
+# direction, zone resolution) lives in tests/notch_direction.sh.
 tmux set -gu @themux_module_leading_position
 tmux set -g @themux_status_line_1 "host cpu"
 tmux set -g @themux_all_shape "rounded"

@@ -135,7 +135,9 @@ there); `>` bakes the shape's cap with the leading (visually first) block's
 colour tapering into the second; `<` mirrors it, the second block's colour
 tapering back into the first, cap and colours reversed. Either direction
 collapses to nothing when the two blocks share one background — no phantom
-cell.
+cell. With the `squared` shape both directions draw the same full-block glyph
+(there is no taper to mirror), so `>` vs `<` differ only in which side the
+colour lands on, not in the glyph itself.
 
 `auto` (`on` is an alias) resolves a direction per placement instead of a fixed
 one:
@@ -156,6 +158,17 @@ This is a different axis from the module [connectors](#status-layout) (`>` /
 item, between its own leading and text blocks; connectors join *between*
 items. They share glyphs by design — the same taper reads the same way either
 side of the axis — but are configured and resolved independently.
+
+`auto`/`on` only resolve when a module is read through the layout grammar (a
+token in `@themux_status_line_N`, or a pane's `leading_position`) — that is
+what tells themux which zone/side this occurrence sits in. If you consume
+`@themux_module_<name>` directly instead — your own tmux formats, or a
+`_prepend`/`_append` value — there is no zone to resolve against, so the
+internal placeholder byte themux uses to defer that choice is never replaced.
+tmux's status-line renderer silently drops that byte at draw time (it has no
+visible glyph), so the leading and text blocks simply abut with no seam, as if
+notch were `off`. Pin an explicit `>` or `<` on any module you consume
+directly this way.
 
 > **Breaking**: the old `on` always drew the `>` seam. As an alias of `auto`
 > it can now draw `>`, `<`, or nothing depending on where the item sits — pin
