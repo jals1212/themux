@@ -32,13 +32,17 @@ vocabulary.
 | **shape** | `squared` / `rounded` / `slanted` / `powerline` | Block with square / round / slant / arrow (powerline chevron) caps. |
 | | `unstyled` | themux leaves the item alone so you can build it by hand. |
 | **leading** / **text** | `solid` / `soft` / `subtle` / `naked` | The icon-or-number block and the text block each pick a style: accent block / grey block / grey block with accent text / transparent. |
-| **notch** | `on` / `off` | The leading↔text seam inherits the shape's cap. |
+| **notch** | `off` / `>` / `<` / `auto` (`on` alias) | The leading↔text seam direction; `auto` resolves one per placement. |
 
 The props are orthogonal: each item's `shape`, `leading`, `text` and `notch`
 are chosen independently, and any combination is valid — a colored chip with a
 transparent label, a rounded outline capsule, a plain grey pill. A common
 renderer resolves the two block styles, so a new shape is a few cap glyphs, not
 a flag that interacts with every other flag.
+
+One prop bends this locality rule: `notch auto` is the only one whose resolved
+value depends on where the item sits (its status-line zone, or a pane's
+`leading_position`) rather than solely on the item's own options.
 
 `unstyled` is the escape hatch: it makes the law of orthogonality hold even at
 the edges. Anything themux's props do not cover, you build yourself with the

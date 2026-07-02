@@ -149,8 +149,13 @@ set -g @themux_module_notch           "off"
   accent text) or `naked` (transparent, accent text — pair with
   `@themux_status_background "none"`). A naked block keeps the shape's caps as an
   outline, so `rounded` leading + `naked` text reads as a capsule.
-- **notch** — `on` makes the leading↔text seam inherit the shape's cap instead
-  of a flat edge.
+- **notch** — the leading↔text seam. `off` (default) is flat; `>` bakes the
+  shape's cap with leading's colour tapering into text; `<` mirrors it,
+  colours reversed; `auto` (`on` is an alias) picks a direction per placement:
+  zone-aware for modules/windows (left zone `>`, right zone `<`, centre off),
+  position-aware for panes (`leading_position left` → `>`, `right` → `<`). A
+  different axis from the connectors below — notch shapes the seam *inside*
+  one item, connectors join *between* items.
 
 The text-block **variant** prop is `@themux_<item>_text_variant` for all three
 items; on windows the name *content* lives in `@themux_window_name` (the bare
